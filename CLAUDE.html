@@ -19,6 +19,7 @@
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/pedrobtz/zudate/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -28,7 +29,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>CLAUDE.md</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/pedrobtz/zudate/blob/main/CLAUDE.md" class="external-link"><code>CLAUDE.md</code></a></small>
     </div>
 
 <div id="claudemd" class="section level1">
@@ -88,7 +89,7 @@
 <li>On Windows the Makevars additionally mocks <code>libgcc_eh.a</code> and points cargo at the Rtools linker; <code>src/zudate-win.def</code> exports only <code>R_init_zudate</code>.</li>
 <li>
 <code>.Rbuildignore</code> excludes <code>src/rust/.cargo</code> and <code>src/rust/target</code> from the tarball.</li>
-</ol><p>For CRAN the crate dependencies (jiff, savvy, …) must be vendored (<code>cargo vendor</code> -&gt; <code>src/rust/vendor.tar.xz</code>, extracted by Makevars and built with <code>--offline</code>). See <code>design.md</code> “Vendoring and CRAN compliance” for the exact scheme and <code>roadmap.md</code> for its status.</p>
+</ol><p>The crate dependencies (jiff, savvy, …) are vendored: <code>src/rust/vendor.tar.xz</code> is extracted by Makevars into <code>src/rust/vendor/</code> and cargo runs offline with <code>CARGO_HOME=src/rust/cargo-home</code> (both gitignored, removed by <code>cleanup</code>). This applies to <code>load_all()</code> too, so <strong>after any change to <code>Cargo.toml</code>/<code>Cargo.lock</code> run <code>sh tools/vendor.sh</code></strong> (regenerates the tarball, <code>inst/AUTHORS</code> and <code>LICENSE.note</code>; it is deterministic) or the build fails with “no matching package”. See <code>design.md</code> “Vendoring and CRAN compliance”.</p>
 </div>
 <div class="section level3">
 <h3 id="ffi-layer-savvy">FFI layer (savvy)<a class="anchor" aria-label="anchor" href="#ffi-layer-savvy"></a></h3>
@@ -123,7 +124,11 @@
 <code>src/rust/.cargo/config.toml</code> exists only so <code>cargo test</code> links on Windows MSVC; it is excluded from the tarball on purpose.</li>
 <li>
 <code>cargo test</code> warns about an unexpected <code>savvy-test</code> cfg; that is expected (the feature is injected by <code>savvy-cli test</code>), do not “fix” it by removing the test module.</li>
-<li>CRAN installs with at most 2 CPUs: the vendored build must pass <code>-j 2</code> to cargo (see roadmap).</li>
+<li>CRAN installs with at most 2 CPUs: Makevars passes <code>-j 2</code> to cargo.</li>
+<li>Makevars only builds <code>libzudate.a</code> when it is missing (it is deleted after linking). A stray <code>src/rust/target/&lt;profile&gt;/libzudate.a</code> left by a manual <code>cargo build</code> is linked as is and gives “undefined symbol: savvy_…_ffi”; delete it.</li>
+<li>Rust functions exported through savvy are internal and prefixed <code>rs_</code> (no <code>@export</code>); the documented, exported R API lives in hand-written <code>R/*.R</code> files that call them.</li>
+<li>
+<code>.github/workflows/offline-install.yaml</code> builds the tarball and installs it with networking blocked on Linux, macOS and Windows; it also enforces the 5 MB tarball limit.</li>
 <li>Dates in <code>NEWS.md</code> / <code>DESCRIPTION</code> follow standard R package conventions; bump <code>Version:</code> in <code>DESCRIPTION</code> and <code>version</code> in <code>src/rust/Cargo.toml</code> together.</li>
 </ul></div>
 </div>
@@ -133,7 +138,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by First Last.</p>
+  <p>Developed by Pedro Z.</p>
 </div>
 
 <div class="pkgdown-footer-right">

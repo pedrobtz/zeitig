@@ -88,10 +88,15 @@ same “object not found” error even though compilation succeeded.
 4.  `.Rbuildignore` excludes `src/rust/.cargo` and `src/rust/target`
     from the tarball.
 
-For CRAN the crate dependencies (jiff, savvy, …) must be vendored
-(`cargo vendor` -\> `src/rust/vendor.tar.xz`, extracted by Makevars and
-built with `--offline`). See `design.md` “Vendoring and CRAN compliance”
-for the exact scheme and `roadmap.md` for its status.
+The crate dependencies (jiff, savvy, …) are vendored:
+`src/rust/vendor.tar.xz` is extracted by Makevars into
+`src/rust/vendor/` and cargo runs offline with
+`CARGO_HOME=src/rust/cargo-home` (both gitignored, removed by
+`cleanup`). This applies to `load_all()` too, so **after any change to
+`Cargo.toml`/`Cargo.lock` run `sh tools/vendor.sh`** (regenerates the
+tarball, `inst/AUTHORS` and `LICENSE.note`; it is deterministic) or the
+build fails with “no matching package”. See `design.md` “Vendoring and
+CRAN compliance”.
 
 ### FFI layer (savvy)
 
@@ -148,8 +153,17 @@ for the exact scheme and `roadmap.md` for its status.
 - `cargo test` warns about an unexpected `savvy-test` cfg; that is
   expected (the feature is injected by `savvy-cli test`), do not “fix”
   it by removing the test module.
-- CRAN installs with at most 2 CPUs: the vendored build must pass `-j 2`
-  to cargo (see roadmap).
+- CRAN installs with at most 2 CPUs: Makevars passes `-j 2` to cargo.
+- Makevars only builds `libzudate.a` when it is missing (it is deleted
+  after linking). A stray `src/rust/target/<profile>/libzudate.a` left
+  by a manual `cargo build` is linked as is and gives “undefined symbol:
+  savvy\_…\_ffi”; delete it.
+- Rust functions exported through savvy are internal and prefixed `rs_`
+  (no `@export`); the documented, exported R API lives in hand-written
+  `R/*.R` files that call them.
+- `.github/workflows/offline-install.yaml` builds the tarball and
+  installs it with networking blocked on Linux, macOS and Windows; it
+  also enforces the 5 MB tarball limit.
 - Dates in `NEWS.md` / `DESCRIPTION` follow standard R package
   conventions; bump `Version:` in `DESCRIPTION` and `version` in
   `src/rust/Cargo.toml` together.

@@ -19,6 +19,7 @@
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/pedrobtz/zudate/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -28,7 +29,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>zudate roadmap</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/pedrobtz/zudate/blob/main/roadmap.md" class="external-link"><code>roadmap.md</code></a></small>
     </div>
 
 <div id="zudate-roadmap" class="section level1">
@@ -42,17 +43,17 @@
 <li><label><input type="checkbox" checked><code>CLAUDE.md</code>, <code>design.md</code>, <code>roadmap.md</code>.</label></li>
 </ul></div>
 <div class="section level2">
-<h2 id="milestone-1---build-foundations">Milestone 1 - Build foundations<a class="anchor" aria-label="anchor" href="#milestone-1---build-foundations"></a></h2>
+<h2 id="milestone-1---build-foundations-done">Milestone 1 - Build foundations (done)<a class="anchor" aria-label="anchor" href="#milestone-1---build-foundations-done"></a></h2>
 <p>Make the package CRAN-buildable before writing features, so every later PR is checked under the real constraints.</p>
-<ul class="task-list"><li><label><input type="checkbox">Pin dependencies in <code>src/rust/Cargo.toml</code>: <code>jiff = { version = "0.2", default-features = false, features = ["std", "tz-system", "tz-fat", "tzdb-zoneinfo", "tzdb-bundle-platform", "perf-inline"] }</code>, <code>savvy = "0.11"</code>; edition 2021; commit <code>Cargo.lock</code>.</label></li>
-<li><label><input type="checkbox">Release profile: <code>opt-level = 3</code>, <code>lto = true</code>, <code>codegen-units = 1</code>, <code>strip = true</code>, keep <code>panic = "abort"</code>.</label></li>
-<li><label><input type="checkbox"><code>tools/vendor.sh</code>: <code>cargo vendor</code> -&gt; <code>src/rust/vendor.tar.xz</code>; regenerate <code>inst/AUTHORS</code> and <code>LICENSE.note</code> from the vendored crates’ metadata.</label></li>
-<li><label><input type="checkbox"><code>src/Makevars.in</code> / <code>src/Makevars.win.in</code>: extract the tarball, write <code>.cargo/config.toml</code> pointing at <code>vendor/</code>, build with <code>--offline -j 2</code>, set <code>CARGO_HOME</code> inside the build tree; <code>cleanup</code>/<code>cleanup.win</code> remove extracted sources.</label></li>
-<li><label><input type="checkbox"><code>configure.win</code>: pick <code>x86_64-pc-windows-gnu</code> or <code>aarch64-pc-windows-gnullvm</code> from the architecture.</label></li>
-<li><label><input type="checkbox"><code>DESCRIPTION</code>: real title/description, authors (including the <code>cph</code> entry for crate authors), <code>SystemRequirements</code> with MSRV, <code>Imports: vctrs, rlang</code>, <code>Suggests: testthat, knitr, rmarkdown, pillar</code>.</label></li>
-<li><label><input type="checkbox">Remove the template examples (<code>to_upper</code>, <code>int_times_int</code>, <code>Person</code>) once the first real function exists.</label></li>
-<li><label><input type="checkbox">CI job: build the tarball, install it with networking disabled (<code>CARGO_NET_OFFLINE=true</code>, no <code>~/.cargo/registry</code>), run tests.</label></li>
-<li><label><input type="checkbox">Measure tarball size; must stay under 5 MB.</label></li>
+<ul class="task-list"><li><label><input type="checkbox" checked>Pin dependencies in <code>src/rust/Cargo.toml</code>: <code>jiff = { version = "0.2", default-features = false, features = ["std", "tz-system", "tz-fat", "tzdb-zoneinfo", "tzdb-bundle-platform", "perf-inline"] }</code>, <code>savvy = "0.11"</code>; edition 2021; commit <code>Cargo.lock</code>. (MSRV 1.81, from savvy.)</label></li>
+<li><label><input type="checkbox" checked>Release profile: <code>opt-level = 3</code>, <code>lto = true</code>, <code>codegen-units = 1</code>, <code>strip = true</code>, keep <code>panic = "abort"</code>.</label></li>
+<li><label><input type="checkbox" checked><code>tools/vendor.sh</code>: <code>cargo vendor</code> -&gt; <code>src/rust/vendor.tar.xz</code>; regenerate <code>inst/AUTHORS</code> and <code>LICENSE.note</code> from the vendored crates’ metadata.</label></li>
+<li><label><input type="checkbox" checked><code>src/Makevars.in</code> / <code>src/Makevars.win.in</code>: extract the tarball, write a cargo config pointing at <code>vendor/</code> (in a build-local <code>CARGO_HOME</code>), build with <code>--offline -j 2</code>, set <code>CARGO_HOME</code> inside the build tree; <code>cleanup</code>/<code>cleanup.win</code> remove extracted sources.</label></li>
+<li><label><input type="checkbox" checked><code>configure.win</code>: pick <code>x86_64-pc-windows-gnu</code> or <code>aarch64-pc-windows-gnullvm</code> from the architecture.</label></li>
+<li><label><input type="checkbox" checked><code>DESCRIPTION</code>: real title/description, authors (including the <code>cph</code> entry for crate authors), <code>SystemRequirements</code> with MSRV, <code>Imports: vctrs, rlang</code>, <code>Suggests: testthat, knitr, rmarkdown, pillar</code>.</label></li>
+<li><label><input type="checkbox" checked>Remove the template examples (<code>to_upper</code>, <code>int_times_int</code>, <code>Person</code>) once the first real function exists.</label></li>
+<li><label><input type="checkbox" checked>CI job: build the tarball, install it with networking disabled (<code>CARGO_NET_OFFLINE=true</code>, no <code>~/.cargo/registry</code>), run tests.</label></li>
+<li><label><input type="checkbox" checked>Measure tarball size; must stay under 5 MB. (1.5 MB; enforced by the offline-install job.)</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="milestone-2---core-civil-types">Milestone 2 - Core civil types<a class="anchor" aria-label="anchor" href="#milestone-2---core-civil-types"></a></h2>
@@ -124,7 +125,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by First Last.</p>
+  <p>Developed by Pedro Z.</p>
 </div>
 
 <div class="pkgdown-footer-right">

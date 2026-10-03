@@ -17,14 +17,15 @@ deploy.
 
 `CLAUDE.md`, `design.md`, `roadmap.md`.
 
-## Milestone 1 - Build foundations
+## Milestone 1 - Build foundations (done)
 
 Make the package CRAN-buildable before writing features, so every later
 PR is checked under the real constraints.
 
 Pin dependencies in `src/rust/Cargo.toml`:
 `jiff = { version = "0.2", default-features = false, features = ["std", "tz-system", "tz-fat", "tzdb-zoneinfo", "tzdb-bundle-platform", "perf-inline"] }`,
-`savvy = "0.11"`; edition 2021; commit `Cargo.lock`.
+`savvy = "0.11"`; edition 2021; commit `Cargo.lock`. (MSRV 1.81, from
+savvy.)
 
 Release profile: `opt-level = 3`, `lto = true`, `codegen-units = 1`,
 `strip = true`, keep `panic = "abort"`.
@@ -33,10 +34,10 @@ Release profile: `opt-level = 3`, `lto = true`, `codegen-units = 1`,
 regenerate `inst/AUTHORS` and `LICENSE.note` from the vendored crates’
 metadata.
 
-`src/Makevars.in` / `src/Makevars.win.in`: extract the tarball, write
-`.cargo/config.toml` pointing at `vendor/`, build with `--offline -j 2`,
-set `CARGO_HOME` inside the build tree; `cleanup`/`cleanup.win` remove
-extracted sources.
+`src/Makevars.in` / `src/Makevars.win.in`: extract the tarball, write a
+cargo config pointing at `vendor/` (in a build-local `CARGO_HOME`),
+build with `--offline -j 2`, set `CARGO_HOME` inside the build tree;
+`cleanup`/`cleanup.win` remove extracted sources.
 
 `configure.win`: pick `x86_64-pc-windows-gnu` or
 `aarch64-pc-windows-gnullvm` from the architecture.
@@ -51,7 +52,8 @@ once the first real function exists.
 CI job: build the tarball, install it with networking disabled
 (`CARGO_NET_OFFLINE=true`, no `~/.cargo/registry`), run tests.
 
-Measure tarball size; must stay under 5 MB.
+Measure tarball size; must stay under 5 MB. (1.5 MB; enforced by the
+offline-install job.)
 
 ## Milestone 2 - Core civil types
 
