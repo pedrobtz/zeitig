@@ -2,14 +2,15 @@
 
 use jiff::civil::DateTime;
 use jiff::fmt::temporal::SpanParser;
-use jiff::{SpanCompare, SpanRelativeTo, SpanRound, SpanTotal};
+use jiff::{SpanCompare, SpanRelativeTo, SpanRound, SpanTotal, Zoned};
 use savvy::{
     savvy, IntegerSexp, ListSexp, OwnedIntegerSexp, OwnedListSexp, OwnedRealSexp, OwnedStringSexp,
     StringSexp, TypedSexp,
 };
 
-use crate::cols::{common_len, elt_error, DateTimeIn, DurationIn, DurationOut};
+use crate::cols::{common_len, elt_error, DateTimeIn, DurationIn, DurationOut, ZonedIn};
 use crate::opts::{increment_i64, parse_round_mode, parse_unit, parse_unit_auto};
+use crate::tz::TzCache;
 
 static SPAN_PARSER: SpanParser = SpanParser::new();
 
@@ -41,51 +42,61 @@ impl DateTimeCols {
     }
 }
 
-/// Optional `relative_to` column (plain date-times; plain dates are passed
-/// as midnight). `None` means days are 24 hours and calendar units error.
-pub(crate) struct Relative {
-    cols: Option<DateTimeCols>,
+/// Optional `relative_to` column: plain date-times (plain dates are passed as
+/// midnight) or zoned date-times. Without it days are 24 hours and calendar
+/// units error.
+pub(crate) enum Relative {
+    None,
+    Civil(DateTimeCols),
+    Zoned(ZonedIn, std::cell::RefCell<TzCache>),
 }
 
 impl Relative {
     pub(crate) fn new(x: Option<ListSexp>) -> savvy::Result<Self> {
-        Ok(Self {
-            cols: x.as_ref().map(DateTimeCols::new).transpose()?,
+        Ok(match x {
+            None => Relative::None,
+            Some(x) if x.len() == 3 => Relative::Zoned(ZonedIn::new(&x)?, Default::default()),
+            Some(x) => Relative::Civil(DateTimeCols::new(&x)?),
         })
     }
 
     pub(crate) fn len(&self) -> savvy::Result<Option<usize>> {
-        match &self.cols {
-            Some(c) => Ok(Some(c.reader()?.len())),
-            None => Ok(None),
-        }
+        Ok(match self {
+            Relative::None => None,
+            Relative::Civil(c) => Some(c.reader()?.len()),
+            Relative::Zoned(z, _) => Some(z.len()),
+        })
     }
 
-    /// The relative-to anchor for element `i`. `Ok(None)` when no
-    /// `relative_to` was given; `Err` never for missing values: a missing
-    /// anchor is reported by `is_na()`.
+    /// The relative-to anchor for element `i`.
     pub(crate) fn anchor(&self, i: usize) -> savvy::Result<Anchor> {
-        match &self.cols {
-            None => Ok(Anchor::DaysAre24Hours),
-            Some(c) => match c.reader()?.get(i)? {
-                Some(dt) => Ok(Anchor::Civil(dt)),
-                None => Ok(Anchor::Missing),
+        Ok(match self {
+            Relative::None => Anchor::DaysAre24Hours,
+            Relative::Civil(c) => match c.reader()?.get(i)? {
+                Some(dt) => Anchor::Civil(dt),
+                None => Anchor::Missing,
             },
-        }
+            Relative::Zoned(z, cache) => match z.get(i, &mut cache.borrow_mut())? {
+                Some(z) => Anchor::Zoned(Box::new(z)),
+                None => Anchor::Missing,
+            },
+        })
     }
 }
 
 pub(crate) enum Anchor {
     DaysAre24Hours,
     Civil(DateTime),
+    Zoned(Box<Zoned>),
     Missing,
 }
 
 impl Anchor {
-    fn relative(&self) -> Option<SpanRelativeTo<'static>> {
+    fn relative(&self) -> Option<SpanRelativeTo<'_>> {
         match self {
             Anchor::DaysAre24Hours => Some(SpanRelativeTo::days_are_24_hours()),
             Anchor::Civil(dt) => Some((*dt).into()),
+            Anchor::Zoned(z) => Some(z.as_ref().into()),
             Anchor::Missing => None,
         }
     }

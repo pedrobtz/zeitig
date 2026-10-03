@@ -18,8 +18,8 @@ duration_blank(x)
 \item{unit}{The unit to express the duration in, e.g. \code{"hour"}. Plural
 spellings (\code{"hours"}) are accepted.}
 
-\item{relative_to}{\code{NULL}, or a plain date / plain date-time (or string)
-recycled against \code{x}.}
+\item{relative_to}{\code{NULL}, or a plain date, plain date-time or zoned
+date-time (or string) recycled against \code{x}.}
 }
 \value{
 \code{duration_total()}: a double vector. \code{duration_compare()}: an
@@ -36,9 +36,10 @@ or 1 (\code{Duration.compare()}).
 }
 \details{
 Without \code{relative_to}, days are 24 hours long and durations with years,
-months or weeks are an error. With \code{relative_to} (a plain date or plain
-date-time, or a string), calendar units are resolved from that starting
-point.
+months are an error. With \code{relative_to} (a plain date, plain date-time or
+zoned date-time, or a string), calendar units are resolved from that
+starting point; with a zoned date-time, days follow the time zone's DST
+rules.
 }
 \examples{
 duration_total(duration(hours = 1, minutes = 30), "minute")

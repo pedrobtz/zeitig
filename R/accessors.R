@@ -6,8 +6,14 @@ civil_date_fields <- function(x, arg = rlang::caller_arg(x), call = rlang::calle
   if (is_plain_date(x) || is_plain_date_time(x)) {
     return(vec_data(x)[c("year", "month", "day")])
   }
+  if (is_zoned_date_time(x)) {
+    return(zoned_civil(x, call = call)[c("year", "month", "day")])
+  }
   zudate_type_error(
-    sprintf("`%s` must be a plain date or plain date-time, not %s.", arg, obj_type_friendly(x)),
+    sprintf(
+      "`%s` must be a plain date, plain date-time or zoned date-time, not %s.",
+      arg, obj_type_friendly(x)
+    ),
     call = call
   )
 }
@@ -16,10 +22,21 @@ civil_time_fields <- function(x, arg = rlang::caller_arg(x), call = rlang::calle
   if (is_plain_time(x) || is_plain_date_time(x)) {
     return(vec_data(x)[c("second_of_day", "nanos")])
   }
+  if (is_zoned_date_time(x)) {
+    return(zoned_civil(x, call = call)[c("second_of_day", "nanos")])
+  }
   zudate_type_error(
-    sprintf("`%s` must be a plain time or plain date-time, not %s.", arg, obj_type_friendly(x)),
+    sprintf(
+      "`%s` must be a plain time, plain date-time or zoned date-time, not %s.",
+      arg, obj_type_friendly(x)
+    ),
     call = call
   )
+}
+
+# Wall-clock fields of a zoned date-time, as a list of plain date-time fields.
+zoned_civil <- function(x, call = rlang::caller_env()) {
+  zudate_call(rs_zoned_civil(zoned_data(x)), call = call)
 }
 
 date_field <- function(x, field, call = rlang::caller_env()) {
@@ -62,8 +79,9 @@ time_field <- function(x, field, call = rlang::caller_env()) {
 #' `temporal_fields()` returns all the component fields as a data frame; for
 #' durations these are the ten fields from `years` to `nanoseconds`.
 #'
-#' @param x A Temporal object: date fields need a plain date or plain
-#'   date-time, time fields a plain time or plain date-time;
+#' @param x A Temporal object: date fields need a plain date, plain
+#'   date-time or zoned date-time (whose fields are the wall clock in its time
+#'   zone), time fields a plain time, plain date-time or zoned date-time;
 #'   `temporal_fields()` also accepts durations.
 #' @returns An integer vector (`in_leap_year()`: logical; `temporal_fields()`:
 #'   a data frame).
@@ -163,10 +181,10 @@ temporal_fields <- function(x) {
     return(new_data_frame(duration_data(x), n = vec_size(x)))
   }
   out <- list()
-  if (is_plain_date(x) || is_plain_date_time(x)) {
+  if (is_plain_date(x) || is_plain_date_time(x) || is_zoned_date_time(x)) {
     out <- c(out, civil_date_fields(x))
   }
-  if (is_plain_time(x) || is_plain_date_time(x)) {
+  if (is_plain_time(x) || is_plain_date_time(x) || is_zoned_date_time(x)) {
     out <- c(out, lapply(
       c(
         hour = "hour", minute = "minute", second = "second", millisecond = "millisecond",

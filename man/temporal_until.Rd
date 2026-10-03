@@ -53,8 +53,11 @@ A duration vector.
 \details{
 The result is balanced up to \code{largest_unit} and rounded to
 \code{smallest_unit}. The default largest unit (\code{"auto"}) is \code{"day"} for plain
-dates and plain date-times and \code{"hour"} for plain times; the default
-smallest unit is \code{"day"} for plain dates and \code{"nanosecond"} otherwise.
+dates and plain date-times, \code{"hour"} for plain times and zoned
+date-times, and \code{"second"} for instants; the default smallest unit is
+\code{"day"} for plain dates and \code{"nanosecond"} otherwise. For zoned
+date-times, calendar units (\code{largest_unit} of \code{"day"} or more) require both
+values to have the same time zone.
 }
 \examples{
 temporal_until(plain_date(2006, 8, 24), plain_date(2019, 1, 31))

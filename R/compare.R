@@ -5,6 +5,10 @@
 #' `compare()` ordering. `temporal_compare()` is the equivalent of
 #' `Temporal.X.compare(a, b)` and `temporal_equals()` of `a.equals(b)`.
 #'
+#' Zoned date-times compare by their exact time only, so `==` is `TRUE` for
+#' the same instant in two time zones; `temporal_equals()` additionally
+#' requires the same time zone, as Temporal's `equals()`.
+#'
 #' Character vectors are parsed as the type of the other argument.
 #'
 #' @param x,y Temporal objects of the same type (or strings), recycled to a
@@ -27,7 +31,11 @@ temporal_compare <- function(x, y) {
 #' @export
 temporal_equals <- function(x, y) {
   args <- temporal_common(x, y)
-  vec_equal(args[[1]], args[[2]])
+  out <- vec_equal(args[[1]], args[[2]])
+  if (is_zoned_date_time(args[[1]])) {
+    out <- out & time_zone(args[[1]]) == time_zone(args[[2]])
+  }
+  out
 }
 
 temporal_common <- function(x, y, call = rlang::caller_env()) {

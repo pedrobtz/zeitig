@@ -16,5 +16,14 @@
 * Arithmetic for plain types: `temporal_add()`, `temporal_subtract()`,
   `+`/`-` operators, `temporal_until()`, `temporal_since()` and
   `temporal_round()` (also for durations, with `relative_to`).
+* New `instant()` (Temporal `Instant`) and `zoned_date_time()` (Temporal
+  `ZonedDateTime`) classes: RFC 9557 parsing with `disambiguation` and
+  `offset` options, per-element time zones, `epoch_*()` accessors,
+  `time_zone()`, `offset()`, `offset_nanoseconds()`, `hours_in_day()`,
+  `start_of_day()`, `time_zone_transition()`, `with_time_zone()`,
+  `to_instant()`, `to_zoned_date_time()`, DST-aware arithmetic, rounding and
+  differences, and `POSIXct`/`POSIXlt` conversions.
+* `now_instant()`, `now_zoned_date_time()`, `now_plain_date()`,
+  `now_plain_time()`, `now_plain_date_time()` and `now_time_zone()`.
 * New `available_time_zones()` lists the IANA time zone identifiers known to
   the time zone database.

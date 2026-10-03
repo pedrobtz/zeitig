@@ -25,6 +25,10 @@ Temporal objects support the usual comparison operators (\code{<}, \code{==}, ..
 \code{Temporal.X.compare(a, b)} and \code{temporal_equals()} of \code{a.equals(b)}.
 }
 \details{
+Zoned date-times compare by their exact time only, so \code{==} is \code{TRUE} for
+the same instant in two time zones; \code{temporal_equals()} additionally
+requires the same time zone, as Temporal's \code{equals()}.
+
 Character vectors are parsed as the type of the other argument.
 }
 \examples{

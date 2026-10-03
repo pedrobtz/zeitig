@@ -6,7 +6,13 @@
 \alias{with_plain_date}
 \title{Replace fields}
 \usage{
-temporal_with(x, ..., overflow = c("constrain", "reject"))
+temporal_with(
+  x,
+  ...,
+  overflow = c("constrain", "reject"),
+  disambiguation = c("compatible", "earlier", "later", "reject"),
+  offset = c("prefer", "use", "ignore", "reject")
+)
 
 with_plain_time(x, time = NULL)
 
@@ -17,10 +23,14 @@ with_plain_date(x, date)
 
 \item{...}{Named fields to replace, recycled with \code{x} to a common length. Plain dates take
 \code{year}, \code{month}, \code{day}; plain times take \code{hour}, \code{minute}, \code{second},
-\code{millisecond}, \code{microsecond}, \code{nanosecond}; plain date-times take both.}
+\code{millisecond}, \code{microsecond}, \code{nanosecond}; plain and zoned date-times
+take both.}
 
 \item{overflow}{How to handle out-of-range values: \code{"constrain"} (the
 default) clamps, \code{"reject"} raises an error.}
+
+\item{disambiguation, offset}{Zoned date-times only; see
+\code{\link[=zoned_date_time]{zoned_date_time()}}. \code{offset} defaults to \code{"prefer"} here.}
 
 \item{time}{A plain time (or string), recycled against \code{x}; \code{NULL} means
 midnight.}
@@ -33,8 +43,16 @@ An object of the same class as \code{x}.
 \description{
 \code{temporal_with()} returns a copy of \code{x} with some fields replaced, the
 equivalent of Temporal's \code{.with()}. \code{with_plain_time()} and
-\code{with_plain_date()} replace the whole time or date part of a plain
-date-time (\code{.withPlainTime()}, \code{.withPlainDate()}).
+\code{with_plain_date()} replace the whole time or date part of a plain or
+zoned date-time (\code{.withPlainTime()}, \code{.withPlainDate()}).
+}
+\details{
+For zoned date-times the fields are wall-clock fields in the element's
+time zone; the new local time is resolved with \code{disambiguation}, and
+\code{offset = "prefer"} (the default) keeps the current UTC offset when it is
+still valid, so that changing a field inside a DST overlap stays on the
+same side of it. \code{with_plain_time(x)} without \code{time} gives the start of the
+day.
 }
 \examples{
 d <- plain_date(2006, 1, 24)
@@ -44,4 +62,7 @@ temporal_with(dt, hour = 12)
 with_plain_time(dt, plain_time(9, 30))
 with_plain_time(dt) # midnight
 with_plain_date(dt, plain_date(2000, 1, 1))
+z <- zoned_date_time("2019-11-03T01:30-04:00[America/New_York]")
+temporal_with(z, minute = 45) # stays at -04:00 in the DST overlap
+with_plain_time(z)
 }

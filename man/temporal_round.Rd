@@ -15,7 +15,8 @@ temporal_round(
 )
 }
 \arguments{
-\item{x}{A plain time, plain date-time or duration.}
+\item{x}{A plain time, plain date-time, instant, zoned date-time or
+duration.}
 
 \item{smallest_unit}{The unit to round to (plurals accepted). For durations
 the default is \code{"nanosecond"}.}
@@ -31,8 +32,8 @@ zero); see \code{\link[=temporal_until]{temporal_until()}} for the other modes.}
 \item{largest_unit}{Durations only: the largest unit of the result
 (\code{"auto"} keeps the largest non-zero unit of \code{x}).}
 
-\item{relative_to}{Durations only: \code{NULL}, or a plain date / plain
-date-time (or string) recycled against \code{x}.}
+\item{relative_to}{Durations only: \code{NULL}, or a plain date, plain
+date-time or zoned date-time (or string) recycled against \code{x}.}
 }
 \value{
 An object of the same class as \code{x}.
@@ -42,9 +43,11 @@ An object of the same class as \code{x}.
 }
 \details{
 \itemize{
-\item Plain times and plain date-times round to \code{smallest_unit} (at most
-\code{"hour"} for times, \code{"day"} for date-times). \code{rounding_increment} must
-divide evenly into the next larger unit.
+\item Plain times, plain date-times, instants and zoned date-times round to
+\code{smallest_unit} (at most \code{"hour"} for times and instants, \code{"day"} for
+date-times; a zoned day may be 23 or 25 hours long).
+\code{rounding_increment} must divide evenly into the next larger unit (for
+instants, into a day).
 \item Durations are rounded and balanced between \code{largest_unit} and
 \code{smallest_unit}. Without \code{relative_to}, days are 24 hours and years,
 months and weeks are an error; with it, calendar units are resolved from
