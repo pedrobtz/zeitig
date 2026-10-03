@@ -151,22 +151,53 @@ and recycle arguments with
 | `Temporal.Now.*` | `now_instant()`, `now_zoned_date_time(time_zone = NULL)`, `now_plain_date(...)`, `now_plain_time(...)`, `now_plain_date_time(...)`, `now_time_zone()` |
 
 Every character constructor is a parser; `as_instant()`,
-`as_plain_date()`, etc. are S3 generics with methods for character, base
-R classes and the other zudate classes.
+[`as_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md),
+etc. are S3 generics with methods for character, base R classes and the
+other zudate classes.
 
 ### Accessors (`.year`, `.epochMilliseconds`, …)
 
 `temporal_fields(x)` returns a data frame of all fields. Individual
-accessors: `year()`, `month()`, `day()`, `hour()`, `minute()`,
-`second()`, `millisecond()`, `microsecond()`, `nanosecond()`,
-`day_of_week()`, `day_of_year()`, `week_of_year()`, `year_of_week()`,
-`days_in_month()`, `days_in_year()`, `in_leap_year()`,
+accessors:
+[`year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`month()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`day()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`hour()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`minute()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`second()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`millisecond()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`microsecond()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`nanosecond()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`day_of_week()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`day_of_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`week_of_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`year_of_week()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`days_in_month()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`days_in_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`in_leap_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
 `epoch_seconds()`, `epoch_milliseconds()`,
 [`offset()`](https://rdrr.io/r/stats/offset.html),
 `offset_nanoseconds()`, `time_zone()`, `hours_in_day()`,
 `total()`/[`abs()`](https://rdrr.io/r/base/MathFun.html)/[`sign()`](https://rdrr.io/r/base/sign.html)/`blank()`
 for durations. These are implemented in R from the record fields when
 trivial, in Rust otherwise.
+
+Accessors are plain functions, not S3 generics: each calls an internal
+helper (`civil_date_fields()`, `civil_time_fields()` in `R/accessors.R`)
+that knows which classes carry a date or a time and errors with
+`zudate_type_error` otherwise. Adding a type (e.g. `ZonedDateTime`)
+means adding a branch there, not a method per accessor. Conversions from
+other classes use the
+[`as_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)/[`as_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)/[`as_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)
+S3 generics, while `to_*()` follow Temporal’s `toPlainDate()`-style
+methods and accept only Temporal objects.
+
+Numeric component arguments follow Temporal’s `ToIntegerWithTruncation`:
+doubles are truncated towards zero, non-finite values are a
+`zudate_range_error`, non-numbers a `zudate_type_error`. With
+`overflow = "constrain"` a month or day below 1 is still an error
+(Temporal requires positive integers there), while time fields are
+clamped in both directions (Temporal’s `ConstrainTime`).
 
 ### Arithmetic and comparison
 
@@ -180,7 +211,7 @@ trivial, in Rust otherwise.
 | `x.equals(y)` | `temporal_equals(x, y)` (compares time zone id too, unlike `==` on `ZonedDateTime` which follows `compare`) |
 | `x.round(opts)` | `temporal_round(x, smallest_unit =, rounding_increment = 1, rounding_mode = "halfExpand")` |
 | `x.with({...}, {overflow})` | `temporal_with(x, year = , month = , ...)` |
-| `x.withPlainTime(t)` etc. | `with_plain_time()`, `with_plain_date()`, `with_time_zone()`, `with_calendar()` (iso8601 only) |
+| `x.withPlainTime(t)` etc. | [`with_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md), [`with_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md), `with_time_zone()`, `with_calendar()` (iso8601 only) |
 | `zdt.startOfDay()` | `start_of_day()` |
 | `zdt.getTimeZoneTransition(dir)` | `time_zone_transition(x, direction = c("next", "previous"))` |
 | `Duration.compare(a, b, {relativeTo})` | `duration_compare(a, b, relative_to = NULL)` |
@@ -199,7 +230,9 @@ text.
 
 `to_instant()`,
 `to_zoned_date_time(x, time_zone, disambiguation =, offset =)`,
-`to_plain_date()`, `to_plain_time()`, `to_plain_date_time()`.
+[`to_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
+[`to_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
+[`to_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md).
 `ZonedDateTime -> Instant` is exact; `Instant -> ZonedDateTime` needs a
 time zone; `Plain* -> Zoned*` goes through disambiguation.
 
@@ -222,6 +255,8 @@ time zone; `Plain* -> Zoned*` goes through disambiguation.
 |----|----|----|
 | `Date` | `PlainDate` | exact |
 | `POSIXct` | `Instant`, `ZonedDateTime` | uses `tzone` attribute or [`Sys.timezone()`](https://rdrr.io/r/base/timezones.html); sub-nanosecond doubles are rounded |
+| `POSIXct` | `PlainDate`/`PlainTime`/`PlainDateTime` | wall clock in its own zone, rounded to microseconds (a double cannot hold ns of a current instant) |
+| `PlainDateTime` | `POSIXct`/`POSIXlt` | wall clock interpreted in `tz` (default UTC); DST gaps resolved by the OS |
 | `POSIXlt` | `PlainDateTime` / `ZonedDateTime` | field-wise |
 | `difftime` | `Duration` | units mapped to days/hours/minutes/seconds |
 | `PlainDate` | `Date` | exact |
@@ -378,7 +413,7 @@ binding constraint on the build. The scheme:
 | `Instant` range | ±1e8 days from epoch | ±9999 years (`Timestamp::MIN/MAX`) | jiff’s range; documented; values outside error |
 | `Duration` component range | up to 2^53 per unit | `Span` unit limits | jiff’s range; documented |
 | `Duration` string with fractional units | allowed on the smallest unit | allowed | same |
-| `ZonedDateTime` equality | `equals` includes time zone id | `Zoned == Zoned` compares instant and zone | `==` follows `compare` (instant only); `temporal_equals()` also compares the zone id |
+| `ZonedDateTime` equality | `equals` includes time zone id | `Zoned == Zoned` compares instant and zone | `==` follows `compare` (instant only); [`temporal_equals()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md) also compares the zone id |
 | `until`/`since` default units on `ZonedDateTime` | `hour` largest unit | `Zoned::until` defaults to hours as well | same |
 | [`toString()`](https://rdrr.io/r/base/toString.html) fractional digits | `auto` trims trailing zeros | `Display` prints `auto` precision | same |
 | Leap seconds | not represented | not represented | same |

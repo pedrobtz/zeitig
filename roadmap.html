@@ -56,15 +56,16 @@
 <li><label><input type="checkbox" checked>Measure tarball size; must stay under 5 MB. (1.5 MB; enforced by the offline-install job.)</label></li>
 </ul></div>
 <div class="section level2">
-<h2 id="milestone-2---core-civil-types">Milestone 2 - Core civil types<a class="anchor" aria-label="anchor" href="#milestone-2---core-civil-types"></a></h2>
+<h2 id="milestone-2---core-civil-types-done">Milestone 2 - Core civil types (done)<a class="anchor" aria-label="anchor" href="#milestone-2---core-civil-types-done"></a></h2>
 <p><code>PlainDate</code>, <code>PlainTime</code>, <code>PlainDateTime</code> end to end; this establishes the patterns (record layout, Rust column loops, option handling, error mapping) that the remaining types copy.</p>
-<ul class="task-list"><li><label><input type="checkbox">vctrs record classes + <code>format</code>/<code>print</code>/<code>vec_ptype2</code>/<code>vec_cast</code>/<code>vec_proxy_compare</code> for the three types.</label></li>
-<li><label><input type="checkbox">Constructors from components and from RFC 9557 strings (Rust parser); <code>overflow = "constrain" | "reject"</code>.</label></li>
-<li><label><input type="checkbox">Field accessors (<code>year()</code> … <code>nanosecond()</code>, <code>day_of_week()</code>, <code>day_of_year()</code>, <code>week_of_year()</code>, <code>year_of_week()</code>, <code>days_in_month()</code>, <code>days_in_year()</code>, <code>in_leap_year()</code>).</label></li>
-<li><label><input type="checkbox"><code>temporal_with()</code>, <code>with_plain_time()</code>, <code>with_plain_date()</code>.</label></li>
-<li><label><input type="checkbox">Conversions among the three (<code>to_plain_date()</code>, <code>to_plain_time()</code>, <code>to_plain_date_time()</code>), and from/to <code>Date</code>, <code>POSIXlt</code>.</label></li>
-<li><label><input type="checkbox">Rust error -&gt; <code>zudate_error</code> condition with element index.</label></li>
-<li><label><input type="checkbox">Tests from Temporal docs examples for each method; <code>NA</code> and zero-length inputs in every test file.</label></li>
+<ul class="task-list"><li><label><input type="checkbox" checked>vctrs record classes + <code>format</code>/<code>print</code>/<code>vec_ptype2</code>/<code>vec_cast</code>/<code>vec_proxy_compare</code> for the three types (default record proxy; field order gives Temporal ordering).</label></li>
+<li><label><input type="checkbox" checked>Constructors from components and from RFC 9557 strings (Rust parser); <code>overflow = "constrain" | "reject"</code>.</label></li>
+<li><label><input type="checkbox" checked>Field accessors (<code><a href="reference/temporal-fields.html">year()</a></code> … <code><a href="reference/temporal-fields.html">nanosecond()</a></code>, <code><a href="reference/temporal-fields.html">day_of_week()</a></code>, <code><a href="reference/temporal-fields.html">day_of_year()</a></code>, <code><a href="reference/temporal-fields.html">week_of_year()</a></code>, <code><a href="reference/temporal-fields.html">year_of_week()</a></code>, <code><a href="reference/temporal-fields.html">days_in_month()</a></code>, <code><a href="reference/temporal-fields.html">days_in_year()</a></code>, <code><a href="reference/temporal-fields.html">in_leap_year()</a></code>), plus <code><a href="reference/temporal-fields.html">days_in_week()</a></code>, <code><a href="reference/temporal-fields.html">months_in_year()</a></code>, <code><a href="reference/temporal-fields.html">temporal_fields()</a></code>.</label></li>
+<li><label><input type="checkbox" checked><code><a href="reference/temporal_with.html">temporal_with()</a></code>, <code><a href="reference/temporal_with.html">with_plain_time()</a></code>, <code><a href="reference/temporal_with.html">with_plain_date()</a></code>.</label></li>
+<li><label><input type="checkbox" checked>Conversions among the three (<code><a href="reference/temporal-conversions.html">to_plain_date()</a></code>, <code><a href="reference/temporal-conversions.html">to_plain_time()</a></code>, <code><a href="reference/temporal-conversions.html">to_plain_date_time()</a></code>), and from/to <code>Date</code>, <code>POSIXlt</code>, <code>POSIXct</code> (<code>as_plain_*()</code> generics, <code><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date()</a></code>, <code><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct()</a></code>/<code><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXlt()</a></code>).</label></li>
+<li><label><input type="checkbox" checked>Rust error -&gt; <code>zudate_error</code> condition with element index (<code>zudate_range_error</code>; argument types -&gt; <code>zudate_type_error</code>).</label></li>
+<li><label><input type="checkbox" checked><code><a href="reference/temporal_compare.html">temporal_compare()</a></code> / <code><a href="reference/temporal_compare.html">temporal_equals()</a></code> for the civil types.</label></li>
+<li><label><input type="checkbox" checked>Tests from Temporal docs examples for each method; <code>NA</code> and zero-length inputs in every test file.</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="milestone-3---duration-and-arithmetic">Milestone 3 - Duration and arithmetic<a class="anchor" aria-label="anchor" href="#milestone-3---duration-and-arithmetic"></a></h2>
@@ -83,7 +84,7 @@
 <li><label><input type="checkbox">Per-call time zone cache in Rust; invalid identifiers produce <code>zudate_range_error</code>.</label></li>
 <li><label><input type="checkbox"><code>now_*()</code> functions; default zone from <code><a href="https://rdrr.io/r/base/timezones.html" class="external-link">Sys.timezone()</a></code>.</label></li>
 <li><label><input type="checkbox"><code>POSIXct</code> conversions both ways with documented precision loss.</label></li>
-<li><label><input type="checkbox"><code>temporal_equals()</code> vs <code>==</code> semantics as decided in <code>design.md</code> section 11.</label></li>
+<li><label><input type="checkbox"><code><a href="reference/temporal_compare.html">temporal_equals()</a></code> vs <code>==</code> semantics as decided in <code>design.md</code> section 11.</label></li>
 <li><label><input type="checkbox">Tests covering DST gaps and overlaps in at least three zones, fixed offsets, <code>Etc/UTC</code>, and the <code>TZ</code>/<code>TZDIR</code> environment handling on all CI platforms.</label></li>
 </ul></div>
 <div class="section level2">

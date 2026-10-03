@@ -55,7 +55,7 @@ CI job: build the tarball, install it with networking disabled
 Measure tarball size; must stay under 5 MB. (1.5 MB; enforced by the
 offline-install job.)
 
-## Milestone 2 - Core civil types
+## Milestone 2 - Core civil types (done)
 
 `PlainDate`, `PlainTime`, `PlainDateTime` end to end; this establishes
 the patterns (record layout, Rust column loops, option handling, error
@@ -63,21 +63,46 @@ mapping) that the remaining types copy.
 
 vctrs record classes +
 `format`/`print`/`vec_ptype2`/`vec_cast`/`vec_proxy_compare` for the
-three types.
+three types (default record proxy; field order gives Temporal ordering).
 
 Constructors from components and from RFC 9557 strings (Rust parser);
 `overflow = "constrain" | "reject"`.
 
-Field accessors (`year()` … `nanosecond()`, `day_of_week()`,
-`day_of_year()`, `week_of_year()`, `year_of_week()`, `days_in_month()`,
-`days_in_year()`, `in_leap_year()`).
+Field accessors
+([`year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md)
+…
+[`nanosecond()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`day_of_week()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`day_of_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`week_of_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`year_of_week()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`days_in_month()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`days_in_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`in_leap_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md)),
+plus
+[`days_in_week()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`months_in_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
+[`temporal_fields()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md).
 
-`temporal_with()`, `with_plain_time()`, `with_plain_date()`.
+[`temporal_with()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md),
+[`with_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md),
+[`with_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md).
 
-Conversions among the three (`to_plain_date()`, `to_plain_time()`,
-`to_plain_date_time()`), and from/to `Date`, `POSIXlt`.
+Conversions among the three
+([`to_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
+[`to_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
+[`to_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md)),
+and from/to `Date`, `POSIXlt`, `POSIXct` (`as_plain_*()` generics,
+[`as.Date()`](https://rdrr.io/r/base/as.Date.html),
+[`as.POSIXct()`](https://rdrr.io/r/base/as.POSIXlt.html)/[`as.POSIXlt()`](https://rdrr.io/r/base/as.POSIXlt.html)).
 
-Rust error -\> `zudate_error` condition with element index.
+Rust error -\> `zudate_error` condition with element index
+(`zudate_range_error`; argument types -\> `zudate_type_error`).
+
+[`temporal_compare()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md)
+/
+[`temporal_equals()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md)
+for the civil types.
 
 Tests from Temporal docs examples for each method; `NA` and zero-length
 inputs in every test file.
@@ -127,8 +152,8 @@ Per-call time zone cache in Rust; invalid identifiers produce
 
 `POSIXct` conversions both ways with documented precision loss.
 
-`temporal_equals()` vs `==` semantics as decided in `design.md` section
-11.
+[`temporal_equals()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md)
+vs `==` semantics as decided in `design.md` section 11.
 
 Tests covering DST gaps and overlaps in at least three zones, fixed
 offsets, `Etc/UTC`, and the `TZ`/`TZDIR` environment handling on all CI

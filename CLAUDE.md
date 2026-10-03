@@ -158,6 +158,11 @@ CRAN compliance”.
   after linking). A stray `src/rust/target/<profile>/libzudate.a` left
   by a manual `cargo build` is linked as is and gives “undefined symbol:
   savvy\_…\_ffi”; delete it.
+- Do not use savvy’s `NotAvailableValue::is_na()` on `i32` in code that
+  `cargo test` links: it reads the `R_NaInt` data symbol and the test
+  binary fails to link (`undefined symbol: R_NaInt`). Use
+  `cols::is_na_int()` / `cols::NA_INT` instead. Column readers/writers
+  for each record layout live in `src/rust/src/cols.rs`.
 - Rust functions exported through savvy are internal and prefixed `rs_`
   (no `@export`); the documented, exported R API lives in hand-written
   `R/*.R` files that call them.

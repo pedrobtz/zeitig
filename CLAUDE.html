@@ -126,6 +126,7 @@
 <code>cargo test</code> warns about an unexpected <code>savvy-test</code> cfg; that is expected (the feature is injected by <code>savvy-cli test</code>), do not “fix” it by removing the test module.</li>
 <li>CRAN installs with at most 2 CPUs: Makevars passes <code>-j 2</code> to cargo.</li>
 <li>Makevars only builds <code>libzudate.a</code> when it is missing (it is deleted after linking). A stray <code>src/rust/target/&lt;profile&gt;/libzudate.a</code> left by a manual <code>cargo build</code> is linked as is and gives “undefined symbol: savvy_…_ffi”; delete it.</li>
+<li>Do not use savvy’s <code>NotAvailableValue::is_na()</code> on <code>i32</code> in code that <code>cargo test</code> links: it reads the <code>R_NaInt</code> data symbol and the test binary fails to link (<code>undefined symbol: R_NaInt</code>). Use <code>cols::is_na_int()</code> / <code>cols::NA_INT</code> instead. Column readers/writers for each record layout live in <code>src/rust/src/cols.rs</code>.</li>
 <li>Rust functions exported through savvy are internal and prefixed <code>rs_</code> (no <code>@export</code>); the documented, exported R API lives in hand-written <code>R/*.R</code> files that call them.</li>
 <li>
 <code>.github/workflows/offline-install.yaml</code> builds the tarball and installs it with networking blocked on Linux, macOS and Windows; it also enforces the 5 MB tarball limit.</li>
