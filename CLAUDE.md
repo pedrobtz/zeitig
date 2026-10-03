@@ -5,7 +5,7 @@ with code in this repository.
 
 ## What this package is
 
-`zudate` is an R package that implements the [TC39
+`zeitig` is an R package that implements the [TC39
 Temporal](https://tc39.es/proposal-temporal/docs/) date/time model
 (Instant, PlainDate, PlainTime, PlainDateTime, ZonedDateTime, Duration,
 …) on top of the Rust crate [`jiff`](https://docs.rs/jiff), which is
@@ -78,13 +78,13 @@ same “object not found” error even though compilation succeeded.
     `src/Makevars` / `src/Makevars.win`. The generated Makevars files
     are gitignored and removed by `cleanup` / `cleanup.win`.
 2.  `src/Makevars` runs `cargo build --lib` on `src/rust/Cargo.toml`
-    producing the static library `libzudate.a`, then links it with
-    `src/init.c` into `zudate.so` / `zudate.dll`. The static lib is
+    producing the static library `libzeitig.a`, then links it with
+    `src/init.c` into `zeitig.so` / `zeitig.dll`. The static lib is
     deleted after linking (`clean_intermediate`) to keep the installed
     size small.
 3.  On Windows the Makevars additionally mocks `libgcc_eh.a` and points
-    cargo at the Rtools linker; `src/zudate-win.def` exports only
-    `R_init_zudate`.
+    cargo at the Rtools linker; `src/zeitig-win.def` exports only
+    `R_init_zeitig`.
 4.  `.Rbuildignore` excludes `src/rust/.cargo` and `src/rust/target`
     from the tarball.
 
@@ -106,7 +106,7 @@ CRAN compliance”.
 - `savvy-cli update .` parses those attributes and generates three files
   that must never be edited by hand: `src/rust/api.h` (C prototypes),
   `src/init.c` (`.Call` entry points, `handle_result` error trampoline,
-  `R_init_zudate` registration) and `R/000-wrappers.R` (R wrappers;
+  `R_init_zeitig` registration) and `R/000-wrappers.R` (R wrappers;
   roxygen comments on the Rust items are copied here, so `@export` on a
   Rust doc comment is what makes the R function exported after
   `document()`).
@@ -124,7 +124,7 @@ CRAN compliance”.
 
 - `R/000-wrappers.R` loads first so hand-written R files can
   override/extend generated functions.
-- `R/zudate-package.R` holds the package-level roxygen block
+- `R/zeitig-package.R` holds the package-level roxygen block
   (`"_PACKAGE"`) and usethis namespace markers.
 - Tests: `tests/testthat/`, edition 3. Rust tests live next to the Rust
   code.
@@ -144,8 +144,8 @@ CRAN compliance”.
 
 ## Conventions and gotchas
 
-- Crate name and R package name are both `zudate`; the static lib must
-  be `libzudate.a` and the init symbol `R_init_zudate`. Renaming either
+- Crate name and R package name are both `zeitig`; the static lib must
+  be `libzeitig.a` and the init symbol `R_init_zeitig`. Renaming either
   requires touching Makevars, `init.c`, the `.def` file and `Cargo.toml`
   together.
 - `src/rust/.cargo/config.toml` exists only so `cargo test` links on
@@ -154,8 +154,8 @@ CRAN compliance”.
   expected (the feature is injected by `savvy-cli test`), do not “fix”
   it by removing the test module.
 - CRAN installs with at most 2 CPUs: Makevars passes `-j 2` to cargo.
-- Makevars only builds `libzudate.a` when it is missing (it is deleted
-  after linking). A stray `src/rust/target/<profile>/libzudate.a` left
+- Makevars only builds `libzeitig.a` when it is missing (it is deleted
+  after linking). A stray `src/rust/target/<profile>/libzeitig.a` left
   by a manual `cargo build` is linked as is and gives “undefined symbol:
   savvy\_…\_ffi”; delete it.
 - Do not use savvy’s `NotAvailableValue::is_na()` on `i32` in code that

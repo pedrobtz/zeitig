@@ -40,7 +40,7 @@ to_zoned_date_time(
 - disambiguation:
 
   How to resolve local times in DST gaps and overlaps, see
-  [`zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/zoned_date_time.md).
+  [`zoned_date_time()`](https://pedrobtz.github.io/zeitig/reference/zoned_date_time.md).
 
 ## Value
 

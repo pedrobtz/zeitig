@@ -2,9 +2,9 @@
 
 ``` r
 
-library(zudate)
+library(zeitig)
 #> 
-#> Attaching package: 'zudate'
+#> Attaching package: 'zeitig'
 #> The following object is masked from 'package:stats':
 #> 
 #>     offset
@@ -12,9 +12,9 @@ library(zudate)
 
 ## Exact time versus wall-clock time
 
-An [`instant()`](https://pedrobtz.github.io/zudate/reference/instant.md)
+An [`instant()`](https://pedrobtz.github.io/zeitig/reference/instant.md)
 is a point on the global timeline. A
-[`zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/zoned_date_time.md)
+[`zoned_date_time()`](https://pedrobtz.github.io/zeitig/reference/zoned_date_time.md)
 is the same point plus a time zone, which gives it a wall-clock reading.
 Plain types have a wall-clock reading but no position on the timeline.
 
@@ -29,20 +29,20 @@ with_time_zone(to_zoned_date_time(i, "UTC"), c("America/New_York", "Asia/Tokyo",
 ```
 
 Each element carries its own time zone. Identifiers are IANA names (see
-[`available_time_zones()`](https://pedrobtz.github.io/zudate/reference/available_time_zones.md))
+[`available_time_zones()`](https://pedrobtz.github.io/zeitig/reference/available_time_zones.md))
 or fixed offsets such as `"+05:30"`.
 
 ## Where the database comes from
 
-On Linux and macOS zudate reads the operating system’s time zone
+On Linux and macOS zeitig reads the operating system’s time zone
 database (`/usr/share/zoneinfo`, or the directory in `TZDIR`), so its
 rules are as current as the system’s. On Windows, which has no such
 database, the copy of the IANA database bundled with the jiff crate is
-used. Setting `ZUDATE_TZDIR` before the first time zone lookup in a
-session points zudate at another zoneinfo directory.
+used. Setting `ZEITIG_TZDIR` before the first time zone lookup in a
+session points zeitig at another zoneinfo directory.
 
 The default time zone, used by
-[`now_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
+[`now_zoned_date_time()`](https://pedrobtz.github.io/zeitig/reference/now_instant.md)
 and for `POSIXct` values without a `tzone`, is the `TZ` environment
 variable when set, otherwise
 [`Sys.timezone()`](https://rdrr.io/r/base/timezones.html):

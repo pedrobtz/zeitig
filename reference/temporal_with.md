@@ -42,7 +42,7 @@ with_plain_date(x, date)
 - disambiguation, offset:
 
   Zoned date-times only; see
-  [`zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/zoned_date_time.md).
+  [`zoned_date_time()`](https://pedrobtz.github.io/zeitig/reference/zoned_date_time.md).
   `offset` defaults to `"prefer"` here.
 
 - time:

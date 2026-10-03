@@ -30,7 +30,7 @@ character vector (`epoch_nanoseconds()`).
 ## See also
 
 Other instant:
-[`instant()`](https://pedrobtz.github.io/zudate/reference/instant.md)
+[`instant()`](https://pedrobtz.github.io/zeitig/reference/instant.md)
 
 ## Examples
 

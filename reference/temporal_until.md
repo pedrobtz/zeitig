@@ -72,8 +72,8 @@ both values to have the same time zone.
 ## See also
 
 Other arithmetic:
-[`temporal_add()`](https://pedrobtz.github.io/zudate/reference/temporal_add.md),
-[`temporal_round()`](https://pedrobtz.github.io/zudate/reference/temporal_round.md)
+[`temporal_add()`](https://pedrobtz.github.io/zeitig/reference/temporal_add.md),
+[`temporal_round()`](https://pedrobtz.github.io/zeitig/reference/temporal_round.md)
 
 ## Examples
 

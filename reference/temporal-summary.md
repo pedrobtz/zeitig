@@ -9,22 +9,22 @@ summarized.
 ## Usage
 
 ``` r
-# S3 method for class 'zudate_plain_date'
+# S3 method for class 'zeitig_plain_date'
 summary(object, ...)
 
-# S3 method for class 'zudate_plain_time'
+# S3 method for class 'zeitig_plain_time'
 summary(object, ...)
 
-# S3 method for class 'zudate_plain_date_time'
+# S3 method for class 'zeitig_plain_date_time'
 summary(object, ...)
 
-# S3 method for class 'zudate_instant'
+# S3 method for class 'zeitig_instant'
 summary(object, ...)
 
-# S3 method for class 'zudate_zoned_date_time'
+# S3 method for class 'zeitig_zoned_date_time'
 summary(object, ...)
 
-# S3 method for class 'zudate_duration'
+# S3 method for class 'zeitig_duration'
 summary(object, ...)
 ```
 

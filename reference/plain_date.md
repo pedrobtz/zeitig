@@ -1,6 +1,6 @@
 # Plain dates
 
-A `zudate_plain_date` is a calendar date without a time or time zone,
+A `zeitig_plain_date` is a calendar date without a time or time zone,
 the equivalent of
 [`Temporal.PlainDate`](https://tc39.es/proposal-temporal/docs/plaindate.html).
 Only the ISO 8601 calendar is supported.
@@ -36,7 +36,7 @@ is_plain_date(x)
 
 ## Value
 
-A `zudate_plain_date` vector.
+A `zeitig_plain_date` vector.
 
 ## Details
 

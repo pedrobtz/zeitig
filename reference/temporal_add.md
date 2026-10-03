@@ -59,8 +59,8 @@ Subtracting two values of the same type (`x - y`) is
 ## See also
 
 Other arithmetic:
-[`temporal_round()`](https://pedrobtz.github.io/zudate/reference/temporal_round.md),
-[`temporal_until()`](https://pedrobtz.github.io/zudate/reference/temporal_until.md)
+[`temporal_round()`](https://pedrobtz.github.io/zeitig/reference/temporal_round.md),
+[`temporal_until()`](https://pedrobtz.github.io/zeitig/reference/temporal_until.md)
 
 ## Examples
 

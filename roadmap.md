@@ -1,6 +1,6 @@
-# zudate roadmap
+# zeitig roadmap
 
-Goal: `zudate` 0.1.0 accepted on CRAN with the core Temporal types
+Goal: `zeitig` 0.1.0 accepted on CRAN with the core Temporal types
 backed by vendored `jiff`. Design decisions live in `design.md`; this
 file tracks the work and its order. Tick items as they land and move
 anything that slips into “After 0.1.0” rather than letting 0.1.0 grow.
@@ -69,39 +69,39 @@ Constructors from components and from RFC 9557 strings (Rust parser);
 `overflow = "constrain" | "reject"`.
 
 Field accessors
-([`year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md)
+([`year()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md)
 …
-[`nanosecond()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`day_of_week()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`day_of_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`week_of_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`year_of_week()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`days_in_month()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`days_in_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`in_leap_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md)),
+[`nanosecond()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`day_of_week()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`day_of_year()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`week_of_year()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`year_of_week()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`days_in_month()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`days_in_year()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`in_leap_year()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md)),
 plus
-[`days_in_week()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`months_in_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`temporal_fields()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md).
+[`days_in_week()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`months_in_year()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`temporal_fields()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md).
 
-[`temporal_with()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md),
-[`with_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md),
-[`with_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md).
+[`temporal_with()`](https://pedrobtz.github.io/zeitig/reference/temporal_with.md),
+[`with_plain_time()`](https://pedrobtz.github.io/zeitig/reference/temporal_with.md),
+[`with_plain_date()`](https://pedrobtz.github.io/zeitig/reference/temporal_with.md).
 
 Conversions among the three
-([`to_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
-[`to_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
-[`to_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md)),
+([`to_plain_date()`](https://pedrobtz.github.io/zeitig/reference/temporal-conversions.md),
+[`to_plain_time()`](https://pedrobtz.github.io/zeitig/reference/temporal-conversions.md),
+[`to_plain_date_time()`](https://pedrobtz.github.io/zeitig/reference/temporal-conversions.md)),
 and from/to `Date`, `POSIXlt`, `POSIXct` (`as_plain_*()` generics,
 [`as.Date()`](https://rdrr.io/r/base/as.Date.html),
 [`as.POSIXct()`](https://rdrr.io/r/base/as.POSIXlt.html)/[`as.POSIXlt()`](https://rdrr.io/r/base/as.POSIXlt.html)).
 
-Rust error -\> `zudate_error` condition with element index
-(`zudate_range_error`; argument types -\> `zudate_type_error`).
+Rust error -\> `zeitig_error` condition with element index
+(`zeitig_range_error`; argument types -\> `zeitig_type_error`).
 
-[`temporal_compare()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md)
+[`temporal_compare()`](https://pedrobtz.github.io/zeitig/reference/temporal_compare.md)
 /
-[`temporal_equals()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md)
+[`temporal_equals()`](https://pedrobtz.github.io/zeitig/reference/temporal_compare.md)
 for the civil types.
 
 Tests from Temporal docs examples for each method; `NA` and zero-length
@@ -109,28 +109,28 @@ inputs in every test file.
 
 ## Milestone 3 - Duration and arithmetic (done)
 
-`zudate_duration` record class, constructor from components and ISO 8601
+`zeitig_duration` record class, constructor from components and ISO 8601
 strings, uniform-sign and range validation.
 
-[`temporal_add()`](https://pedrobtz.github.io/zudate/reference/temporal_add.md)/[`temporal_subtract()`](https://pedrobtz.github.io/zudate/reference/temporal_add.md)
+[`temporal_add()`](https://pedrobtz.github.io/zeitig/reference/temporal_add.md)/[`temporal_subtract()`](https://pedrobtz.github.io/zeitig/reference/temporal_add.md)
 and `+`/`-` via `vec_arith` for Plain\* types.
 
-[`temporal_until()`](https://pedrobtz.github.io/zudate/reference/temporal_until.md)/[`temporal_since()`](https://pedrobtz.github.io/zudate/reference/temporal_until.md)
+[`temporal_until()`](https://pedrobtz.github.io/zeitig/reference/temporal_until.md)/[`temporal_since()`](https://pedrobtz.github.io/zeitig/reference/temporal_until.md)
 with `largest_unit`, `smallest_unit`, `rounding_increment`,
 `rounding_mode`.
 
-[`temporal_round()`](https://pedrobtz.github.io/zudate/reference/temporal_round.md)
+[`temporal_round()`](https://pedrobtz.github.io/zeitig/reference/temporal_round.md)
 for Plain\* types and durations (`relative_to` for calendar units).
 
-[`duration_total()`](https://pedrobtz.github.io/zudate/reference/duration_total.md),
-[`duration_compare()`](https://pedrobtz.github.io/zudate/reference/duration_total.md),
+[`duration_total()`](https://pedrobtz.github.io/zeitig/reference/duration_total.md),
+[`duration_compare()`](https://pedrobtz.github.io/zeitig/reference/duration_total.md),
 [`abs()`](https://rdrr.io/r/base/MathFun.html), unary `-`,
 [`sign()`](https://rdrr.io/r/base/sign.html),
-[`duration_blank()`](https://pedrobtz.github.io/zudate/reference/duration_total.md).
+[`duration_blank()`](https://pedrobtz.github.io/zeitig/reference/duration_total.md).
 
 `difftime` conversions
-([`as_duration()`](https://pedrobtz.github.io/zudate/reference/as_duration.md),
-[`as_difftime()`](https://pedrobtz.github.io/zudate/reference/as_duration.md)).
+([`as_duration()`](https://pedrobtz.github.io/zeitig/reference/as_duration.md),
+[`as_difftime()`](https://pedrobtz.github.io/zeitig/reference/as_duration.md)).
 
 CI job building with the MSRV (rustc 1.81) from the vendored crates.
 
@@ -139,28 +139,28 @@ trip of strings (deterministic LCG, no extra crate).
 
 ## Milestone 4 - Instant, ZonedDateTime, Now (done)
 
-`zudate_instant`: constructor from strings and epoch units,
-[`epoch_seconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md),
-[`epoch_milliseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md),
-[`epoch_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
+`zeitig_instant`: constructor from strings and epoch units,
+[`epoch_seconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md),
+[`epoch_milliseconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md),
+[`epoch_nanoseconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md)
 (string), arithmetic with time-unit durations,
-[`temporal_round()`](https://pedrobtz.github.io/zudate/reference/temporal_round.md),
+[`temporal_round()`](https://pedrobtz.github.io/zeitig/reference/temporal_round.md),
 `until`/`since`.
 
-`zudate_zoned_date_time`: per-element time zone, constructor with
+`zeitig_zoned_date_time`: per-element time zone, constructor with
 `disambiguation` and `offset` options, parsing of `[Zone]` and `[!Zone]`
 annotations,
-[`offset()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
-[`offset_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
-[`time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
-[`hours_in_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
-[`start_of_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
-[`time_zone_transition()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
-[`with_time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+[`offset()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md),
+[`offset_nanoseconds()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md),
+[`time_zone()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md),
+[`hours_in_day()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md),
+[`start_of_day()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md),
+[`time_zone_transition()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md),
+[`with_time_zone()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md),
 calendar-aware `add`/`until`/`round`.
 
 Per-call time zone cache in Rust; invalid identifiers produce
-`zudate_range_error`; `ZUDATE_TZDIR` overrides the database (read once
+`zeitig_range_error`; `ZEITIG_TZDIR` overrides the database (read once
 per session).
 
 `now_*()` functions; default zone from `TZ`, then
@@ -169,7 +169,7 @@ and misses later `TZ` changes), then UTC.
 
 `POSIXct` conversions both ways with documented precision loss.
 
-[`temporal_equals()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md)
+[`temporal_equals()`](https://pedrobtz.github.io/zeitig/reference/temporal_compare.md)
 vs `==` semantics as decided in `design.md` section 11.
 
 Tests covering DST gaps and overlaps in at least three zones, fixed
@@ -182,9 +182,9 @@ platforms.
 `fractional_second_digits`, `smallest_unit`, `rounding_mode`, `offset`,
 `time_zone_name`, `calendar_name`.
 
-[`temporal_strftime()`](https://pedrobtz.github.io/zudate/reference/temporal_strftime.md)
+[`temporal_strftime()`](https://pedrobtz.github.io/zeitig/reference/temporal_strftime.md)
 /
-[`temporal_strptime()`](https://pedrobtz.github.io/zudate/reference/temporal_strftime.md).
+[`temporal_strptime()`](https://pedrobtz.github.io/zeitig/reference/temporal_strftime.md).
 
 `pillar` methods (tibble columns),
 [`str()`](https://rdrr.io/r/utils/str.html) output,
@@ -194,15 +194,15 @@ platforms.
 [`format()`](https://rdrr.io/r/base/format.html)/`vec_ptype_abbr()`; no
 direct pillar dependency needed.)
 
-`as_*()` S3 generics complete for character, base classes and all zudate
+`as_*()` S3 generics complete for character, base classes and all zeitig
 classes (`as_plain_date/time/date_time()`,
-[`as_instant()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md),
-[`as_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md),
-[`as_duration()`](https://pedrobtz.github.io/zudate/reference/as_duration.md),
-[`as_difftime()`](https://pedrobtz.github.io/zudate/reference/as_duration.md)).
+[`as_instant()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md),
+[`as_zoned_date_time()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md),
+[`as_duration()`](https://pedrobtz.github.io/zeitig/reference/as_duration.md),
+[`as_difftime()`](https://pedrobtz.github.io/zeitig/reference/as_duration.md)).
 
 `README.md` with install instructions and a worked example;
-`vignettes/zudate.Rmd` (overview and Temporal mapping) and
+`vignettes/zeitig.Rmd` (overview and Temporal mapping) and
 `vignettes/time-zones.Rmd`.
 
 pkgdown reference grouped by Temporal type.

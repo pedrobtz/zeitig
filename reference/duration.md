@@ -1,6 +1,6 @@
 # Durations
 
-A `zudate_duration` is a length of time expressed in calendar and clock
+A `zeitig_duration` is a length of time expressed in calendar and clock
 units, the equivalent of
 [`Temporal.Duration`](https://tc39.es/proposal-temporal/docs/duration.html)
 (and of `jiff::Span`). Each element stores ten integer fields that must
@@ -45,14 +45,14 @@ is_duration(x)
 
 ## Value
 
-A `zudate_duration` vector.
+A `zeitig_duration` vector.
 
 ## Details
 
 `duration()` builds durations from fields (recycled to a common length,
 all defaulting to zero) or, when given a single character vector, parses
 ISO 8601 duration strings such as `"P1Y2M3DT4H5M6.5S"`. Use
-[`temporal_fields()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md)
+[`temporal_fields()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md)
 (or [`vctrs::field()`](https://vctrs.r-lib.org/reference/fields.html))
 to read the fields.
 
@@ -60,22 +60,22 @@ Durations support unary `-`,
 [`abs()`](https://rdrr.io/r/base/MathFun.html),
 [`sign()`](https://rdrr.io/r/base/sign.html), `+` and `-` between
 durations (calendar units need
-[`temporal_add()`](https://pedrobtz.github.io/zudate/reference/temporal_add.md)
+[`temporal_add()`](https://pedrobtz.github.io/zeitig/reference/temporal_add.md)
 on a date instead), and arithmetic with dates and times (see
-[`temporal_add()`](https://pedrobtz.github.io/zudate/reference/temporal_add.md)).
+[`temporal_add()`](https://pedrobtz.github.io/zeitig/reference/temporal_add.md)).
 Comparison operators order durations by their length with 24-hour days;
 durations with years, months or weeks can only be compared with
-[`duration_compare()`](https://pedrobtz.github.io/zudate/reference/duration_total.md)
+[`duration_compare()`](https://pedrobtz.github.io/zeitig/reference/duration_total.md)
 and a `relative_to` date. `==` compares the fields, so `PT1H == PT60M`
 is `FALSE` (use
-[`duration_compare()`](https://pedrobtz.github.io/zudate/reference/duration_total.md)
+[`duration_compare()`](https://pedrobtz.github.io/zeitig/reference/duration_total.md)
 to compare lengths).
 
 ## See also
 
 Other duration:
-[`as_duration()`](https://pedrobtz.github.io/zudate/reference/as_duration.md),
-[`duration_total()`](https://pedrobtz.github.io/zudate/reference/duration_total.md)
+[`as_duration()`](https://pedrobtz.github.io/zeitig/reference/as_duration.md),
+[`duration_total()`](https://pedrobtz.github.io/zeitig/reference/duration_total.md)
 
 ## Examples
 

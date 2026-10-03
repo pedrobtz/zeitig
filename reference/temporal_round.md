@@ -38,7 +38,7 @@ temporal_round(
 - rounding_mode:
 
   Defaults to `"halfExpand"` (round half away from zero); see
-  [`temporal_until()`](https://pedrobtz.github.io/zudate/reference/temporal_until.md)
+  [`temporal_until()`](https://pedrobtz.github.io/zeitig/reference/temporal_until.md)
   for the other modes.
 
 - largest_unit:
@@ -71,8 +71,8 @@ An object of the same class as `x`.
 ## See also
 
 Other arithmetic:
-[`temporal_add()`](https://pedrobtz.github.io/zudate/reference/temporal_add.md),
-[`temporal_until()`](https://pedrobtz.github.io/zudate/reference/temporal_until.md)
+[`temporal_add()`](https://pedrobtz.github.io/zeitig/reference/temporal_add.md),
+[`temporal_until()`](https://pedrobtz.github.io/zeitig/reference/temporal_until.md)
 
 ## Examples
 

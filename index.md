@@ -1,6 +1,6 @@
-# zudate
+# zeitig
 
-zudate brings the [TC39
+zeitig brings the [TC39
 Temporal](https://tc39.es/proposal-temporal/docs/) date/time model to R:
 `PlainDate`, `PlainTime`, `PlainDateTime`, `Instant`, `ZonedDateTime`
 and `Duration` as vectorised R classes with nanosecond precision, RFC
@@ -10,13 +10,13 @@ disambiguation rules. All date/time logic is delegated to the Rust crate
 
 ## Installation
 
-You can install the development version of zudate from
-[GitHub](https://github.com/pedrobtz/zudate) with:
+You can install the development version of zeitig from
+[GitHub](https://github.com/pedrobtz/zeitig) with:
 
 ``` r
 
 # install.packages("pak")
-pak::pak("pedrobtz/zudate")
+pak::pak("pedrobtz/zeitig")
 ```
 
 Building from source needs a Rust toolchain (`cargo` and `rustc` \>=
@@ -28,7 +28,7 @@ installation.
 
 ``` r
 
-library(zudate)
+library(zeitig)
 
 # Calendar arithmetic clamps to the end of the month, as in Temporal
 plain_date(2021, 1, 31) + duration(months = 1)
@@ -61,7 +61,7 @@ epoch_nanoseconds(x)
 ```
 
 See
-[`vignette("zudate")`](https://pedrobtz.github.io/zudate/articles/zudate.md)
+[`vignette("zeitig")`](https://pedrobtz.github.io/zeitig/articles/zeitig.md)
 for an overview and
-[`vignette("time-zones")`](https://pedrobtz.github.io/zudate/articles/time-zones.md)
+[`vignette("time-zones")`](https://pedrobtz.github.io/zeitig/articles/time-zones.md)
 for time zone handling.

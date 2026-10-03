@@ -1,6 +1,6 @@
 # Instants
 
-A `zudate_instant` is an exact point in time with nanosecond precision
+A `zeitig_instant` is an exact point in time with nanosecond precision
 and no time zone or calendar, the equivalent of
 [`Temporal.Instant`](https://tc39.es/proposal-temporal/docs/instant.html)
 (and of `jiff::Timestamp`). The supported range is years -9999 to 9999.
@@ -30,7 +30,7 @@ is_instant(x)
 
 ## Value
 
-A `zudate_instant` vector.
+A `zeitig_instant` vector.
 
 ## Details
 
@@ -43,7 +43,7 @@ doubles cannot hold present-day epoch nanoseconds exactly.
 ## See also
 
 Other instant:
-[`epoch_seconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
+[`epoch_seconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md)
 
 ## Examples
 

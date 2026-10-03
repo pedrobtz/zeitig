@@ -1,6 +1,6 @@
 # Plain times
 
-A `zudate_plain_time` is a wall-clock time of day with nanosecond
+A `zeitig_plain_time` is a wall-clock time of day with nanosecond
 precision and no date or time zone, the equivalent of
 [`Temporal.PlainTime`](https://tc39.es/proposal-temporal/docs/plaintime.html).
 
@@ -44,7 +44,7 @@ is_plain_time(x)
 
 ## Value
 
-A `zudate_plain_time` vector.
+A `zeitig_plain_time` vector.
 
 ## Details
 

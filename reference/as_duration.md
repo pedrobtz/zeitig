@@ -40,8 +40,8 @@ plus a sub-second part rounded to the nanosecond.
 ## See also
 
 Other duration:
-[`duration()`](https://pedrobtz.github.io/zudate/reference/duration.md),
-[`duration_total()`](https://pedrobtz.github.io/zudate/reference/duration_total.md)
+[`duration()`](https://pedrobtz.github.io/zeitig/reference/duration.md),
+[`duration_total()`](https://pedrobtz.github.io/zeitig/reference/duration_total.md)
 
 ## Examples
 

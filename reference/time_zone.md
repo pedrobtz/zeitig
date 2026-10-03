@@ -54,7 +54,7 @@ See above.
 ## See also
 
 Other zoned date-time:
-[`zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/zoned_date_time.md)
+[`zoned_date_time()`](https://pedrobtz.github.io/zeitig/reference/zoned_date_time.md)
 
 ## Examples
 

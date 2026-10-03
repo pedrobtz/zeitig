@@ -10,22 +10,22 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/pedrobtz/zudate/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/pedrobtz/zeitig/blob/main/DESCRIPTION)
 
-Z P (2026). *zudate: 'Temporal' Date and Time Types Backed by 'jiff'*. R
-package version 0.1.0, <https://pedrobtz.github.io/zudate/>.
+Z P (2026). *zeitig: 'Temporal' Date and Time Types Backed by 'jiff'*. R
+package version 0.1.0, <https://pedrobtz.github.io/zeitig/>.
 
     @Manual{,
-      title = {zudate: 'Temporal' Date and Time Types Backed by 'jiff'},
+      title = {zeitig: 'Temporal' Date and Time Types Backed by 'jiff'},
       author = {Pedro Z},
       year = {2026},
       note = {R package version 0.1.0},
-      url = {https://pedrobtz.github.io/zudate/},
+      url = {https://pedrobtz.github.io/zeitig/},
     }
 
 ## Additional details
 
-    The zudate package bundles the following Rust crates in
+    The zeitig package bundles the following Rust crates in
     src/rust/vendor.tar.xz. Their authors and licences are:
 
     bitflags 1.3.2 (MIT/Apache-2.0)

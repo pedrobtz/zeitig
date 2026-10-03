@@ -1,6 +1,6 @@
-# zudate design (target: 0.1.0 on CRAN)
+# zeitig design (target: 0.1.0 on CRAN)
 
-`zudate` brings the [TC39
+`zeitig` brings the [TC39
 Temporal](https://tc39.es/proposal-temporal/docs/) date/time model to R.
 All date/time logic is delegated to the Rust crate
 [`jiff`](https://docs.rs/jiff) (0.2.x), which was itself designed after
@@ -98,12 +98,12 @@ element. Field order is chosen so that vctrs’ default record ordering
 
 | R class | Temporal type | Record fields (type) | jiff type |
 |----|----|----|----|
-| `zudate_instant` | `Instant` | `seconds` (double, integral, since 1970-01-01T00:00Z), `nanos` (integer, 0..1e9-1) | `Timestamp` |
-| `zudate_plain_date` | `PlainDate` | `year` (integer), `month` (integer), `day` (integer) | `civil::Date` |
-| `zudate_plain_time` | `PlainTime` | `second_of_day` (integer, 0..86399), `nanos` (integer, 0..1e9-1) | `civil::Time` |
-| `zudate_plain_date_time` | `PlainDateTime` | date fields + time fields | `civil::DateTime` |
-| `zudate_zoned_date_time` | `ZonedDateTime` | `seconds`, `nanos`, `tz` (character, IANA id or `[+hh:mm]` fixed offset) | `Zoned` |
-| `zudate_duration` | `Duration` | `years`, `months`, `weeks`, `days`, `hours`, `minutes`, `seconds`, `milliseconds`, `microseconds`, `nanoseconds` (all double, integral, same sign) | `Span` |
+| `zeitig_instant` | `Instant` | `seconds` (double, integral, since 1970-01-01T00:00Z), `nanos` (integer, 0..1e9-1) | `Timestamp` |
+| `zeitig_plain_date` | `PlainDate` | `year` (integer), `month` (integer), `day` (integer) | `civil::Date` |
+| `zeitig_plain_time` | `PlainTime` | `second_of_day` (integer, 0..86399), `nanos` (integer, 0..1e9-1) | `civil::Time` |
+| `zeitig_plain_date_time` | `PlainDateTime` | date fields + time fields | `civil::DateTime` |
+| `zeitig_zoned_date_time` | `ZonedDateTime` | `seconds`, `nanos`, `tz` (character, IANA id or `[+hh:mm]` fixed offset) | `Zoned` |
+| `zeitig_duration` | `Duration` | `years`, `months`, `weeks`, `days`, `hours`, `minutes`, `seconds`, `milliseconds`, `microseconds`, `nanoseconds` (all double, integral, same sign) | `Span` |
 
 Notes
 
@@ -120,12 +120,12 @@ Notes
   error wording.
 - Temporal’s `Instant` in JavaScript is a `BigInt` of epoch nanoseconds;
   we expose
-  [`epoch_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
+  [`epoch_nanoseconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md)
   as a character/`bit64`-free double pair only through helper accessors
-  ([`epoch_seconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md),
-  [`epoch_milliseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md),
+  ([`epoch_seconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md),
+  [`epoch_milliseconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md),
   and
-  [`epoch_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
+  [`epoch_nanoseconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md)
   returning a string) since R has no native 64-bit integer.
 
 Why records rather than a single numeric with attributes (like
@@ -152,61 +152,61 @@ and recycle arguments with
 | `PlainDateTime.from(...)` | `plain_date_time(year, month, day, hour, ...)` / character |
 | `ZonedDateTime.from(...)` | `zoned_date_time(year, ..., time_zone =)`; character with `[Zone]` suffix |
 | `Duration.from(...)` | `duration(years = 0, months = 0, ..., nanoseconds = 0)`; ISO 8601 duration strings |
-| `Temporal.Now.*` | [`now_instant()`](https://pedrobtz.github.io/zudate/reference/now_instant.md), `now_zoned_date_time(time_zone = NULL)`, `now_plain_date(...)`, `now_plain_time(...)`, `now_plain_date_time(...)`, [`now_time_zone()`](https://pedrobtz.github.io/zudate/reference/now_instant.md) |
+| `Temporal.Now.*` | [`now_instant()`](https://pedrobtz.github.io/zeitig/reference/now_instant.md), `now_zoned_date_time(time_zone = NULL)`, `now_plain_date(...)`, `now_plain_time(...)`, `now_plain_date_time(...)`, [`now_time_zone()`](https://pedrobtz.github.io/zeitig/reference/now_instant.md) |
 
 Every character constructor is a parser;
-[`as_instant()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md),
-[`as_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md),
+[`as_instant()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md),
+[`as_plain_date()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md),
 etc. are S3 generics with methods for character, base R classes and the
-other zudate classes.
+other zeitig classes.
 
 ### Accessors (`.year`, `.epochMilliseconds`, …)
 
 `temporal_fields(x)` returns a data frame of all fields. Individual
 accessors:
-[`year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`month()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`day()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`hour()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`minute()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`second()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`millisecond()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`microsecond()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`nanosecond()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`day_of_week()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`day_of_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`week_of_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`year_of_week()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`days_in_month()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`days_in_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`in_leap_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-[`epoch_seconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md),
-[`epoch_milliseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md),
-[`offset()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
-[`offset_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
-[`time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
-[`hours_in_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
-[`duration_total()`](https://pedrobtz.github.io/zudate/reference/duration_total.md)/[`abs()`](https://rdrr.io/r/base/MathFun.html)/[`sign()`](https://rdrr.io/r/base/sign.html)/[`duration_blank()`](https://pedrobtz.github.io/zudate/reference/duration_total.md)
+[`year()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`month()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`day()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`hour()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`minute()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`second()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`millisecond()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`microsecond()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`nanosecond()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`day_of_week()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`day_of_year()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`week_of_year()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`year_of_week()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`days_in_month()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`days_in_year()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`in_leap_year()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md),
+[`epoch_seconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md),
+[`epoch_milliseconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md),
+[`offset()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md),
+[`offset_nanoseconds()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md),
+[`time_zone()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md),
+[`hours_in_day()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md),
+[`duration_total()`](https://pedrobtz.github.io/zeitig/reference/duration_total.md)/[`abs()`](https://rdrr.io/r/base/MathFun.html)/[`sign()`](https://rdrr.io/r/base/sign.html)/[`duration_blank()`](https://pedrobtz.github.io/zeitig/reference/duration_total.md)
 for durations (no per-unit duration accessors, which would mask
 [`base::months()`](https://rdrr.io/r/base/weekday.POSIXt.html) and clash
 with lubridate; use
-[`temporal_fields()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md)).
+[`temporal_fields()`](https://pedrobtz.github.io/zeitig/reference/temporal-fields.md)).
 These are implemented in R from the record fields when trivial, in Rust
 otherwise.
 
 Accessors are plain functions, not S3 generics: each calls an internal
 helper (`civil_date_fields()`, `civil_time_fields()` in `R/accessors.R`)
 that knows which classes carry a date or a time and errors with
-`zudate_type_error` otherwise. Adding a type (e.g. `ZonedDateTime`)
+`zeitig_type_error` otherwise. Adding a type (e.g. `ZonedDateTime`)
 means adding a branch there, not a method per accessor. Conversions from
 other classes use the
-[`as_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)/[`as_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)/[`as_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)
+[`as_plain_date()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md)/[`as_plain_time()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md)/[`as_plain_date_time()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md)
 S3 generics, while `to_*()` follow Temporal’s `toPlainDate()`-style
 methods and accept only Temporal objects.
 
 Numeric component arguments follow Temporal’s `ToIntegerWithTruncation`:
 doubles are truncated towards zero, non-finite values are a
-`zudate_range_error`, non-numbers a `zudate_type_error`. With
+`zeitig_range_error`, non-numbers a `zeitig_type_error`. With
 `overflow = "constrain"` a month or day below 1 is still an error
 (Temporal requires positive integers there), while time fields are
 clamped in both directions (Temporal’s `ConstrainTime`).
@@ -223,8 +223,8 @@ clamped in both directions (Temporal’s `ConstrainTime`).
 | `x.equals(y)` | `temporal_equals(x, y)` (compares time zone id too, unlike `==` on `ZonedDateTime` which follows `compare`) |
 | `x.round(opts)` | `temporal_round(x, smallest_unit =, rounding_increment = 1, rounding_mode = "halfExpand")` |
 | `x.with({...}, {overflow})` | `temporal_with(x, year = , month = , ...)` |
-| `x.withPlainTime(t)` etc. | [`with_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md), [`with_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md), [`with_time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md), `with_calendar()` (iso8601 only) |
-| `zdt.startOfDay()` | [`start_of_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md) |
+| `x.withPlainTime(t)` etc. | [`with_plain_time()`](https://pedrobtz.github.io/zeitig/reference/temporal_with.md), [`with_plain_date()`](https://pedrobtz.github.io/zeitig/reference/temporal_with.md), [`with_time_zone()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md), `with_calendar()` (iso8601 only) |
+| `zdt.startOfDay()` | [`start_of_day()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md) |
 | `zdt.getTimeZoneTransition(dir)` | `time_zone_transition(x, direction = c("next", "previous"))` |
 | `Duration.compare(a, b, {relativeTo})` | `duration_compare(a, b, relative_to = NULL)` |
 | `d.negated()`, `d.abs()` | `-d`, `abs(d)` |
@@ -240,11 +240,11 @@ text.
 
 ### Conversion between Temporal types
 
-[`to_instant()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
+[`to_instant()`](https://pedrobtz.github.io/zeitig/reference/temporal-conversions.md),
 `to_zoned_date_time(x, time_zone, disambiguation =, offset =)`,
-[`to_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
-[`to_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
-[`to_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md).
+[`to_plain_date()`](https://pedrobtz.github.io/zeitig/reference/temporal-conversions.md),
+[`to_plain_time()`](https://pedrobtz.github.io/zeitig/reference/temporal-conversions.md),
+[`to_plain_date_time()`](https://pedrobtz.github.io/zeitig/reference/temporal-conversions.md).
 `ZonedDateTime -> Instant` is exact; `Instant -> ZonedDateTime` needs a
 time zone; `Plain* -> Zoned*` goes through disambiguation.
 
@@ -305,11 +305,11 @@ docs.
 - All Rust entry points return `savvy::Result`. `jiff::Error` is
   converted with its message
   (e.g. `"parameter 'day' with value 31 is not in the required range of 1..=30"`);
-  the R wrapper rethrows it as a condition of class `zudate_error` with
+  the R wrapper rethrows it as a condition of class `zeitig_error` with
   the element index appended (`"... (element 3)"`) when a vector
   operation fails.
 - Temporal distinguishes `RangeError` and `TypeError`. R conditions
-  carry a subclass `zudate_range_error` / `zudate_type_error`;
+  carry a subclass `zeitig_range_error` / `zeitig_type_error`;
   input-type problems are detected in R before calling Rust.
 - `NA` is never an error. Rust receives `NA` as R’s sentinel values via
   savvy’s `is_na()` and emits `NA` fields in the output.
@@ -362,7 +362,7 @@ binding constraint on the build. The scheme:
 4.  **Time zone database.** On Linux/macOS `jiff` reads
     `/usr/share/zoneinfo` (or `TZDIR`). On Windows it uses the bundled
     `jiff-tzdb` because Windows has no zoneinfo. CRAN’s check machines
-    all satisfy one of these. `ZUDATE_TZDIR` is honoured as an override
+    all satisfy one of these. `ZEITIG_TZDIR` is honoured as an override
     for testing. Document in the package that the database version
     therefore follows the OS on Unix and the vendored crate on Windows.
 5.  **Authorship and licences.** `DESCRIPTION` adds
@@ -388,7 +388,7 @@ binding constraint on the build. The scheme:
 8.  **Installed size.** The static library is deleted after linking
     (already done); release profile sets `opt-level = 3`, `lto = true`,
     `codegen-units = 1`, `strip = true`. `strip` does not apply to a
-    `staticlib`, so the linked `zudate.so` keeps the debug info of the
+    `staticlib`, so the linked `zeitig.so` keeps the debug info of the
     precompiled Rust standard library: about 6 MB on Linux, 2.3 MB after
     `strip --strip-debug`. We accept the installed-size NOTE rather than
     strip in Makevars (R’s `--strip` install option and CRAN’s own
@@ -423,21 +423,21 @@ binding constraint on the build. The scheme:
 
 | Area | Temporal | jiff | 0.1.0 behaviour |
 |----|----|----|----|
-| Calendars | pluggable, `iso8601` default | ISO only | `calendar = "iso8601"` accepted, anything else errors with `zudate_range_error` |
+| Calendars | pluggable, `iso8601` default | ISO only | `calendar = "iso8601"` accepted, anything else errors with `zeitig_range_error` |
 | `overflow: "constrain"` in `from()`/[`with()`](https://rdrr.io/r/base/with.html) | clamps day to month length | `civil::Date::new` rejects | R/Rust clamps `day` to `days_in_month` before calling `jiff` when `overflow = "constrain"`; `reject` passes through |
 | Date arithmetic across month ends | constrain (Jan 31 + 1 month = Feb 28) | same | no adaptation needed |
 | `Instant` range | ±1e8 days from epoch | ±9999 years (`Timestamp::MIN/MAX`) | jiff’s range; documented; values outside error |
 | `Duration` component range | up to 2^53 per unit | `Span` unit limits | jiff’s range; documented |
 | `Duration` string with fractional units | allowed on the smallest unit | allowed | same |
-| `ZonedDateTime` equality | `equals` includes time zone id | `Zoned == Zoned` compares instant and zone | `==` follows `compare` (instant only); [`temporal_equals()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md) also compares the zone id |
+| `ZonedDateTime` equality | `equals` includes time zone id | `Zoned == Zoned` compares instant and zone | `==` follows `compare` (instant only); [`temporal_equals()`](https://pedrobtz.github.io/zeitig/reference/temporal_compare.md) also compares the zone id |
 | `until`/`since` default units on `ZonedDateTime` | `hour` largest unit | `Zoned::until` defaults to hours as well | same |
-| `Instant` epoch accessors | `epochMilliseconds`, `epochNanoseconds` (BigInt) | `as_millisecond()`, `as_nanosecond()` (i128) | [`epoch_seconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)/[`epoch_milliseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md) floor to doubles; [`epoch_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md) is a decimal string; `instant_from_epoch(nanoseconds =)` accepts strings |
+| `Instant` epoch accessors | `epochMilliseconds`, `epochNanoseconds` (BigInt) | `as_millisecond()`, `as_nanosecond()` (i128) | [`epoch_seconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md)/[`epoch_milliseconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md) floor to doubles; [`epoch_nanoseconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md) is a decimal string; `instant_from_epoch(nanoseconds =)` accepts strings |
 | Time zone identifiers | IANA names and `±HH:MM` | also POSIX TZ strings | POSIX TZ strings and sub-minute offsets are rejected; names are canonicalised to the database’s spelling |
-| `ZonedDateTime` `until` across zones | RangeError for calendar units when zones differ | computes anyway | R checks and errors (`zudate_range_error`) when `largest_unit` is `day` or larger and the zones differ |
+| `ZonedDateTime` `until` across zones | RangeError for calendar units when zones differ | computes anyway | R checks and errors (`zeitig_range_error`) when `largest_unit` is `day` or larger and the zones differ |
 | [`toString()`](https://rdrr.io/r/base/toString.html) fractional digits | `auto` trims trailing zeros | `Display` prints `auto` precision | same |
 | Leap seconds | not represented | not represented | same |
 | Weeks without `relativeTo` | `Duration.compare`/`total`/`round` need `relativeTo` for weeks | weeks are 7 days with `days_are_24_hours()` | jiff behaviour: weeks count as 7 x 24 hours when no `relative_to` is given |
-| `Duration` operators | no `<`/`==` (`valueOf` throws) | `Span` has no `Ord`; `fieldwise()` equality | `<`, [`sort()`](https://rdrr.io/r/base/sort.html) order by length with 24-hour days (error for years/months); `==` compares fields (`PT1H != PT60M`); [`duration_compare()`](https://pedrobtz.github.io/zudate/reference/duration_total.md) compares lengths |
+| `Duration` operators | no `<`/`==` (`valueOf` throws) | `Span` has no `Ord`; `fieldwise()` equality | `<`, [`sort()`](https://rdrr.io/r/base/sort.html) order by length with 24-hour days (error for years/months); `==` compares fields (`PT1H != PT60M`); [`duration_compare()`](https://pedrobtz.github.io/zeitig/reference/duration_total.md) compares lengths |
 | `PlainDate - PlainDate` | n/a (no operators) | `Date - Date` is a `Span` in days | `x - y` is `temporal_since(x, y)` with default options |
 
 [`toString()`](https://rdrr.io/r/base/toString.html) offset of zoned
@@ -445,12 +445,12 @@ values \| rounded to whole minutes \| printed with seconds when non-zero
 (`+00:19:32`) \| jiff’s form, so strings round-trip exactly; only
 visible for pre-1900 LMT offsets \|  
 `toString({ smallestUnit: "minute" })` \| `HH:MM` \| no direct printer
-option \| implemented in zudate’s own formatter
+option \| implemented in zeitig’s own formatter
 (`src/rust/src/format.rs`), which reproduces jiff’s `Display` for
 default options (unit-tested) \|  
 `strftime`/`strptime` \| not part of Temporal \| `jiff::fmt::strtime` \|
 exposed as
-[`temporal_strftime()`](https://pedrobtz.github.io/zudate/reference/temporal_strftime.md)/[`temporal_strptime()`](https://pedrobtz.github.io/zudate/reference/temporal_strftime.md)
+[`temporal_strftime()`](https://pedrobtz.github.io/zeitig/reference/temporal_strftime.md)/[`temporal_strptime()`](https://pedrobtz.github.io/zeitig/reference/temporal_strftime.md)
 with jiff’s directive set \|
 
 Reviewed against the behaviour at the end of milestone 5; every row
@@ -482,7 +482,7 @@ shipped.
     [`sort()`](https://rdrr.io/r/base/sort.html) and
     [`unique()`](https://rdrr.io/r/base/unique.html) use the exact time
     only (`vec_proxy_equal`/`vec_proxy_compare` drop `tz`);
-    [`temporal_equals()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md)
+    [`temporal_equals()`](https://pedrobtz.github.io/zeitig/reference/temporal_compare.md)
     also compares the zone.
 3.  Whether to export `SignedDuration` (jiff-only, absolute time).
     Leaning no: not part of Temporal.

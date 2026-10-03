@@ -1,6 +1,6 @@
 # Plain date-times
 
-A `zudate_plain_date_time` is a calendar date and a wall-clock time with
+A `zeitig_plain_date_time` is a calendar date and a wall-clock time with
 nanosecond precision but no time zone, the equivalent of
 [`Temporal.PlainDateTime`](https://tc39.es/proposal-temporal/docs/plaindatetime.html).
 
@@ -51,7 +51,7 @@ is_plain_date_time(x)
 
 ## Value
 
-A `zudate_plain_date_time` vector.
+A `zeitig_plain_date_time` vector.
 
 ## Details
 

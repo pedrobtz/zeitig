@@ -45,7 +45,7 @@ A Temporal vector of the requested type.
 
 - `POSIXct` converts to an instant, or to a zoned date-time in its
   `tzone` (the session time zone, see
-  [`now_time_zone()`](https://pedrobtz.github.io/zudate/reference/now_instant.md),
+  [`now_time_zone()`](https://pedrobtz.github.io/zeitig/reference/now_instant.md),
   when unset); `as_zoned_date_time(x, time_zone = )` picks another zone.
 
 The reverse conversions use base generics:

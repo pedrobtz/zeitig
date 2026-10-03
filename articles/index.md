@@ -3,6 +3,6 @@
 ### Articles
 
 - [Introduction to
-  zudate](https://pedrobtz.github.io/zudate/articles/zudate.md):
+  zeitig](https://pedrobtz.github.io/zeitig/articles/zeitig.md):
 - [Time
-  zones](https://pedrobtz.github.io/zudate/articles/time-zones.md):
+  zones](https://pedrobtz.github.io/zeitig/articles/time-zones.md):

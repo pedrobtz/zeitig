@@ -1,11 +1,11 @@
 # Zoned date-times
 
-A `zudate_zoned_date_time` is an exact time together with the time zone
+A `zeitig_zoned_date_time` is an exact time together with the time zone
 used to view it, the equivalent of
 [`Temporal.ZonedDateTime`](https://tc39.es/proposal-temporal/docs/zoneddatetime.html)
 (and of `jiff::Zoned`). Each element carries its own time zone: an IANA
 identifier (see
-[`available_time_zones()`](https://pedrobtz.github.io/zudate/reference/available_time_zones.md))
+[`available_time_zones()`](https://pedrobtz.github.io/zeitig/reference/available_time_zones.md))
 or a fixed offset such as `"+05:30"`. Arithmetic with calendar units
 follows the wall clock and is DST-aware.
 
@@ -75,7 +75,7 @@ is_zoned_date_time(x)
 
 ## Value
 
-A `zudate_zoned_date_time` vector.
+A `zeitig_zoned_date_time` vector.
 
 ## Details
 
@@ -89,7 +89,7 @@ when the string's UTC offset disagrees with the time zone.
 ## See also
 
 Other zoned date-time:
-[`time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
+[`time_zone()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md)
 
 ## Examples
 

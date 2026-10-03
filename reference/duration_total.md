@@ -50,8 +50,8 @@ rules.
 ## See also
 
 Other duration:
-[`as_duration()`](https://pedrobtz.github.io/zudate/reference/as_duration.md),
-[`duration()`](https://pedrobtz.github.io/zudate/reference/duration.md)
+[`as_duration()`](https://pedrobtz.github.io/zeitig/reference/as_duration.md),
+[`duration()`](https://pedrobtz.github.io/zeitig/reference/duration.md)
 
 ## Examples
 

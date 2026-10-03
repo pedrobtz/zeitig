@@ -10,10 +10,10 @@ defaults print the shortest exact representation.
 ## Usage
 
 ``` r
-# S3 method for class 'zudate_plain_date'
+# S3 method for class 'zeitig_plain_date'
 format(x, ..., calendar_name = "auto")
 
-# S3 method for class 'zudate_plain_time'
+# S3 method for class 'zeitig_plain_time'
 format(
   x,
   ...,
@@ -22,7 +22,7 @@ format(
   rounding_mode = "trunc"
 )
 
-# S3 method for class 'zudate_plain_date_time'
+# S3 method for class 'zeitig_plain_date_time'
 format(
   x,
   ...,
@@ -32,7 +32,7 @@ format(
   calendar_name = "auto"
 )
 
-# S3 method for class 'zudate_instant'
+# S3 method for class 'zeitig_instant'
 format(
   x,
   ...,
@@ -42,7 +42,7 @@ format(
   time_zone = NULL
 )
 
-# S3 method for class 'zudate_zoned_date_time'
+# S3 method for class 'zeitig_zoned_date_time'
 format(
   x,
   ...,
