@@ -5,3 +5,6 @@
 ^src/Makevars$
 ^src/Makevars\.win$
 ^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
