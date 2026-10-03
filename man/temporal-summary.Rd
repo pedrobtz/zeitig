@@ -2,25 +2,25 @@
 % Please edit documentation in R/summary.R
 \name{temporal-summary}
 \alias{temporal-summary}
-\alias{summary.zudate_plain_date}
-\alias{summary.zudate_plain_time}
-\alias{summary.zudate_plain_date_time}
-\alias{summary.zudate_instant}
-\alias{summary.zudate_zoned_date_time}
-\alias{summary.zudate_duration}
+\alias{summary.zietig_plain_date}
+\alias{summary.zietig_plain_time}
+\alias{summary.zietig_plain_date_time}
+\alias{summary.zietig_instant}
+\alias{summary.zietig_zoned_date_time}
+\alias{summary.zietig_duration}
 \title{Summaries of Temporal vectors}
 \usage{
-\method{summary}{zudate_plain_date}(object, ...)
+\method{summary}{zietig_plain_date}(object, ...)
 
-\method{summary}{zudate_plain_time}(object, ...)
+\method{summary}{zietig_plain_time}(object, ...)
 
-\method{summary}{zudate_plain_date_time}(object, ...)
+\method{summary}{zietig_plain_date_time}(object, ...)
 
-\method{summary}{zudate_instant}(object, ...)
+\method{summary}{zietig_instant}(object, ...)
 
-\method{summary}{zudate_zoned_date_time}(object, ...)
+\method{summary}{zietig_zoned_date_time}(object, ...)
 
-\method{summary}{zudate_duration}(object, ...)
+\method{summary}{zietig_duration}(object, ...)
 }
 \arguments{
 \item{object}{A Temporal vector.}

@@ -1,4 +1,4 @@
-# zudate 0.1.0
+# zietig 0.1.0
 
 Initial CRAN release.
 
@@ -31,7 +31,7 @@ Initial CRAN release.
   (`fractional_second_digits`, `smallest_unit`, `rounding_mode`, `offset`,
   `time_zone_name`, `calendar_name`, `time_zone`), and
   `temporal_strftime()`/`temporal_strptime()` expose jiff's strftime.
-* `summary()` methods; vignettes `vignette("zudate")` and
+* `summary()` methods; vignettes `vignette("zietig")` and
   `vignette("time-zones")`.
 * New `available_time_zones()` lists the IANA time zone identifiers known to
   the time zone database.

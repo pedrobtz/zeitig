@@ -1,4 +1,4 @@
-The zudate package itself is licensed under the MIT licence (see LICENSE).
+The zietig package itself is licensed under the MIT licence (see LICENSE).
 
 It bundles the sources of the Rust crates listed in inst/AUTHORS
 (src/rust/vendor.tar.xz). All of them are available under permissive

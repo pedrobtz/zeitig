@@ -55,8 +55,8 @@ jobs:
         run: |
           set -eu
           R CMD build --no-build-vignettes --no-manual .
-          ls -la zudate_*.tar.gz
-          size=$(wc -c < zudate_*.tar.gz)
+          ls -la zietig_*.tar.gz
+          size=$(wc -c < zietig_*.tar.gz)
           echo "tarball size: ${size} bytes"
           # CRAN's guideline is 5 MB for the source package.
           test "${size}" -lt 5000000
@@ -76,14 +76,14 @@ jobs:
           export http_proxy="${HTTP_PROXY}" https_proxy="${HTTPS_PROXY}"
           rm -rf "${CARGO_HOME:-$HOME/.cargo}/registry" "${CARGO_HOME:-$HOME/.cargo}/git"
           mkdir -p lib
-          R CMD INSTALL --library=lib zudate_*.tar.gz
+          R CMD INSTALL --library=lib zietig_*.tar.gz
 
       - name: Test the installed package
         shell: Rscript {0}
         run: |
           .libPaths(c("lib", .libPaths()))
-          library(zudate)
-          testthat::test_dir("tests/testthat", package = "zudate", load_package = "installed", stop_on_failure = TRUE)
+          library(zietig)
+          testthat::test_dir("tests/testthat", package = "zietig", load_package = "installed", stop_on_failure = TRUE)
 
   # The minimum supported Rust version (DESCRIPTION SystemRequirements,
   # rust-version in Cargo.toml) must keep building from the vendored crates:

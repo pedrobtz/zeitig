@@ -43,12 +43,12 @@ temporal_with <- function(x, ..., overflow = c("constrain", "reject"),
     pdt <- temporal_with(to_plain_date_time(x), ..., overflow = overflow)
     n <- vec_size(pdt)
     x <- vec_recycle(x, n)
-    old <- zudate_call(rs_zoned_offset(zoned_data(x)))$seconds
+    old <- zietig_call(rs_zoned_offset(zoned_data(x)))$seconds
     return(zoned_from_plain(pdt, time_zone(x), disambiguation, old, offset))
   }
   args <- rlang::list2(...)
   if (length(args) > 0 && (is.null(names(args)) || any(names(args) == ""))) {
-    zudate_type_error("All fields in `...` must be named.")
+    zietig_type_error("All fields in `...` must be named.")
   }
   if (is_plain_date(x)) {
     ctor <- plain_date
@@ -57,14 +57,14 @@ temporal_with <- function(x, ..., overflow = c("constrain", "reject"),
   } else if (is_plain_date_time(x)) {
     ctor <- plain_date_time
   } else {
-    zudate_type_error(sprintf("`x` must be a Temporal object, not %s.", obj_type_friendly(x)))
+    zietig_type_error(sprintf("`x` must be a Temporal object, not %s.", obj_type_friendly(x)))
   }
   n <- vec_size_common(x, !!!args)
   x <- vec_recycle(x, n)
   fields <- as.list(temporal_fields(x))
   unknown <- setdiff(names(args), names(fields))
   if (length(unknown) > 0) {
-    zudate_type_error(sprintf(
+    zietig_type_error(sprintf(
       "Can't set unknown field%s %s.", if (length(unknown) > 1) "s" else "",
       paste0("`", unknown, "`", collapse = ", ")
     ))
@@ -89,7 +89,7 @@ with_plain_time <- function(x, time = NULL) {
     x <- vec_recycle(x, vec_size(pdt))
     return(zoned_from_plain(pdt, time_zone(x)))
   }
-  check_class(x, "zudate_plain_date_time", "a plain or zoned date-time")
+  check_class(x, "zietig_plain_date_time", "a plain or zoned date-time")
   date <- to_plain_date(x)
   to_plain_date_time(date, time)
 }
@@ -103,7 +103,7 @@ with_plain_date <- function(x, date) {
     x <- vec_recycle(x, vec_size(pdt))
     return(zoned_from_plain(pdt, time_zone(x)))
   }
-  check_class(x, "zudate_plain_date_time", "a plain or zoned date-time")
+  check_class(x, "zietig_plain_date_time", "a plain or zoned date-time")
   date <- as_plain_date(date)
   time <- to_plain_time(x)
   args <- vec_recycle_common(date = date, time = time)

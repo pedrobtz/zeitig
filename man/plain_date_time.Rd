@@ -36,10 +36,10 @@ default) clamps each component to its range, \code{"reject"} raises an error.}
 \item{x}{An object to test.}
 }
 \value{
-A \code{zudate_plain_date_time} vector.
+A \code{zietig_plain_date_time} vector.
 }
 \description{
-A \code{zudate_plain_date_time} is a calendar date and a wall-clock time with
+A \code{zietig_plain_date_time} is a calendar date and a wall-clock time with
 nanosecond precision but no time zone, the equivalent of
 \href{https://tc39.es/proposal-temporal/docs/plaindatetime.html}{\code{Temporal.PlainDateTime}}.
 }

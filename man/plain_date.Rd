@@ -23,10 +23,10 @@ error.}
 \item{x}{An object to test or convert.}
 }
 \value{
-A \code{zudate_plain_date} vector.
+A \code{zietig_plain_date} vector.
 }
 \description{
-A \code{zudate_plain_date} is a calendar date without a time or time zone, the
+A \code{zietig_plain_date} is a calendar date without a time or time zone, the
 equivalent of
 \href{https://tc39.es/proposal-temporal/docs/plaindate.html}{\code{Temporal.PlainDate}}.
 Only the ISO 8601 calendar is supported.

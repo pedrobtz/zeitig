@@ -11,7 +11,7 @@ A sorted character vector of time zone identifiers.
 }
 \description{
 Lists the IANA time zone identifiers known to the time zone database used
-by zudate. On Linux and macOS this is the system database (\verb{/usr/share/zoneinfo}
+by zietig. On Linux and macOS this is the system database (\verb{/usr/share/zoneinfo}
 or the directory in the \code{TZDIR} environment variable); on Windows it is the
 copy of the IANA database bundled with the package.
 }

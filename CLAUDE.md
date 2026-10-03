@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this package is
 
-`zudate` is an R package that implements the [TC39 Temporal](https://tc39.es/proposal-temporal/docs/) date/time model
+`zietig` is an R package that implements the [TC39 Temporal](https://tc39.es/proposal-temporal/docs/) date/time model
 (Instant, PlainDate, PlainTime, PlainDateTime, ZonedDateTime, Duration, ...) on top of the Rust crate
 [`jiff`](https://docs.rs/jiff), which is vendored into the package so it builds offline on CRAN.
 The R <-> Rust bridge is [savvy](https://yutannihilation.github.io/savvy/guide/).
@@ -69,10 +69,10 @@ link errors. Forgetting `document()` leaves `NAMESPACE` without `useDynLib`, whi
    placeholders in `src/Makevars.in` / `src/Makevars.win.in` into `src/Makevars` / `src/Makevars.win`.
    The generated Makevars files are gitignored and removed by `cleanup` / `cleanup.win`.
 2. `src/Makevars` runs `cargo build --lib` on `src/rust/Cargo.toml` producing the static library
-   `libzudate.a`, then links it with `src/init.c` into `zudate.so` / `zudate.dll`. The static lib is
+   `libzietig.a`, then links it with `src/init.c` into `zietig.so` / `zietig.dll`. The static lib is
    deleted after linking (`clean_intermediate`) to keep the installed size small.
 3. On Windows the Makevars additionally mocks `libgcc_eh.a` and points cargo at the Rtools linker;
-   `src/zudate-win.def` exports only `R_init_zudate`.
+   `src/zietig-win.def` exports only `R_init_zietig`.
 4. `.Rbuildignore` excludes `src/rust/.cargo` and `src/rust/target` from the tarball.
 
 The crate dependencies (jiff, savvy, ...) are vendored: `src/rust/vendor.tar.xz` is extracted by
@@ -88,7 +88,7 @@ and `LICENSE.note`; it is deterministic) or the build fails with "no matching pa
   `impl` blocks marked `#[savvy]` are exported to R.
 - `savvy-cli update .` parses those attributes and generates three files that must never be edited
   by hand: `src/rust/api.h` (C prototypes), `src/init.c` (`.Call` entry points, `handle_result`
-  error trampoline, `R_init_zudate` registration) and `R/000-wrappers.R` (R wrappers; roxygen
+  error trampoline, `R_init_zietig` registration) and `R/000-wrappers.R` (R wrappers; roxygen
   comments on the Rust items are copied here, so `@export` on a Rust doc comment is what makes the
   R function exported after `document()`).
 - Rust errors returned as `savvy::Result::Err` become R errors via `handle_result`. Panics abort the
@@ -102,7 +102,7 @@ and `LICENSE.note`; it is deterministic) or the build fails with "no matching pa
 ### R layer
 
 - `R/000-wrappers.R` loads first so hand-written R files can override/extend generated functions.
-- `R/zudate-package.R` holds the package-level roxygen block (`"_PACKAGE"`) and usethis namespace
+- `R/zietig-package.R` holds the package-level roxygen block (`"_PACKAGE"`) and usethis namespace
   markers.
 - Tests: `tests/testthat/`, edition 3. Rust tests live next to the Rust code.
 
@@ -117,16 +117,16 @@ and `LICENSE.note`; it is deterministic) or the build fails with "no matching pa
 
 ## Conventions and gotchas
 
-- Crate name and R package name are both `zudate`; the static lib must be `libzudate.a` and the init
-  symbol `R_init_zudate`. Renaming either requires touching Makevars, `init.c`, the `.def` file and
+- Crate name and R package name are both `zietig`; the static lib must be `libzietig.a` and the init
+  symbol `R_init_zietig`. Renaming either requires touching Makevars, `init.c`, the `.def` file and
   `Cargo.toml` together.
 - `src/rust/.cargo/config.toml` exists only so `cargo test` links on Windows MSVC; it is excluded
   from the tarball on purpose.
 - `cargo test` warns about an unexpected `savvy-test` cfg; that is expected (the feature is injected
   by `savvy-cli test`), do not "fix" it by removing the test module.
 - CRAN installs with at most 2 CPUs: Makevars passes `-j 2` to cargo.
-- Makevars only builds `libzudate.a` when it is missing (it is deleted after linking). A stray
-  `src/rust/target/<profile>/libzudate.a` left by a manual `cargo build` is linked as is and gives
+- Makevars only builds `libzietig.a` when it is missing (it is deleted after linking). A stray
+  `src/rust/target/<profile>/libzietig.a` left by a manual `cargo build` is linked as is and gives
   "undefined symbol: savvy_..._ffi"; delete it.
 - Do not use savvy's `NotAvailableValue::is_na()` on `i32` in code that `cargo test` links: it reads
   the `R_NaInt` data symbol and the test binary fails to link (`undefined symbol: R_NaInt`). Use

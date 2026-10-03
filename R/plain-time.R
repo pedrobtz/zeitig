@@ -1,6 +1,6 @@
 #' Plain times
 #'
-#' A `zudate_plain_time` is a wall-clock time of day with nanosecond precision
+#' A `zietig_plain_time` is a wall-clock time of day with nanosecond precision
 #' and no date or time zone, the equivalent of
 #' [`Temporal.PlainTime`](https://tc39.es/proposal-temporal/docs/plaintime.html).
 #'
@@ -16,7 +16,7 @@
 #' @param overflow How to handle out-of-range values: `"constrain"` (the
 #'   default) clamps every component to its range (e.g. `hour = 25` becomes 23),
 #'   `"reject"` raises an error.
-#' @returns A `zudate_plain_time` vector.
+#' @returns A `zietig_plain_time` vector.
 #' @family plain time
 #' @export
 #' @examples
@@ -45,7 +45,7 @@ plain_time <- function(hour = 0L, minute = 0L, second = 0L, millisecond = 0L,
 }
 
 plain_time_parts <- function(f, reject, call = rlang::caller_env()) {
-  zudate_call(
+  zietig_call(
     rs_plain_time_from_parts(
       f$hour, f$minute, f$second, f$millisecond, f$microsecond, f$nanosecond, reject
     ),
@@ -55,41 +55,41 @@ plain_time_parts <- function(f, reject, call = rlang::caller_env()) {
 
 plain_time_parse <- function(x, call = rlang::caller_env()) {
   check_character(x, call = call)
-  new_plain_time_fields(zudate_call(rs_plain_time_parse(unname(x)), call = call))
+  new_plain_time_fields(zietig_call(rs_plain_time_parse(unname(x)), call = call))
 }
 
 new_plain_time_fields <- function(fields) {
-  new_rcrd(fields, class = "zudate_plain_time")
+  new_rcrd(fields, class = "zietig_plain_time")
 }
 
 #' @rdname plain_time
 #' @param x An object to test.
 #' @export
 is_plain_time <- function(x) {
-  inherits(x, "zudate_plain_time")
+  inherits(x, "zietig_plain_time")
 }
 
 #' @export
-as.character.zudate_plain_time <- function(x, ...) {
+as.character.zietig_plain_time <- function(x, ...) {
   format(x)
 }
 
 #' @export
-vec_ptype_abbr.zudate_plain_time <- function(x, ...) "ptime"
+vec_ptype_abbr.zietig_plain_time <- function(x, ...) "ptime"
 
 #' @export
-vec_ptype_full.zudate_plain_time <- function(x, ...) "plain_time"
+vec_ptype_full.zietig_plain_time <- function(x, ...) "plain_time"
 
 #' @export
-vec_ptype2.zudate_plain_time.zudate_plain_time <- function(x, y, ...) {
+vec_ptype2.zietig_plain_time.zietig_plain_time <- function(x, y, ...) {
   new_plain_time_fields(list(second_of_day = integer(), nanos = integer()))
 }
 
 #' @export
-vec_cast.zudate_plain_time.zudate_plain_time <- function(x, to, ...) x
+vec_cast.zietig_plain_time.zietig_plain_time <- function(x, to, ...) x
 
 #' @export
-vec_cast.zudate_plain_time.character <- function(x, to, ...) plain_time_parse(x)
+vec_cast.zietig_plain_time.character <- function(x, to, ...) plain_time_parse(x)
 
 #' @export
-vec_cast.character.zudate_plain_time <- function(x, to, ...) format(x)
+vec_cast.character.zietig_plain_time <- function(x, to, ...) format(x)

@@ -1,6 +1,6 @@
-# zudate roadmap
+# zietig roadmap
 
-Goal: `zudate` 0.1.0 accepted on CRAN with the core Temporal types backed by vendored `jiff`.
+Goal: `zietig` 0.1.0 accepted on CRAN with the core Temporal types backed by vendored `jiff`.
 Design decisions live in `design.md`; this file tracks the work and its order. Tick items as they
 land and move anything that slips into "After 0.1.0" rather than letting 0.1.0 grow.
 
@@ -37,13 +37,13 @@ Rust column loops, option handling, error mapping) that the remaining types copy
 - [x] Field accessors (`year()` ... `nanosecond()`, `day_of_week()`, `day_of_year()`, `week_of_year()`, `year_of_week()`, `days_in_month()`, `days_in_year()`, `in_leap_year()`), plus `days_in_week()`, `months_in_year()`, `temporal_fields()`.
 - [x] `temporal_with()`, `with_plain_time()`, `with_plain_date()`.
 - [x] Conversions among the three (`to_plain_date()`, `to_plain_time()`, `to_plain_date_time()`), and from/to `Date`, `POSIXlt`, `POSIXct` (`as_plain_*()` generics, `as.Date()`, `as.POSIXct()`/`as.POSIXlt()`).
-- [x] Rust error -> `zudate_error` condition with element index (`zudate_range_error`; argument types -> `zudate_type_error`).
+- [x] Rust error -> `zietig_error` condition with element index (`zietig_range_error`; argument types -> `zietig_type_error`).
 - [x] `temporal_compare()` / `temporal_equals()` for the civil types.
 - [x] Tests from Temporal docs examples for each method; `NA` and zero-length inputs in every test file.
 
 ## Milestone 3 - Duration and arithmetic (done)
 
-- [x] `zudate_duration` record class, constructor from components and ISO 8601 strings, uniform-sign and range validation.
+- [x] `zietig_duration` record class, constructor from components and ISO 8601 strings, uniform-sign and range validation.
 - [x] `temporal_add()`/`temporal_subtract()` and `+`/`-` via `vec_arith` for Plain* types.
 - [x] `temporal_until()`/`temporal_since()` with `largest_unit`, `smallest_unit`, `rounding_increment`, `rounding_mode`.
 - [x] `temporal_round()` for Plain* types and durations (`relative_to` for calendar units).
@@ -54,9 +54,9 @@ Rust column loops, option handling, error mapping) that the remaining types copy
 
 ## Milestone 4 - Instant, ZonedDateTime, Now (done)
 
-- [x] `zudate_instant`: constructor from strings and epoch units, `epoch_seconds()`, `epoch_milliseconds()`, `epoch_nanoseconds()` (string), arithmetic with time-unit durations, `temporal_round()`, `until`/`since`.
-- [x] `zudate_zoned_date_time`: per-element time zone, constructor with `disambiguation` and `offset` options, parsing of `[Zone]` and `[!Zone]` annotations, `offset()`, `offset_nanoseconds()`, `time_zone()`, `hours_in_day()`, `start_of_day()`, `time_zone_transition()`, `with_time_zone()`, calendar-aware `add`/`until`/`round`.
-- [x] Per-call time zone cache in Rust; invalid identifiers produce `zudate_range_error`; `ZUDATE_TZDIR` overrides the database (read once per session).
+- [x] `zietig_instant`: constructor from strings and epoch units, `epoch_seconds()`, `epoch_milliseconds()`, `epoch_nanoseconds()` (string), arithmetic with time-unit durations, `temporal_round()`, `until`/`since`.
+- [x] `zietig_zoned_date_time`: per-element time zone, constructor with `disambiguation` and `offset` options, parsing of `[Zone]` and `[!Zone]` annotations, `offset()`, `offset_nanoseconds()`, `time_zone()`, `hours_in_day()`, `start_of_day()`, `time_zone_transition()`, `with_time_zone()`, calendar-aware `add`/`until`/`round`.
+- [x] Per-call time zone cache in Rust; invalid identifiers produce `zietig_range_error`; `ZIETIG_TZDIR` overrides the database (read once per session).
 - [x] `now_*()` functions; default zone from `TZ`, then `Sys.timezone()` (which caches and misses later `TZ` changes), then UTC.
 - [x] `POSIXct` conversions both ways with documented precision loss.
 - [x] `temporal_equals()` vs `==` semantics as decided in `design.md` section 11.
@@ -67,8 +67,8 @@ Rust column loops, option handling, error mapping) that the remaining types copy
 - [x] `format()` options: `fractional_second_digits`, `smallest_unit`, `rounding_mode`, `offset`, `time_zone_name`, `calendar_name`.
 - [x] `temporal_strftime()` / `temporal_strptime()`.
 - [x] `pillar` methods (tibble columns), `str()` output, `summary()`. (tibble columns and `str()` come from vctrs' `vctrs_vctr` methods using `format()`/`vec_ptype_abbr()`; no direct pillar dependency needed.)
-- [x] `as_*()` S3 generics complete for character, base classes and all zudate classes (`as_plain_date/time/date_time()`, `as_instant()`, `as_zoned_date_time()`, `as_duration()`, `as_difftime()`).
-- [x] `README.md` with install instructions and a worked example; `vignettes/zudate.Rmd` (overview and Temporal mapping) and `vignettes/time-zones.Rmd`.
+- [x] `as_*()` S3 generics complete for character, base classes and all zietig classes (`as_plain_date/time/date_time()`, `as_instant()`, `as_zoned_date_time()`, `as_duration()`, `as_difftime()`).
+- [x] `README.md` with install instructions and a worked example; `vignettes/zietig.Rmd` (overview and Temporal mapping) and `vignettes/time-zones.Rmd`.
 - [x] pkgdown reference grouped by Temporal type.
 - [x] Deviation table in `design.md` section 9 reviewed against the final behaviour.
 

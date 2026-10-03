@@ -1,8 +1,8 @@
 ---
-title: "Introduction to zudate"
+title: "Introduction to zietig"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to zudate}
+  %\VignetteIndexEntry{Introduction to zietig}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -11,17 +11,17 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-zudate brings the [TC39 Temporal](https://tc39.es/proposal-temporal/docs/) date and time model to
+zietig brings the [TC39 Temporal](https://tc39.es/proposal-temporal/docs/) date and time model to
 R. Every Temporal type is a vectorised R class, and all date/time logic is delegated to the Rust
 crate [jiff](https://docs.rs/jiff), which implements Temporal's semantics.
 
 ```{r}
-library(zudate)
+library(zietig)
 ```
 
 ## The types
 
-| Temporal              | zudate                | What it represents                                   |
+| Temporal              | zietig                | What it represents                                   |
 |-----------------------|-----------------------|------------------------------------------------------|
 | `Temporal.PlainDate`  | `plain_date()`        | a calendar date, no time or time zone                |
 | `Temporal.PlainTime`  | `plain_time()`        | a wall-clock time, no date or time zone              |
@@ -129,7 +129,7 @@ microsecond. Use the Temporal types (or `epoch_nanoseconds()`) when you need nan
 
 ## Differences from Temporal
 
-zudate supports only the ISO 8601 calendar, and a few behaviors follow jiff or R conventions;
+zietig supports only the ISO 8601 calendar, and a few behaviors follow jiff or R conventions;
 they are listed in the package's design notes. The most visible ones:
 
 * `x - y` for two values of the same type is `temporal_since(x, y)`.

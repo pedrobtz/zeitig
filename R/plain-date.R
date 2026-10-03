@@ -1,6 +1,6 @@
 #' Plain dates
 #'
-#' A `zudate_plain_date` is a calendar date without a time or time zone, the
+#' A `zietig_plain_date` is a calendar date without a time or time zone, the
 #' equivalent of
 #' [`Temporal.PlainDate`](https://tc39.es/proposal-temporal/docs/plaindate.html).
 #' Only the ISO 8601 calendar is supported.
@@ -19,7 +19,7 @@
 #'   default) clamps `month` to 12 and `day` to the length of the month,
 #'   `"reject"` raises an error. Zero or negative months and days are always an
 #'   error.
-#' @returns A `zudate_plain_date` vector.
+#' @returns A `zietig_plain_date` vector.
 #' @family plain date
 #' @export
 #' @examples
@@ -38,53 +38,53 @@ plain_date <- function(year, month, day, ..., overflow = c("constrain", "reject"
     month = as_int_field(month),
     day = as_int_field(day)
   ))
-  fields <- zudate_call(rs_plain_date_from_parts(f$year, f$month, f$day, reject))
+  fields <- zietig_call(rs_plain_date_from_parts(f$year, f$month, f$day, reject))
   new_plain_date_fields(fields)
 }
 
 plain_date_parse <- function(x, call = rlang::caller_env()) {
   check_character(x, call = call)
-  new_plain_date_fields(zudate_call(rs_plain_date_parse(unname(x)), call = call))
+  new_plain_date_fields(zietig_call(rs_plain_date_parse(unname(x)), call = call))
 }
 
 new_plain_date_fields <- function(fields) {
-  new_rcrd(fields, class = "zudate_plain_date")
+  new_rcrd(fields, class = "zietig_plain_date")
 }
 
 #' @rdname plain_date
 #' @param x An object to test or convert.
 #' @export
 is_plain_date <- function(x) {
-  inherits(x, "zudate_plain_date")
+  inherits(x, "zietig_plain_date")
 }
 
 #' @export
-as.character.zudate_plain_date <- function(x, ...) {
+as.character.zietig_plain_date <- function(x, ...) {
   format(x)
 }
 
 #' @export
-vec_ptype_abbr.zudate_plain_date <- function(x, ...) "pdate"
+vec_ptype_abbr.zietig_plain_date <- function(x, ...) "pdate"
 
 #' @export
-vec_ptype_full.zudate_plain_date <- function(x, ...) "plain_date"
+vec_ptype_full.zietig_plain_date <- function(x, ...) "plain_date"
 
 #' @export
-vec_ptype2.zudate_plain_date.zudate_plain_date <- function(x, y, ...) {
+vec_ptype2.zietig_plain_date.zietig_plain_date <- function(x, y, ...) {
   new_plain_date_fields(list(year = integer(), month = integer(), day = integer()))
 }
 
 #' @export
-vec_cast.zudate_plain_date.zudate_plain_date <- function(x, to, ...) x
+vec_cast.zietig_plain_date.zietig_plain_date <- function(x, to, ...) x
 
 #' @export
-vec_cast.zudate_plain_date.character <- function(x, to, ...) plain_date_parse(x)
+vec_cast.zietig_plain_date.character <- function(x, to, ...) plain_date_parse(x)
 
 #' @export
-vec_cast.character.zudate_plain_date <- function(x, to, ...) format(x)
+vec_cast.character.zietig_plain_date <- function(x, to, ...) format(x)
 
 #' @export
-vec_cast.zudate_plain_date.Date <- function(x, to, ...) as_plain_date(x)
+vec_cast.zietig_plain_date.Date <- function(x, to, ...) as_plain_date(x)
 
 #' @export
-vec_cast.Date.zudate_plain_date <- function(x, to, ...) as.Date(x)
+vec_cast.Date.zietig_plain_date <- function(x, to, ...) as.Date(x)

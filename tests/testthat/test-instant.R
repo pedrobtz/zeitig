@@ -2,14 +2,14 @@ test_that("instant() parses strings with offsets", {
   x <- instant(
     c("1969-07-20T20:17Z", "2020-01-01T12:00:00.5+01:00", "2020-01-01T00:00Z[Asia/Tokyo]", NA)
   )
-  expect_s3_class(x, "zudate_instant")
+  expect_s3_class(x, "zietig_instant")
   expect_equal(
     format(x),
     c("1969-07-20T20:17:00Z", "2020-01-01T11:00:00.5Z", "2020-01-01T00:00:00Z", NA)
   )
-  expect_error(instant("2020-01-01T00:00"), class = "zudate_range_error")
-  expect_error(instant("2020-01-01T00:00[Europe/Paris]"), class = "zudate_range_error")
-  expect_error(instant(1), class = "zudate_type_error")
+  expect_error(instant("2020-01-01T00:00"), class = "zietig_range_error")
+  expect_error(instant("2020-01-01T00:00[Europe/Paris]"), class = "zietig_range_error")
+  expect_error(instant(1), class = "zietig_type_error")
 })
 
 test_that("instant_from_epoch()", {
@@ -22,11 +22,11 @@ test_that("instant_from_epoch()", {
     c("2019-03-30T00:45:00.000000001Z", "1969-12-31T23:59:59.999999999Z", NA)
   )
   expect_equal(format(instant_from_epoch(nanoseconds = 1e9)), "1970-01-01T00:00:01Z")
-  expect_error(instant_from_epoch(), class = "zudate_type_error")
-  expect_error(instant_from_epoch(seconds = 1, milliseconds = 1), class = "zudate_type_error")
-  expect_error(instant_from_epoch(seconds = 1e15), class = "zudate_range_error")
-  expect_error(instant_from_epoch(nanoseconds = "abc"), class = "zudate_range_error")
-  expect_error(instant_from_epoch(seconds = Inf), class = "zudate_range_error")
+  expect_error(instant_from_epoch(), class = "zietig_type_error")
+  expect_error(instant_from_epoch(seconds = 1, milliseconds = 1), class = "zietig_type_error")
+  expect_error(instant_from_epoch(seconds = 1e15), class = "zietig_range_error")
+  expect_error(instant_from_epoch(nanoseconds = "abc"), class = "zietig_range_error")
+  expect_error(instant_from_epoch(seconds = Inf), class = "zietig_range_error")
 })
 
 test_that("epoch accessors", {
@@ -34,14 +34,14 @@ test_that("epoch accessors", {
   expect_equal(epoch_seconds(x), c(1553906700, -1, NA))
   expect_equal(epoch_milliseconds(x), c(1553906700123, -100, NA))
   expect_equal(epoch_nanoseconds(x), c("1553906700123456789", "-100000000", NA))
-  expect_error(epoch_seconds(plain_date(2020, 1, 1)), class = "zudate_type_error")
+  expect_error(epoch_seconds(plain_date(2020, 1, 1)), class = "zietig_type_error")
 })
 
 test_that("arithmetic, difference and rounding", {
   x <- instant("2020-01-01T00:00Z")
   expect_equal(format(x + duration(hours = 1, nanoseconds = 1)), "2020-01-01T01:00:00.000000001Z")
   expect_equal(format(x - duration(minutes = 1)), "2019-12-31T23:59:00Z")
-  expect_error(x + duration(days = 1), class = "zudate_range_error")
+  expect_error(x + duration(days = 1), class = "zietig_range_error")
   y <- instant("2020-01-02T01:30:00.5Z")
   expect_equal(format(y - x), "PT91800.5S")
   expect_equal(format(temporal_until(x, y, largest_unit = "hour")), "PT25H30M0.5S")
@@ -53,7 +53,7 @@ test_that("arithmetic, difference and rounding", {
     )),
     "PT25H30M"
   )
-  expect_error(temporal_until(x, y, largest_unit = "day"), class = "zudate_range_error")
+  expect_error(temporal_until(x, y, largest_unit = "day"), class = "zietig_range_error")
   expect_equal(format(temporal_round(y, "hour")), "2020-01-02T02:00:00Z")
   expect_equal(format(temporal_round(y, "second", rounding_mode = "floor")), "2020-01-02T01:30:00Z")
   expect_equal(format(temporal_round(y, "minute", rounding_increment = 60)), "2020-01-02T02:00:00Z")

@@ -1,24 +1,24 @@
 # Internal helpers shared by all types.
 
-# Run a call into Rust and rethrow its errors as zudate conditions. Rust only
+# Run a call into Rust and rethrow its errors as zietig conditions. Rust only
 # reports range problems (invalid values, unparsable strings); type problems
 # are detected in R before the call.
-zudate_call <- function(expr, call = rlang::caller_env()) {
+zietig_call <- function(expr, call = rlang::caller_env()) {
   tryCatch(expr, error = function(e) {
     abort(
       conditionMessage(e),
-      class = c("zudate_range_error", "zudate_error"),
+      class = c("zietig_range_error", "zietig_error"),
       call = call
     )
   })
 }
 
-zudate_type_error <- function(message, call = rlang::caller_env()) {
-  abort(message, class = c("zudate_type_error", "zudate_error"), call = call)
+zietig_type_error <- function(message, call = rlang::caller_env()) {
+  abort(message, class = c("zietig_type_error", "zietig_error"), call = call)
 }
 
-zudate_range_error <- function(message, call = rlang::caller_env()) {
-  abort(message, class = c("zudate_range_error", "zudate_error"), call = call)
+zietig_range_error <- function(message, call = rlang::caller_env()) {
+  abort(message, class = c("zietig_range_error", "zietig_error"), call = call)
 }
 
 # Temporal's ToIntegerWithTruncation: numbers are truncated towards zero,
@@ -32,7 +32,7 @@ as_int_field <- function(x, arg = rlang::caller_arg(x), call = rlang::caller_env
     return(rep(NA_integer_, length(x)))
   }
   if (!is.double(x)) {
-    zudate_type_error(
+    zietig_type_error(
       sprintf("`%s` must be a number, not %s.", arg, obj_type_friendly(x)),
       call = call
     )
@@ -40,7 +40,7 @@ as_int_field <- function(x, arg = rlang::caller_arg(x), call = rlang::caller_env
   x <- unclass(x)
   bad <- !is.na(x) & (!is.finite(x) | abs(x) > .Machine$integer.max)
   if (any(bad)) {
-    zudate_range_error(
+    zietig_range_error(
       sprintf("`%s` must be finite and smaller than 2^31 (element %d).", arg, which(bad)[[1]]),
       call = call
     )
@@ -62,7 +62,7 @@ arg_overflow <- function(overflow, call = rlang::caller_env()) {
 
 check_character <- function(x, arg = rlang::caller_arg(x), call = rlang::caller_env()) {
   if (!is.character(x)) {
-    zudate_type_error(
+    zietig_type_error(
       sprintf("`%s` must be a character vector, not %s.", arg, obj_type_friendly(x)),
       call = call
     )
@@ -71,7 +71,7 @@ check_character <- function(x, arg = rlang::caller_arg(x), call = rlang::caller_
 
 check_class <- function(x, class, what, arg = rlang::caller_arg(x), call = rlang::caller_env()) {
   if (!inherits(x, class)) {
-    zudate_type_error(
+    zietig_type_error(
       sprintf("`%s` must be %s, not %s.", arg, what, obj_type_friendly(x)),
       call = call
     )

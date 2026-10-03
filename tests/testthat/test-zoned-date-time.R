@@ -1,6 +1,6 @@
 test_that("zoned_date_time() from components and strings", {
   x <- zoned_date_time(1995, 12, 7, 3, 24, 30, time_zone = "America/New_York")
-  expect_s3_class(x, "zudate_zoned_date_time")
+  expect_s3_class(x, "zietig_zoned_date_time")
   expect_equal(format(x), "1995-12-07T03:24:30-05:00[America/New_York]")
   expect_equal(
     format(zoned_date_time("1995-12-07T03:24:30-08:00[America/Los_Angeles]")),
@@ -29,17 +29,17 @@ test_that("invalid input", {
   expect_error(
     zoned_date_time(2020, 1, 1, time_zone = "Mars/Base"),
     "unknown time zone",
-    class = "zudate_range_error"
+    class = "zietig_range_error"
   )
-  expect_error(zoned_date_time(2020, 1, 1, time_zone = "+05:30:15"), class = "zudate_range_error")
+  expect_error(zoned_date_time(2020, 1, 1, time_zone = "+05:30:15"), class = "zietig_range_error")
   expect_error(
     zoned_date_time(2020, 1, 1, time_zone = "EST5EDT,M3.2.0,M11.1.0"),
-    class = "zudate_range_error"
+    class = "zietig_range_error"
   )
-  expect_error(zoned_date_time(2020, 1, 1), class = "zudate_type_error")
-  expect_error(zoned_date_time(2020, 1, 1, time_zone = 1), class = "zudate_type_error")
-  expect_error(zoned_date_time("2020-01-01T00:00+01:00"), class = "zudate_range_error")
-  expect_error(zoned_date_time("2020-01-01T00:00Z"), class = "zudate_range_error")
+  expect_error(zoned_date_time(2020, 1, 1), class = "zietig_type_error")
+  expect_error(zoned_date_time(2020, 1, 1, time_zone = 1), class = "zietig_type_error")
+  expect_error(zoned_date_time("2020-01-01T00:00+01:00"), class = "zietig_range_error")
+  expect_error(zoned_date_time("2020-01-01T00:00Z"), class = "zietig_range_error")
 })
 
 test_that("DST gaps and overlaps in three zones", {
@@ -66,13 +66,13 @@ test_that("DST gaps and overlaps in three zones", {
     expect_equal(hour(gap("compatible")), g[4] + 1, info = tz)
     expect_equal(hour(gap("later")), g[4] + 1, info = tz)
     expect_equal(hour(gap("earlier")), g[4] - 1, info = tz)
-    expect_error(gap("reject"), class = "zudate_range_error")
+    expect_error(gap("reject"), class = "zietig_range_error")
     # overlap: compatible/earlier take the first (DST) offset
     expect_equal(offset(over("compatible")), dst, info = tz)
     expect_equal(offset(over("earlier")), dst, info = tz)
     expect_equal(offset(over("later")), std, info = tz)
     expect_equal(hour(over("later")), o[4], info = tz)
-    expect_error(over("reject"), class = "zudate_range_error")
+    expect_error(over("reject"), class = "zietig_range_error")
     expect_true(hours_in_day(gap("compatible")) == 23)
     expect_true(hours_in_day(over("compatible")) == 25)
   }
@@ -80,7 +80,7 @@ test_that("DST gaps and overlaps in three zones", {
 
 test_that("the offset option when parsing", {
   s <- "2020-01-01T00:00+01:00[America/New_York]"
-  expect_error(zoned_date_time(s), class = "zudate_range_error")
+  expect_error(zoned_date_time(s), class = "zietig_range_error")
   expect_equal(
     format(zoned_date_time(s, offset = "ignore")),
     "2020-01-01T00:00:00-05:00[America/New_York]"
@@ -149,7 +149,7 @@ test_that("conversions", {
   expect_equal(format(to_zoned_date_time(z, "UTC")), "2020-03-08T16:00:00+00:00[UTC]")
   expect_equal(as.Date(z), as.Date("2020-03-08"))
   expect_equal(format(as_plain_date_time(z)), "2020-03-08T12:00:00")
-  expect_error(to_instant(plain_date(2020, 1, 1)), class = "zudate_type_error")
+  expect_error(to_instant(plain_date(2020, 1, 1)), class = "zietig_type_error")
 })
 
 test_that("temporal_with() and with_plain_*()", {
@@ -179,12 +179,12 @@ test_that("calendar-aware arithmetic", {
   expect_equal(format(temporal_until(z, next_day, largest_unit = "minute")), "PT1380M")
   expect_error(
     temporal_until(z, with_time_zone(next_day, "UTC"), largest_unit = "day"),
-    class = "zudate_range_error"
+    class = "zietig_range_error"
   )
   expect_equal(format(temporal_until(z, with_time_zone(next_day, "UTC"))), "PT23H")
   jan31 <- zoned_date_time("2021-01-31T10:00+01:00[Europe/Paris]")
   expect_equal(format(jan31 + duration(months = 1)), "2021-02-28T10:00:00+01:00[Europe/Paris]")
-  expect_error(temporal_add(jan31, "P1M", overflow = "reject"), class = "zudate_range_error")
+  expect_error(temporal_add(jan31, "P1M", overflow = "reject"), class = "zietig_range_error")
   # 11 of the 23 hours of 2020-03-08 have elapsed at noon: rounds down
   expect_equal(
     format(temporal_round(next_day, "day")),

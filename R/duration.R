@@ -5,7 +5,7 @@ duration_field_names <- c(
 
 #' Durations
 #'
-#' A `zudate_duration` is a length of time expressed in calendar and clock
+#' A `zietig_duration` is a length of time expressed in calendar and clock
 #' units, the equivalent of
 #' [`Temporal.Duration`](https://tc39.es/proposal-temporal/docs/duration.html)
 #' (and of `jiff::Span`). Each element stores ten integer fields that must all
@@ -29,7 +29,7 @@ duration_field_names <- c(
 #'   Integer-valued numbers (stored as doubles, so values beyond 2^53 lose
 #'   precision). `years` may instead be a character vector to parse.
 #' @param ... These dots are for future extensions and must be empty.
-#' @returns A `zudate_duration` vector.
+#' @returns A `zietig_duration` vector.
 #' @family duration
 #' @export
 #' @examples
@@ -52,7 +52,7 @@ duration <- function(years = 0, months = 0, weeks = 0, days = 0, hours = 0, minu
   )
   fields <- Map(as_duration_field, fields, names(fields))
   fields <- recycle_fields(fields)
-  new_duration_fields(zudate_call(rs_duration_validate(fields)))
+  new_duration_fields(zietig_call(rs_duration_validate(fields)))
 }
 
 # Temporal's ToIntegerIfIntegral: fractions are a RangeError.
@@ -61,7 +61,7 @@ as_duration_field <- function(x, arg, call = rlang::caller_env(2)) {
     return(rep(NA_real_, length(x)))
   }
   if (!is.numeric(x)) {
-    zudate_type_error(
+    zietig_type_error(
       sprintf("`%s` must be a number, not %s.", arg, obj_type_friendly(x)),
       call = call
     )
@@ -69,7 +69,7 @@ as_duration_field <- function(x, arg, call = rlang::caller_env(2)) {
   x <- as.double(unclass(x))
   bad <- !is.na(x) & (!is.finite(x) | x != trunc(x))
   if (any(bad)) {
-    zudate_range_error(
+    zietig_range_error(
       sprintf("`%s` must be a finite integer (element %d).", arg, which(bad)[[1]]),
       call = call
     )
@@ -79,11 +79,11 @@ as_duration_field <- function(x, arg, call = rlang::caller_env(2)) {
 
 duration_parse <- function(x, call = rlang::caller_env()) {
   check_character(x, call = call)
-  new_duration_fields(zudate_call(rs_duration_parse(unname(x)), call = call))
+  new_duration_fields(zietig_call(rs_duration_parse(unname(x)), call = call))
 }
 
 new_duration_fields <- function(fields) {
-  new_rcrd(fields, class = "zudate_duration")
+  new_rcrd(fields, class = "zietig_duration")
 }
 
 duration_data <- function(x) {
@@ -94,51 +94,51 @@ duration_data <- function(x) {
 #' @param x An object to test.
 #' @export
 is_duration <- function(x) {
-  inherits(x, "zudate_duration")
+  inherits(x, "zietig_duration")
 }
 
 #' @export
-format.zudate_duration <- function(x, ...) {
-  zudate_call(rs_duration_format(duration_data(x)))
+format.zietig_duration <- function(x, ...) {
+  zietig_call(rs_duration_format(duration_data(x)))
 }
 
 #' @export
-as.character.zudate_duration <- function(x, ...) {
+as.character.zietig_duration <- function(x, ...) {
   format(x)
 }
 
 #' @export
-vec_ptype_abbr.zudate_duration <- function(x, ...) "dur"
+vec_ptype_abbr.zietig_duration <- function(x, ...) "dur"
 
 #' @export
-vec_ptype_full.zudate_duration <- function(x, ...) "duration"
+vec_ptype_full.zietig_duration <- function(x, ...) "duration"
 
 #' @export
-vec_ptype2.zudate_duration.zudate_duration <- function(x, y, ...) {
+vec_ptype2.zietig_duration.zietig_duration <- function(x, y, ...) {
   new_duration_fields(rlang::rep_named(duration_field_names, list(double())))
 }
 
 #' @export
-vec_cast.zudate_duration.zudate_duration <- function(x, to, ...) x
+vec_cast.zietig_duration.zietig_duration <- function(x, to, ...) x
 
 #' @export
-vec_cast.zudate_duration.character <- function(x, to, ...) duration_parse(x)
+vec_cast.zietig_duration.character <- function(x, to, ...) duration_parse(x)
 
 #' @export
-vec_cast.character.zudate_duration <- function(x, to, ...) format(x)
+vec_cast.character.zietig_duration <- function(x, to, ...) format(x)
 
 #' @export
-vec_proxy_compare.zudate_duration <- function(x, ...) {
-  key <- zudate_call(rs_duration_sort_key(duration_data(x)))
+vec_proxy_compare.zietig_duration <- function(x, ...) {
+  key <- zietig_call(rs_duration_sort_key(duration_data(x)))
   new_data_frame(key)
 }
 
 #' @export
-vec_math.zudate_duration <- function(.fn, .x, ...) {
+vec_math.zietig_duration <- function(.fn, .x, ...) {
   switch(.fn,
     abs = duration_map(.x, abs),
     sign = duration_sign(.x),
-    zudate_type_error(sprintf("`%s()` is not supported for durations.", .fn))
+    zietig_type_error(sprintf("`%s()` is not supported for durations.", .fn))
   )
 }
 
@@ -186,7 +186,7 @@ duration_total <- function(x, unit, relative_to = NULL) {
   x <- as_duration(x)
   unit <- arg_unit(unit)
   args <- with_relative(x, relative_to)
-  zudate_call(rs_duration_total(duration_data(args$x), unit, args$relative))
+  zietig_call(rs_duration_total(duration_data(args$x), unit, args$relative))
 }
 
 #' @rdname duration_total
@@ -195,7 +195,7 @@ duration_compare <- function(x, y, relative_to = NULL) {
   args <- vec_recycle_common(x = as_duration(x), y = as_duration(y))
   rel <- with_relative(args$x, relative_to)
   y <- vec_recycle(args$y, vec_size(rel$x))
-  zudate_call(rs_duration_compare(duration_data(rel$x), duration_data(y), rel$relative))
+  zietig_call(rs_duration_compare(duration_data(rel$x), duration_data(y), rel$relative))
 }
 
 #' @rdname duration_total
@@ -232,7 +232,7 @@ with_relative <- function(x, relative_to, call = rlang::caller_env()) {
   if (is_plain_date(relative_to)) {
     relative_to <- to_plain_date_time(relative_to)
   } else if (!is_plain_date_time(relative_to)) {
-    zudate_type_error(
+    zietig_type_error(
       sprintf(
         "`relative_to` must be a plain date, plain date-time or zoned date-time, not %s.",
         obj_type_friendly(relative_to)
@@ -269,11 +269,11 @@ as_duration <- function(x, ...) UseMethod("as_duration")
 
 #' @export
 as_duration.default <- function(x, ...) {
-  zudate_type_error(sprintf("Can't convert %s to a duration.", obj_type_friendly(x)))
+  zietig_type_error(sprintf("Can't convert %s to a duration.", obj_type_friendly(x)))
 }
 
 #' @export
-as_duration.zudate_duration <- function(x, ...) x
+as_duration.zietig_duration <- function(x, ...) x
 
 #' @export
 as_duration.character <- function(x, ...) duration_parse(x)
@@ -306,7 +306,7 @@ as_duration.difftime <- function(x, ...) {
 as_difftime <- function(x, ..., units = "auto") UseMethod("as_difftime")
 
 #' @export
-as_difftime.zudate_duration <- function(x, ..., units = "auto") {
+as_difftime.zietig_duration <- function(x, ..., units = "auto") {
   secs <- duration_total(x, "second")
   out <- as.difftime(secs, units = "secs")
   if (!identical(units, "secs")) {
@@ -359,7 +359,7 @@ arg_rounding_mode <- function(x, arg = rlang::caller_arg(x), call = rlang::calle
 
 arg_increment <- function(x, arg = rlang::caller_arg(x), call = rlang::caller_env()) {
   if (!is.numeric(x) || length(x) != 1 || is.na(x)) {
-    zudate_type_error(sprintf("`%s` must be a single number.", arg), call = call)
+    zietig_type_error(sprintf("`%s` must be a single number.", arg), call = call)
   }
   as.double(x)
 }

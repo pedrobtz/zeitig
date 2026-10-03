@@ -1,4 +1,4 @@
-url: https://pedrobtz.github.io/zudate/
+url: https://pedrobtz.github.io/zietig/
 template:
   bootstrap: 5
 
@@ -44,11 +44,11 @@ reference:
       - now_instant
   - title: Package
     contents:
-      - zudate-package
+      - zietig-package
 
 articles:
   - title: Articles
     navbar: ~
     contents:
-      - zudate
+      - zietig
       - time-zones

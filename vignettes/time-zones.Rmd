@@ -12,7 +12,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
 ```{r}
-library(zudate)
+library(zietig)
 ```
 
 ## Exact time versus wall-clock time
@@ -31,10 +31,10 @@ or fixed offsets such as `"+05:30"`.
 
 ## Where the database comes from
 
-On Linux and macOS zudate reads the operating system's time zone database
+On Linux and macOS zietig reads the operating system's time zone database
 (`/usr/share/zoneinfo`, or the directory in `TZDIR`), so its rules are as current as the system's.
 On Windows, which has no such database, the copy of the IANA database bundled with the jiff crate
-is used. Setting `ZUDATE_TZDIR` before the first time zone lookup in a session points zudate at
+is used. Setting `ZIETIG_TZDIR` before the first time zone lookup in a session points zietig at
 another zoneinfo directory.
 
 The default time zone, used by `now_zoned_date_time()` and for `POSIXct` values without a `tzone`,
