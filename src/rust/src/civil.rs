@@ -10,6 +10,7 @@ use savvy::{
 use crate::cols::{
     common_len, elt_error, is_na_int, DateIn, DateOut, DateTimeIn, DateTimeOut, TimeIn, TimeOut,
 };
+use crate::ixdtf::{prepare, Kind};
 
 fn range_error(i: usize, what: &str, value: i64, lo: i64, hi: i64) -> savvy::Error {
     elt_error(
@@ -112,6 +113,7 @@ fn rs_plain_date_parse(x: StringSexp) -> savvy::Result<savvy::Sexp> {
         if s.is_na() {
             out.push(None);
         } else {
+            let s = prepare(s, Kind::Calendar).map_err(|e| elt_error(i, e))?;
             out.push(Some(s.parse::<Date>().map_err(|e| elt_error(i, e))?));
         }
     }
@@ -266,6 +268,7 @@ fn rs_plain_time_parse(x: StringSexp) -> savvy::Result<savvy::Sexp> {
         if s.is_na() {
             out.push(None);
         } else {
+            let s = prepare(s, Kind::Time).map_err(|e| elt_error(i, e))?;
             out.push(Some(s.parse::<Time>().map_err(|e| elt_error(i, e))?));
         }
     }
@@ -298,6 +301,7 @@ fn rs_plain_date_time_parse(x: StringSexp) -> savvy::Result<savvy::Sexp> {
         if s.is_na() {
             out.push(None);
         } else {
+            let s = prepare(s, Kind::Calendar).map_err(|e| elt_error(i, e))?;
             out.push(Some(s.parse::<DateTime>().map_err(|e| elt_error(i, e))?));
         }
     }

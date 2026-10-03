@@ -2,12 +2,13 @@
 
 use jiff::civil::DateTime;
 use jiff::fmt::temporal::SpanParser;
-use jiff::{SpanCompare, SpanRelativeTo, SpanRound, SpanTotal, Zoned};
+use jiff::{RoundMode, SpanCompare, SpanRelativeTo, SpanRound, SpanTotal, Unit, Zoned};
 use savvy::{
     savvy, IntegerSexp, ListSexp, OwnedIntegerSexp, OwnedListSexp, OwnedRealSexp, OwnedStringSexp,
     StringSexp, TypedSexp,
 };
 
+use crate::arith::unit_value;
 use crate::cols::{common_len, elt_error, DateTimeIn, DurationIn, DurationOut, ZonedIn};
 use crate::opts::{increment_i64, parse_round_mode, parse_unit, parse_unit_auto};
 use crate::tz::TzCache;
@@ -191,15 +192,32 @@ fn rs_duration_round(
             out.push(None);
             continue;
         };
-        let mut opts = SpanRound::new()
-            .smallest(smallest)
-            .increment(increment)
-            .mode(mode)
-            .relative(relative);
-        if let Some(l) = largest {
-            opts = opts.largest(l);
-        }
-        out.push(Some(span.round(opts).map_err(|e| elt_error(i, e))?));
+        let round = |mode| {
+            let mut opts = SpanRound::new()
+                .smallest(smallest)
+                .increment(increment)
+                .mode(mode)
+                .relative(relative);
+            if let Some(l) = largest {
+                opts = opts.largest(l);
+            }
+            span.round(opts).map_err(|e| elt_error(i, e))
+        };
+        // jiff sometimes resolves exact `halfEven` ties to calendar units or
+        // days to the odd neighbour; a tie is where `halfTrunc` and
+        // `halfExpand` disagree, and Temporal picks the even one.
+        let rounded = if mode == RoundMode::HalfEven && smallest >= Unit::Day {
+            let (lo, hi) = (round(RoundMode::HalfTrunc)?, round(RoundMode::HalfExpand)?);
+            let even = (unit_value(&lo, smallest).abs() / increment) % 2 == 0;
+            if lo.fieldwise() == hi.fieldwise() || even {
+                lo
+            } else {
+                hi
+            }
+        } else {
+            round(mode)?
+        };
+        out.push(Some(rounded));
     }
     out.into_sexp()
 }

@@ -4,18 +4,19 @@
 use jiff::civil::DateTime;
 use jiff::fmt::temporal::DateTimeParser;
 use jiff::tz::{Disambiguation, Offset, OffsetConflict};
-use jiff::{Timestamp, TimestampDifference, TimestampRound, Zoned, ZonedDifference, ZonedRound};
+use jiff::{RoundMode, Timestamp, TimestampRound, Zoned, ZonedRound};
 use savvy::{
     savvy, IntegerSexp, ListSexp, OwnedIntegerSexp, OwnedListSexp, OwnedRealSexp, OwnedStringSexp,
     StringSexp,
 };
 
-use crate::arith::check_reject;
+use crate::arith::{check_reject, difference, round_time_like};
 use crate::cols::{
     common_len, elt_error, is_na_int, is_na_str, DateTimeOut, DurationIn, DurationOut, InstantIn,
     InstantOut, ZonedIn, ZonedOut,
 };
 use crate::duration::DateTimeCols;
+use crate::ixdtf::{prepare, Kind};
 use crate::opts::{increment_i64, parse_round_mode, parse_unit, DiffOpts};
 use crate::tz::{db, format_offset, parse_disambiguation, parse_offset_conflict, TzCache};
 
@@ -34,7 +35,8 @@ fn rs_instant_parse(x: StringSexp) -> savvy::Result<savvy::Sexp> {
         if is_na_str(s) {
             out.push(None);
         } else {
-            out.push(Some(p.parse_timestamp(s).map_err(|e| elt_error(i, e))?));
+            let s = prepare(s, Kind::Instant).map_err(|e| elt_error(i, e))?;
+            out.push(Some(p.parse_timestamp(&*s).map_err(|e| elt_error(i, e))?));
         }
     }
     out.into_sexp()
@@ -77,6 +79,17 @@ fn rs_instant_from_epoch_nanoseconds(x: StringSexp) -> savvy::Result<savvy::Sexp
             .trim()
             .parse()
             .map_err(|_| elt_error(i, format!("'{s}' is not an integer number of nanoseconds")))?;
+        // Checked here because jiff panics for some values far out of range.
+        let (lo, hi) = (
+            Timestamp::MIN.as_nanosecond(),
+            Timestamp::MAX.as_nanosecond(),
+        );
+        if !(lo..=hi).contains(&ns) {
+            return Err(elt_error(
+                i,
+                format!("{s} nanoseconds since the epoch is outside the supported range"),
+            ));
+        }
         out.push(Some(
             Timestamp::from_nanosecond(ns).map_err(|e| elt_error(i, e))?,
         ));
@@ -132,14 +145,7 @@ fn rs_instant_diff(
     for i in 0..n {
         match (a.get(i)?, b.get(i)?) {
             (Some(a), Some(b)) => {
-                let mut diff = TimestampDifference::new(b)
-                    .smallest(opts.smallest)
-                    .increment(opts.increment)
-                    .mode(opts.mode);
-                if let Some(l) = opts.largest {
-                    diff = diff.largest(l);
-                }
-                let r = if since { a.since(diff) } else { a.until(diff) };
+                let r = difference(&a, &b, &opts, since);
                 out.push(Some(r.map_err(|e| elt_error(i, e))?));
             }
             _ => out.push(None),
@@ -156,10 +162,21 @@ fn rs_instant_round(
     mode: &str,
 ) -> savvy::Result<savvy::Sexp> {
     let x = InstantIn::new(&x)?;
+    // Temporal rounds instants "as if positive" (RoundNumberToIncrementAsIfPositive):
+    // `trunc` goes down even before 1970, while jiff rounds the signed epoch
+    // value towards zero. Mapping each mode to its direction-fixed
+    // counterpart gives Temporal's result for every instant.
+    let mode = match parse_round_mode(mode)? {
+        RoundMode::Trunc => RoundMode::Floor,
+        RoundMode::Expand => RoundMode::Ceil,
+        RoundMode::HalfTrunc => RoundMode::HalfFloor,
+        RoundMode::HalfExpand => RoundMode::HalfCeil,
+        m => m,
+    };
     let opts = TimestampRound::new()
         .smallest(parse_unit(smallest)?)
         .increment(increment_i64(increment)?)
-        .mode(parse_round_mode(mode)?);
+        .mode(mode);
     let mut out = InstantOut::with_capacity(x.len());
     for i in 0..x.len() {
         match x.get(i)? {
@@ -283,14 +300,27 @@ fn rs_zoned_parse(
             out.push(None);
             continue;
         }
-        let z = p.parse_zoned_with(db(), s).map_err(|e| elt_error(i, e))?;
+        let s = prepare(s, Kind::Zoned).map_err(|e| elt_error(i, e))?;
+        let z = p.parse_zoned_with(db(), &*s).map_err(|e| elt_error(i, e))?;
         // Re-resolve the zone so fixed offsets and names are canonical and
-        // POSIX TZ strings (not Temporal identifiers) are rejected.
-        let id = crate::tz::time_zone_id(z.time_zone());
-        crate::tz::resolve_time_zone(&id).map_err(|e| elt_error(i, e))?;
-        out.push(Some(&z));
+        // POSIX TZ strings (not Temporal identifiers) are rejected. jiff
+        // turns a `[+00:00]` annotation into UTC, which Temporal keeps apart.
+        let id = match offset_annotation(&s) {
+            Some(ann) => ann.to_string(),
+            None => crate::tz::time_zone_id(z.time_zone()),
+        };
+        let (tz, _) = crate::tz::resolve_time_zone(&id).map_err(|e| elt_error(i, e))?;
+        out.push(Some(&z.with_time_zone(tz)));
     }
     out.into_sexp()
+}
+
+/// The time zone annotation of a zoned string when it is a UTC offset.
+fn offset_annotation(s: &str) -> Option<&str> {
+    let start = s.find('[')? + 1;
+    let ann = &s[start..start + s[start..].find(']')?];
+    let ann = ann.strip_prefix('!').unwrap_or(ann);
+    ann.starts_with(['+', '-']).then_some(ann)
 }
 
 #[savvy]
@@ -453,14 +483,7 @@ fn rs_zoned_diff(
                         "time zones must match to compute a difference in calendar units",
                     ));
                 }
-                let mut diff = ZonedDifference::new(&b)
-                    .smallest(opts.smallest)
-                    .increment(opts.increment)
-                    .mode(opts.mode);
-                if let Some(l) = opts.largest {
-                    diff = diff.largest(l);
-                }
-                let r = if since { a.since(diff) } else { a.until(diff) };
+                let r = difference(&a, &b, &opts, since);
                 out.push(Some(r.map_err(|e| elt_error(i, e))?));
             }
             _ => out.push(None),
@@ -477,15 +500,26 @@ fn rs_zoned_round(
     mode: &str,
 ) -> savvy::Result<savvy::Sexp> {
     let x = ZonedIn::new(&x)?;
-    let opts = ZonedRound::new()
-        .smallest(parse_unit(smallest)?)
-        .increment(increment_i64(increment)?)
-        .mode(parse_round_mode(mode)?);
+    let (unit, increment, mode) = (
+        parse_unit(smallest)?,
+        increment_i64(increment)?,
+        parse_round_mode(mode)?,
+    );
+    let opts = ZonedRound::new().smallest(unit).increment(increment);
     let mut cache = TzCache::default();
     let mut out = ZonedOut::with_capacity(x.len());
     for i in 0..x.len() {
         match x.get(i, &mut cache)? {
-            Some(z) => out.push(Some(&z.round(opts).map_err(|e| elt_error(i, e))?)),
+            Some(z) => out.push(Some(
+                &round_time_like(
+                    unit,
+                    increment,
+                    mode,
+                    |m| z.round(opts.mode(m)),
+                    |z| z.time(),
+                )
+                .map_err(|e| elt_error(i, e))?,
+            )),
             None => out.push(None),
         }
     }

@@ -2,9 +2,10 @@
 //! `until()`/`since()` and `round()`.
 
 use jiff::civil::{
-    Date, DateDifference, DateTimeDifference, DateTimeRound, TimeDifference, TimeRound,
+    Date, DateDifference, DateTime, DateTimeDifference, DateTimeRound, Time, TimeDifference,
+    TimeRound,
 };
-use jiff::Span;
+use jiff::{RoundMode, Span, Timestamp, TimestampDifference, Unit, Zoned, ZonedDifference};
 use savvy::{savvy, IntegerSexp, ListSexp};
 
 use crate::cols::{
@@ -35,6 +36,178 @@ pub(crate) fn check_reject(i: usize, date: Date, span: Span) -> savvy::Result<()
         ));
     }
     Ok(())
+}
+
+/// A Temporal value with `until()`: the shared implementation of
+/// `until()`/`since()` for every type.
+pub(crate) trait Point: Sized {
+    fn until_with(
+        &self,
+        other: &Self,
+        largest: Option<Unit>,
+        smallest: Unit,
+        increment: i64,
+        mode: RoundMode,
+    ) -> Result<Span, jiff::Error>;
+    fn add_weeks(&self, weeks: i64) -> Result<Self, jiff::Error>;
+}
+
+macro_rules! civil_point {
+    ($t:ty, $diff:ident) => {
+        impl Point for $t {
+            fn until_with(
+                &self,
+                other: &Self,
+                largest: Option<Unit>,
+                smallest: Unit,
+                increment: i64,
+                mode: RoundMode,
+            ) -> Result<Span, jiff::Error> {
+                let mut d = $diff::new(*other)
+                    .smallest(smallest)
+                    .increment(increment)
+                    .mode(mode);
+                if let Some(l) = largest {
+                    d = d.largest(l);
+                }
+                self.until(d)
+            }
+            fn add_weeks(&self, weeks: i64) -> Result<Self, jiff::Error> {
+                self.checked_add(Span::new().try_weeks(weeks)?)
+            }
+        }
+    };
+}
+
+civil_point!(Date, DateDifference);
+civil_point!(DateTime, DateTimeDifference);
+civil_point!(Time, TimeDifference);
+civil_point!(Timestamp, TimestampDifference);
+
+impl Point for Zoned {
+    fn until_with(
+        &self,
+        other: &Self,
+        largest: Option<Unit>,
+        smallest: Unit,
+        increment: i64,
+        mode: RoundMode,
+    ) -> Result<Span, jiff::Error> {
+        let mut d = ZonedDifference::new(other)
+            .smallest(smallest)
+            .increment(increment)
+            .mode(mode);
+        if let Some(l) = largest {
+            d = d.largest(l);
+        }
+        self.until(d)
+    }
+    fn add_weeks(&self, weeks: i64) -> Result<Self, jiff::Error> {
+        self.checked_add(Span::new().try_weeks(weeks)?)
+    }
+}
+
+/// Temporal's `a.until(b)` (or `a.since(b)`), with workarounds where jiff's
+/// rounding differs from Temporal's:
+///
+/// * `since` is the negation of `until` with the negated rounding mode
+///   (jiff's `since()` measures from `b`, which differs for calendar units);
+/// * `halfEven` to a calendar unit or days resolves exact ties to the even
+///   neighbour (jiff sometimes picks the odd one);
+/// * with `largest_unit = "week"`, a day rounding increment applies to the days
+///   left after whole weeks, not to the total number of days.
+pub(crate) fn difference<P: Point>(
+    a: &P,
+    b: &P,
+    o: &DiffOpts,
+    since: bool,
+) -> Result<Span, jiff::Error> {
+    let span = rounded_until(a, b, o, o.mode_for(since))?;
+    Ok(if since { span.negate() } else { span })
+}
+
+fn rounded_until<P: Point>(
+    a: &P,
+    b: &P,
+    o: &DiffOpts,
+    mode: RoundMode,
+) -> Result<Span, jiff::Error> {
+    if mode == RoundMode::HalfEven && o.smallest >= Unit::Day {
+        let lo = rounded_until(a, b, o, RoundMode::HalfTrunc)?;
+        let hi = rounded_until(a, b, o, RoundMode::HalfExpand)?;
+        if lo.fieldwise() == hi.fieldwise() {
+            return Ok(lo);
+        }
+        let q = unit_value(&lo, o.smallest).abs() / o.increment;
+        return Ok(if q % 2 == 0 { lo } else { hi });
+    }
+    if o.largest == Some(Unit::Week) && o.smallest == Unit::Day && o.increment > 1 {
+        let weeks = i64::from(
+            a.until_with(b, Some(Unit::Week), Unit::Day, 1, RoundMode::Trunc)?
+                .get_weeks(),
+        );
+        let anchor = a.add_weeks(weeks)?;
+        let days = i64::from(
+            anchor
+                .until_with(b, Some(Unit::Day), Unit::Day, o.increment, mode)?
+                .get_days(),
+        );
+        // Temporal's BubbleRelativeDuration: a full week of rounded days
+        // becomes one more week.
+        return if days.abs() >= 7 {
+            Span::new().try_weeks(weeks + days.signum())
+        } else {
+            Span::new().try_weeks(weeks)?.try_days(days)
+        };
+    }
+    a.until_with(b, o.largest, o.smallest, o.increment, mode)
+}
+
+/// The value of one unit's field of a span.
+pub(crate) fn unit_value(span: &Span, unit: Unit) -> i64 {
+    match unit {
+        Unit::Year => span.get_years().into(),
+        Unit::Month => span.get_months().into(),
+        Unit::Week => span.get_weeks().into(),
+        Unit::Day => span.get_days().into(),
+        Unit::Hour => span.get_hours().into(),
+        Unit::Minute => span.get_minutes(),
+        Unit::Second => span.get_seconds(),
+        Unit::Millisecond => span.get_milliseconds(),
+        Unit::Microsecond => span.get_microseconds(),
+        Unit::Nanosecond => span.get_nanoseconds(),
+    }
+}
+
+/// Rounds a wall-clock value as Temporal's `RoundTime` does. For `halfEven`,
+/// Temporal decides a tie by the parity of the rounded unit's own field (the
+/// quantity below the next larger unit; nothing for days), while jiff uses the
+/// whole time of day. A tie is where `halfTrunc` and `halfExpand` disagree.
+pub(crate) fn round_time_like<T: PartialEq>(
+    unit: Unit,
+    increment: i64,
+    mode: RoundMode,
+    round: impl Fn(RoundMode) -> Result<T, jiff::Error>,
+    time: impl Fn(&T) -> Time,
+) -> Result<T, jiff::Error> {
+    if mode != RoundMode::HalfEven {
+        return round(mode);
+    }
+    let (lo, hi) = (round(RoundMode::HalfTrunc)?, round(RoundMode::HalfExpand)?);
+    if lo == hi {
+        return Ok(lo);
+    }
+    let t = time(&lo);
+    let field = match unit {
+        Unit::Hour => i64::from(t.hour()),
+        Unit::Minute => i64::from(t.minute()),
+        Unit::Second => i64::from(t.second()),
+        Unit::Millisecond => i64::from(t.millisecond()),
+        Unit::Microsecond => i64::from(t.microsecond()),
+        Unit::Nanosecond => i64::from(t.nanosecond()),
+        _ => 0,
+    };
+    Ok(if (field / increment) % 2 == 0 { lo } else { hi })
 }
 
 #[savvy]
@@ -128,14 +301,7 @@ fn rs_plain_date_diff(
     for i in 0..n {
         match (a.get(i)?, b.get(i)?) {
             (Some(a), Some(b)) => {
-                let mut diff = DateDifference::new(b)
-                    .smallest(opts.smallest)
-                    .increment(opts.increment)
-                    .mode(opts.mode);
-                if let Some(l) = opts.largest {
-                    diff = diff.largest(l);
-                }
-                let r = if since { a.since(diff) } else { a.until(diff) };
+                let r = difference(&a, &b, &opts, since);
                 out.push(Some(r.map_err(|e| elt_error(i, e))?));
             }
             _ => out.push(None),
@@ -184,14 +350,7 @@ fn rs_plain_time_diff(
     for i in 0..n {
         match (a.get(i)?, b.get(i)?) {
             (Some(a), Some(b)) => {
-                let mut diff = TimeDifference::new(b)
-                    .smallest(opts.smallest)
-                    .increment(opts.increment)
-                    .mode(opts.mode);
-                if let Some(l) = opts.largest {
-                    diff = diff.largest(l);
-                }
-                let r = if since { a.since(diff) } else { a.until(diff) };
+                let r = difference(&a, &b, &opts, since);
                 out.push(Some(r.map_err(|e| elt_error(i, e))?));
             }
             _ => out.push(None),
@@ -219,14 +378,7 @@ fn rs_plain_date_time_diff(
     for i in 0..n {
         match (a.get(i)?, b.get(i)?) {
             (Some(a), Some(b)) => {
-                let mut diff = DateTimeDifference::new(b)
-                    .smallest(opts.smallest)
-                    .increment(opts.increment)
-                    .mode(opts.mode);
-                if let Some(l) = opts.largest {
-                    diff = diff.largest(l);
-                }
-                let r = if since { a.since(diff) } else { a.until(diff) };
+                let r = difference(&a, &b, &opts, since);
                 out.push(Some(r.map_err(|e| elt_error(i, e))?));
             }
             _ => out.push(None),
@@ -244,14 +396,19 @@ fn rs_plain_time_round(
     mode: &str,
 ) -> savvy::Result<savvy::Sexp> {
     let x = TimeIn::new(&second_of_day, &nanos)?;
-    let opts = TimeRound::new()
-        .smallest(parse_unit(smallest)?)
-        .increment(increment_i64(increment)?)
-        .mode(parse_round_mode(mode)?);
+    let (unit, increment, mode) = (
+        parse_unit(smallest)?,
+        increment_i64(increment)?,
+        parse_round_mode(mode)?,
+    );
+    let opts = TimeRound::new().smallest(unit).increment(increment);
     let mut out = TimeOut::with_capacity(x.len());
     for i in 0..x.len() {
         match x.get(i)? {
-            Some(t) => out.push(Some(t.round(opts).map_err(|e| elt_error(i, e))?)),
+            Some(t) => out.push(Some(
+                round_time_like(unit, increment, mode, |m| t.round(opts.mode(m)), |t| *t)
+                    .map_err(|e| elt_error(i, e))?,
+            )),
             None => out.push(None),
         }
     }
@@ -267,14 +424,25 @@ fn rs_plain_date_time_round(
 ) -> savvy::Result<savvy::Sexp> {
     let cols = DateTimeCols::new(&x)?;
     let x = cols.reader()?;
-    let opts = DateTimeRound::new()
-        .smallest(parse_unit(smallest)?)
-        .increment(increment_i64(increment)?)
-        .mode(parse_round_mode(mode)?);
+    let (unit, increment, mode) = (
+        parse_unit(smallest)?,
+        increment_i64(increment)?,
+        parse_round_mode(mode)?,
+    );
+    let opts = DateTimeRound::new().smallest(unit).increment(increment);
     let mut out = DateTimeOut::with_capacity(x.len());
     for i in 0..x.len() {
         match x.get(i)? {
-            Some(dt) => out.push(Some(dt.round(opts).map_err(|e| elt_error(i, e))?)),
+            Some(dt) => out.push(Some(
+                round_time_like(
+                    unit,
+                    increment,
+                    mode,
+                    |m| dt.round(opts.mode(m)),
+                    |dt| dt.time(),
+                )
+                .map_err(|e| elt_error(i, e))?,
+            )),
             None => out.push(None),
         }
     }

@@ -53,6 +53,22 @@ pub(crate) struct DiffOpts {
 }
 
 impl DiffOpts {
+    /// Temporal computes `x.since(y)` as the negation of `x.until(y)` rounded
+    /// with the negated mode (jiff's `since()` measures from `y` instead,
+    /// which differs for calendar units), so `since` uses this mode.
+    pub(crate) fn mode_for(&self, since: bool) -> RoundMode {
+        if !since {
+            return self.mode;
+        }
+        match self.mode {
+            RoundMode::Ceil => RoundMode::Floor,
+            RoundMode::Floor => RoundMode::Ceil,
+            RoundMode::HalfCeil => RoundMode::HalfFloor,
+            RoundMode::HalfFloor => RoundMode::HalfCeil,
+            m => m,
+        }
+    }
+
     pub(crate) fn new(
         largest: &str,
         smallest: &str,

@@ -1,6 +1,18 @@
 # Plan: testing zeitig against Temporal
 
-Status: proposed, not started.
+Status: implemented. The figures quoted below were measured with `@js-temporal/polyfill` 0.5.1.
+
+- `tools/temporal-oracle/`: `generate.mjs` (runner), `cases/*.mjs` (generators per type,
+  `regressions.mjs` for each fixed difference, `test262.mjs` for 447 cases from 47 test262 files),
+  `divergences.mjs` (the design.md section 9 keys), `api.mjs` + `api-map.csv` (API share),
+  `report.R` (match share).
+- `tests/testthat/helper-conformance.R` (dispatch table) and `test-temporal-conformance.R`.
+- Result: 6,262 cases; 98.8% match Temporal, 1.2% are documented differences, 0 mismatches.
+  160 of 216 Temporal members (74%) are implemented.
+- Fixtures: about 1 MB of JSON on disk, about 75 KB compressed in the tarball. This is above the
+  500 KB target below, which was chosen with the tarball in mind. The test takes about
+  10 seconds. Most of that is per-call overhead: about 3,500 calls, because options are scalar
+  and every expected error runs on its own.
 
 ## Goal
 
@@ -126,10 +138,11 @@ license to `LICENSE.note`. Keep the ported set small; the comparison harness is 
   Alternatively, write fixtures as tab-separated text and read them with base R.
 - Never test against a live network or a live Node install in `tests/`.
 
-## Open questions
+## Decisions (formerly open questions)
 
-- JSON with `jsonlite` in `Suggests`, or tab-separated text with no new dependency?
-- Should a GitHub Actions job regenerate fixtures and fail on a diff, to catch polyfill or tzdata
-  drift? This would run on a schedule, not on every pull request.
-- How should the API-share figure be defined: Temporal methods and options implemented, or
-  generated cases matched?
+- JSON with `jsonlite` in `Suggests`, because the cases have nested arguments and options.
+- No scheduled regeneration job yet. Fixtures change only when someone runs `generate.mjs`.
+  The zoned cases avoid tzdata drift by using 2000-2024 dates and no link names.
+- Both figures are reported. The API share counts static and prototype members of the
+  polyfill's classes that have a zeitig equivalent in `api-map.csv`, leaving out `valueOf`.
+  The case share counts generated cases that match.

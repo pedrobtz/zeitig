@@ -33,9 +33,16 @@ temporal_equals <- function(x, y) {
   args <- temporal_common(x, y)
   out <- vec_equal(args[[1]], args[[2]])
   if (is_zoned_date_time(args[[1]])) {
-    out <- out & time_zone(args[[1]]) == time_zone(args[[2]])
+    out <- out & time_zone_primary(time_zone(args[[1]])) == time_zone_primary(time_zone(args[[2]]))
   }
   out
+}
+
+# ECMA-402 resolves "Etc/UTC", "Etc/GMT" and "GMT" to "UTC" (other links are
+# not resolved, see design.md section 9).
+time_zone_primary <- function(x) {
+  x[x %in% c("Etc/UTC", "Etc/GMT", "GMT")] <- "UTC"
+  x
 }
 
 temporal_common <- function(x, y, call = rlang::caller_env()) {

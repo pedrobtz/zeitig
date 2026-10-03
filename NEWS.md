@@ -35,3 +35,24 @@ Initial CRAN release.
   `vignette("time-zones")` and `vignette("temporal-differences")`.
 * New `available_time_zones()` lists the IANA time zone identifiers known to
   the time zone database.
+* A conformance test compares about 6,300 operations with the reference
+  Temporal implementation, including a selection of test262 cases. Every
+  remaining difference is listed in `vignette("temporal-differences")`.
+  Fixed while bringing zeitig in line:
+  * `[!u-ca=iso8601]` annotations are accepted. Other calendar annotations
+    are an error instead of being ignored.
+  * UTC offsets of 24 hours or more are an error. So are offsets with
+    fractional seconds for instants and zoned date-times, which were
+    silently truncated.
+  * `temporal_since()` with calendar units and the `halfEven` rounding mode
+    in several cases give Temporal's results. So do day rounding increments
+    with `largest_unit = "week"`, and the rounding of instants before 1970.
+  * A `+00:00` time zone is no longer turned into `UTC`. `temporal_equals()`
+    treats `UTC`, `Etc/UTC`, `Etc/GMT` and `GMT` as the same zone.
+  * `instant_from_epoch()` gives an error for out-of-range nanoseconds
+    instead of crashing the R session.
+  * `temporal_add()` and `temporal_subtract()` accept durations, and
+    `format()` on durations supports `fractional_second_digits`,
+    `smallest_unit` and `rounding_mode`.
+  * Invalid option values raise `zeitig_range_error`, as Temporal raises a
+    `RangeError`.

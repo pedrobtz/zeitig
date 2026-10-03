@@ -20,11 +20,30 @@ and time logic comes from the Rust crate [jiff](https://docs.rs/jiff), which is 
 without claiming to implement it exactly. Code ported from JavaScript works as expected in most
 cases. This article lists the differences you are most likely to notice.
 
+## How closely zeitig follows Temporal
+
+The package's tests run about 6,300 operations through both zeitig and the reference Temporal
+implementation and compare the results. The operations cover parsing, arithmetic, differences and
+rounding with every unit and rounding mode, formatting options, and time zone transitions, and
+include a selection of cases from Temporal's official test suite (test262). 98.8% of the cases
+give the same result. The remaining 1.2% are the differences described below, mostly dates beyond
+the year 9999. No other case may differ, or the tests fail.
+
+zeitig implements 160 of the 216 methods and properties of Temporal's classes (74%). Most of the
+rest belong to `PlainYearMonth`, `PlainMonthDay`, calendars and `toLocaleString()`.
+
 ## Only the ISO 8601 calendar
 
 Temporal supports many calendars (Hebrew, Islamic, Japanese, ...); jiff, and therefore zeitig,
-supports only the ISO 8601 (proleptic Gregorian) calendar. Some other parts of Temporal are missing
-too:
+supports only the ISO 8601 (proleptic Gregorian) calendar. A string with another calendar is an
+error rather than being read as ISO 8601:
+
+```{r, error = TRUE}
+plain_date("2024-03-15[u-ca=iso8601]")
+plain_date("2024-03-15[u-ca=hebrew]")
+```
+
+Some other parts of Temporal are missing too:
 
 * There are no `PlainYearMonth` or `PlainMonthDay` types. Use a `plain_date()` and ignore the
   fields you do not need.
@@ -37,7 +56,8 @@ temporal_strftime(plain_date(2024, 3, 15), "%A %d %B %Y")
 ## A smaller range of dates
 
 Temporal allows instants about 273,790 years either side of 1970. zeitig only covers the years
--9999 to 9999, and a duration can be at most 19,998 years:
+-9999 to 9999 (instants stop a day or two short of either end, so that any UTC offset can be
+applied), and a duration can be at most 19,998 years:
 
 ```{r, error = TRUE}
 plain_date(9999, 12, 31)
@@ -85,6 +105,9 @@ utc == london
 temporal_equals(utc, london)
 ```
 
+Like Temporal, `temporal_equals()` treats `UTC`, `Etc/UTC`, `Etc/GMT` and `GMT` as the same zone,
+but it does not resolve other alternative names, such as `Asia/Calcutta` for `Asia/Kolkata`.
+
 ## Nanoseconds since the epoch
 
 Temporal returns `epochNanoseconds` as a `BigInt`. R has no 64-bit integer type, and a double
@@ -98,6 +121,18 @@ instant_from_epoch(nanoseconds = epoch_nanoseconds(x)) == x
 ```
 
 `epoch_seconds()` and `epoch_milliseconds()` return doubles, rounded down to whole units.
+
+## UTC offsets with seconds
+
+Before about 1900, many places used local mean time, with UTC offsets that are not whole minutes.
+Temporal prints such offsets rounded to the minute; zeitig prints the seconds, so that the string
+reads back as the same value. A UTC offset with fractional seconds, which Temporal accepts, is an
+error in zeitig:
+
+```{r, error = TRUE}
+format(instant("1900-01-01T12:00Z"), time_zone = "Europe/Dublin")
+instant("2020-01-01T12:00+01:00:30.5")
+```
 
 ## R conveniences
 

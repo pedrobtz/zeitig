@@ -97,9 +97,62 @@ is_duration <- function(x) {
   inherits(x, "zeitig_duration")
 }
 
+#' @rdname temporal-format
 #' @export
-format.zeitig_duration <- function(x, ...) {
-  zeitig_call(rs_duration_format(duration_data(x)))
+format.zeitig_duration <- function(x, ..., fractional_second_digits = "auto",
+                                   smallest_unit = NULL, rounding_mode = "trunc") {
+  if (is_default_precision(fractional_second_digits, smallest_unit)) {
+    return(zeitig_call(rs_duration_format(duration_data(x))))
+  }
+  rounding_mode <- arg_rounding_mode(rounding_mode)
+  p <- format_precision(
+    fractional_second_digits, smallest_unit,
+    units = c("second", "millisecond", "microsecond", "nanosecond")
+  )
+  duration_format_precision(x, p$digits, p$round, rounding_mode)
+}
+
+# Temporal's Duration.prototype.toString() with a fixed precision: the time
+# part (hours and smaller) is rounded, balanced up to the duration's largest
+# unit (at least seconds; days for durations with date units), and the
+# seconds are always printed.
+duration_format_precision <- function(x, digits, round, rounding_mode) {
+  f <- duration_data(x)
+  date_units <- c("years", "months", "weeks", "days")
+  time_units <- setdiff(duration_field_names, date_units)
+  has_date <- Reduce(`|`, lapply(f[date_units], function(v) !is.na(v) & v != 0))
+  time_largest <- vapply(seq_len(vec_size(x)), function(i) {
+    nonzero <- time_units[vapply(f[time_units], function(v) isTRUE(v[i] != 0), logical(1))]
+    sub_second <- length(nonzero) == 0 || match(nonzero[1], time_units) > 3
+    if (sub_second) "second" else sub("s$", "", nonzero[1])
+  }, character(1))
+  largest <- ifelse(has_date, "day", time_largest)
+  time <- duration_map(x, identity)
+  for (u in date_units) vctrs::field(time, u) <- rep(0, vec_size(x))
+  rounded <- time
+  for (l in unique(largest[!is.na(largest)])) {
+    idx <- which(largest == l)
+    rounded[idx] <- temporal_round(
+      time[idx], round$unit,
+      rounding_increment = round$increment, rounding_mode = rounding_mode, largest_unit = l
+    )
+  }
+  r <- duration_data(rounded)
+  r[date_units] <- f[date_units]
+  r$days <- f$days + duration_data(rounded)$days
+  sign <- duration_sign(new_duration_fields(r))
+  r <- lapply(r, abs)
+  num <- function(v) format(v, scientific = FALSE, trim = TRUE)
+  part <- function(v, suffix) ifelse(v != 0, paste0(num(v), suffix), "")
+  frac <- sprintf("%09.0f", r$milliseconds * 1e6 + r$microseconds * 1e3 + r$nanoseconds)
+  frac <- if (digits > 0) paste0(".", substr(frac, 1, digits)) else ""
+  out <- paste0(
+    ifelse(sign < 0, "-", ""), "P",
+    part(r$years, "Y"), part(r$months, "M"), part(r$weeks, "W"), part(r$days, "D"),
+    "T", part(r$hours, "H"), part(r$minutes, "M"), num(r$seconds), frac, "S"
+  )
+  out[vec_detect_missing(x)] <- NA_character_
+  out
 }
 
 #' @export
@@ -344,7 +397,7 @@ arg_unit <- function(x, auto = FALSE, arg = rlang::caller_arg(x), call = rlang::
   if (auto) {
     values <- c("auto", values)
   }
-  x <- arg_match(x, values, error_arg = arg, error_call = call)
+  x <- arg_option(x, values, error_arg = arg, error_call = call)
   sub("s$", "", x)
 }
 
@@ -354,7 +407,7 @@ rounding_modes <- c(
 )
 
 arg_rounding_mode <- function(x, arg = rlang::caller_arg(x), call = rlang::caller_env()) {
-  arg_match(x, rounding_modes, error_arg = arg, error_call = call)
+  arg_option(x, rounding_modes, error_arg = arg, error_call = call)
 }
 
 arg_increment <- function(x, arg = rlang::caller_arg(x), call = rlang::caller_env()) {
