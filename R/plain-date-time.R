@@ -79,12 +79,6 @@ is_plain_date_time <- function(x) {
 }
 
 #' @export
-format.zudate_plain_date_time <- function(x, ...) {
-  f <- vec_data(x)
-  zudate_call(rs_plain_date_time_format(f$year, f$month, f$day, f$second_of_day, f$nanos))
-}
-
-#' @export
 as.character.zudate_plain_date_time <- function(x, ...) {
   format(x)
 }

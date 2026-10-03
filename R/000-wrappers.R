@@ -83,6 +83,11 @@ NULL
 }
 
 
+`rs_format` <- function(`x`, `kind`, `digits`, `minute`, `offset`, `time_zone_name`, `calendar_name`, `time_zone`) {
+  .Call(savvy_rs_format__impl, `x`, `kind`, `digits`, `minute`, `offset`, `time_zone_name`, `calendar_name`, `time_zone`)
+}
+
+
 `rs_instant_add` <- function(`x`, `duration`) {
   .Call(savvy_rs_instant_add__impl, `x`, `duration`)
 }
@@ -225,6 +230,16 @@ NULL
 
 `rs_plain_time_round` <- function(`second_of_day`, `nanos`, `smallest`, `increment`, `mode`) {
   .Call(savvy_rs_plain_time_round__impl, `second_of_day`, `nanos`, `smallest`, `increment`, `mode`)
+}
+
+
+`rs_strftime` <- function(`x`, `kind`, `format`) {
+  .Call(savvy_rs_strftime__impl, `x`, `kind`, `format`)
+}
+
+
+`rs_strptime` <- function(`x`, `format`, `kind`) {
+  .Call(savvy_rs_strptime__impl, `x`, `format`, `kind`)
 }
 
 

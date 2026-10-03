@@ -6,6 +6,7 @@ mod arith;
 mod civil;
 mod cols;
 mod duration;
+mod format;
 mod opts;
 mod tz;
 mod zoned;

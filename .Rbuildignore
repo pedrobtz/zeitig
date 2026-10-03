@@ -15,3 +15,5 @@
 ^roadmap\.md$
 ^tools$
 ^\.lintr$
+^doc$
+^Meta$

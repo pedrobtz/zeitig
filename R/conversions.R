@@ -297,6 +297,14 @@ as_zoned_date_time.zudate_zoned_date_time <- function(x, ...) x
 as_zoned_date_time.character <- function(x, ...) zoned_date_time_parse(x)
 
 #' @export
+as_zoned_date_time.zudate_instant <- function(x, ..., time_zone) {
+  if (missing(time_zone)) {
+    zudate_type_error("`time_zone` must be given to convert an instant to a zoned date-time.")
+  }
+  to_zoned_date_time(x, time_zone)
+}
+
+#' @export
 as_zoned_date_time.POSIXt <- function(x, ..., time_zone = NULL) {
   ct <- as.POSIXct(x)
   time_zone <- time_zone %||% posixct_time_zone(ct)

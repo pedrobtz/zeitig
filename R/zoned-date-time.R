@@ -102,11 +102,6 @@ is_zoned_date_time <- function(x) {
 }
 
 #' @export
-format.zudate_zoned_date_time <- function(x, ...) {
-  zudate_call(rs_zoned_format(zoned_data(x)))
-}
-
-#' @export
 as.character.zudate_zoned_date_time <- function(x, ...) {
   format(x)
 }

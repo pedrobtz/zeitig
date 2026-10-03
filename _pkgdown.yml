@@ -2,3 +2,53 @@ url: https://pedrobtz.github.io/zudate/
 template:
   bootstrap: 5
 
+reference:
+  - title: Plain dates and times
+    desc: Calendar dates and wall-clock times without a time zone.
+    contents:
+      - plain_date
+      - plain_time
+      - plain_date_time
+  - title: Exact time
+    desc: Instants and zoned date-times.
+    contents:
+      - instant
+      - epoch_seconds
+      - zoned_date_time
+      - time_zone
+      - available_time_zones
+  - title: Durations
+    contents:
+      - duration
+      - duration_total
+      - as_duration
+  - title: Fields and modification
+    contents:
+      - temporal-fields
+      - temporal_with
+  - title: Arithmetic, rounding and comparison
+    contents:
+      - temporal_add
+      - temporal_until
+      - temporal_round
+      - temporal_compare
+  - title: Conversion, parsing and formatting
+    contents:
+      - temporal-conversions
+      - temporal-coercion
+      - temporal-format
+      - temporal_strftime
+      - temporal-summary
+  - title: Current time
+    contents:
+      - now_instant
+  - title: Package
+    contents:
+      - zudate-package
+
+articles:
+  - title: Articles
+    navbar: ~
+    contents:
+      - zudate
+      - time-zones

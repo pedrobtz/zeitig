@@ -329,6 +329,12 @@ constraint on the build. The scheme:
 | `Duration` operators | no `<`/`==` (`valueOf` throws) | `Span` has no `Ord`; `fieldwise()` equality | `<`, `sort()` order by length with 24-hour days (error for years/months); `==` compares fields (`PT1H != PT60M`); `duration_compare()` compares lengths |
 | `PlainDate - PlainDate` | n/a (no operators) | `Date - Date` is a `Span` in days | `x - y` is `temporal_since(x, y)` with default options |
 
+| `toString()` offset of zoned values | rounded to whole minutes | printed with seconds when non-zero (`+00:19:32`) | jiff's form, so strings round-trip exactly; only visible for pre-1900 LMT offsets |
+| `toString({ smallestUnit: "minute" })` | `HH:MM` | no direct printer option | implemented in zudate's own formatter (`src/rust/src/format.rs`), which reproduces jiff's `Display` for default options (unit-tested) |
+| `strftime`/`strptime` | not part of Temporal | `jiff::fmt::strtime` | exposed as `temporal_strftime()`/`temporal_strptime()` with jiff's directive set |
+
+Reviewed against the behaviour at the end of milestone 5; every row above is covered by a test.
+
 Anything discovered later goes in this table before the behaviour is shipped.
 
 ## 10. Performance notes
@@ -348,5 +354,7 @@ Anything discovered later goes in this table before the behaviour is shipped.
    `sort()` and `unique()` use the exact time only (`vec_proxy_equal`/`vec_proxy_compare` drop
    `tz`); `temporal_equals()` also compares the zone.
 3. Whether to export `SignedDuration` (jiff-only, absolute time). Leaning no: not part of Temporal.
-4. Whether to ship `pillar`/`tibble` methods in 0.1.0 (Suggests) or defer.
-5. Final function prefix: `temporal_*` (chosen) versus a shorter `tp_*`.
+4. ~~Whether to ship `pillar`/`tibble` methods~~ Decided (0.1.0): not needed; vctrs' `vctrs_vctr`
+   methods already give tibble columns via `format()` and `vec_ptype_abbr()`.
+5. ~~Final function prefix~~ Decided (0.1.0): `temporal_*` for Temporal methods, `duration_*` for
+   Duration-only helpers, constructors named after the type.

@@ -7,3 +7,5 @@ src/rust/cargo-home
 *.o
 *.so
 *.dll
+/doc/
+/Meta/
