@@ -31,7 +31,7 @@ Initial CRAN release.
   (`fractional_second_digits`, `smallest_unit`, `rounding_mode`, `offset`,
   `time_zone_name`, `calendar_name`, `time_zone`), and
   `temporal_strftime()`/`temporal_strptime()` expose jiff's strftime.
-* `summary()` methods; vignettes `vignette("zeitig")` and
-  `vignette("time-zones")`.
+* `summary()` methods; vignettes `vignette("zeitig")`,
+  `vignette("time-zones")` and `vignette("temporal-differences")`.
 * New `available_time_zones()` lists the IANA time zone identifiers known to
   the time zone database.

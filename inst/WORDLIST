@@ -4,6 +4,7 @@ Ecma
 getters
 IANA
 IXDTF
+proleptic
 strftime
 Temporal's
 toolchain

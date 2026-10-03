@@ -6,7 +6,7 @@ itself designed after Temporal and implements the same semantics (RFC 9557 strin
 precision, time-zone-aware arithmetic, disambiguation rules, rounding modes, calendar-aware spans).
 R code provides vectorised, R-idiomatic types and interop with base R; Rust does the arithmetic.
 
-This document records the architecture and the decisions behind it. `roadmap.md` tracks delivery.
+This document records the architecture and the decisions behind it. `.agents/roadmap.md` tracks delivery.
 
 ## 1. Goals and non-goals
 
@@ -335,7 +335,8 @@ constraint on the build. The scheme:
 
 Reviewed against the behaviour at the end of milestone 5; every row above is covered by a test.
 
-Anything discovered later goes in this table before the behaviour is shipped.
+Anything discovered later goes in this table before the behaviour is shipped. The user-facing subset
+is explained in `vignettes/temporal-differences.Rmd`; keep it in sync when a row changes.
 
 ## 10. Performance notes
 
