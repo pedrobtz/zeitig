@@ -31,8 +31,8 @@ duration_blank(x)
 
 - relative_to:
 
-  `NULL`, or a plain date / plain date-time (or string) recycled against
-  `x`.
+  `NULL`, or a plain date, plain date-time or zoned date-time (or
+  string) recycled against `x`.
 
 ## Value
 
@@ -42,9 +42,10 @@ vector. `duration_blank()`: a logical vector.
 ## Details
 
 Without `relative_to`, days are 24 hours long and durations with years,
-months or weeks are an error. With `relative_to` (a plain date or plain
-date-time, or a string), calendar units are resolved from that starting
-point.
+months are an error. With `relative_to` (a plain date, plain date-time
+or zoned date-time, or a string), calendar units are resolved from that
+starting point; with a zoned date-time, days follow the time zone's DST
+rules.
 
 ## See also
 

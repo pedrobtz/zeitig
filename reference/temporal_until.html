@@ -104,8 +104,11 @@ recycled to a common length.</p></dd>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The result is balanced up to <code>largest_unit</code> and rounded to
 <code>smallest_unit</code>. The default largest unit (<code>"auto"</code>) is <code>"day"</code> for plain
-dates and plain date-times and <code>"hour"</code> for plain times; the default
-smallest unit is <code>"day"</code> for plain dates and <code>"nanosecond"</code> otherwise.</p>
+dates and plain date-times, <code>"hour"</code> for plain times and zoned
+date-times, and <code>"second"</code> for instants; the default smallest unit is
+<code>"day"</code> for plain dates and <code>"nanosecond"</code> otherwise. For zoned
+date-times, calendar units (<code>largest_unit</code> of <code>"day"</code> or more) require both
+values to have the same time zone.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

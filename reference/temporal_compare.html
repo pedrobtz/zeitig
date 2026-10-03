@@ -70,7 +70,10 @@ missing.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Character vectors are parsed as the type of the other argument.</p>
+    <p>Zoned date-times compare by their exact time only, so <code>==</code> is <code>TRUE</code> for
+the same instant in two time zones; <code>temporal_equals()</code> additionally
+requires the same time zone, as Temporal's <code>equals()</code>.</p>
+<p>Character vectors are parsed as the type of the other argument.</p>
     </div>
 
     <div class="section level2">

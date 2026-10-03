@@ -123,7 +123,7 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <code>ZonedDateTime</code> stores the time zone identifier per element, as Temporal does. <code>jiff</code> resolves the identifier on each call; Rust keeps a per-call <code>HashMap&lt;&amp;str, TimeZone&gt;</code> so a column with one distinct zone pays one lookup.</li>
 <li>
 <code>Duration</code> field ranges are those of <code>jiff::Span</code> (years ±19998, months/weeks/days i32-ish, time units i64). Construction validates the uniform-sign rule and the ranges in Rust and errors with the Temporal error wording.</li>
-<li>Temporal’s <code>Instant</code> in JavaScript is a <code>BigInt</code> of epoch nanoseconds; we expose <code>epoch_nanoseconds()</code> as a character/<code>bit64</code>-free double pair only through helper accessors (<code>epoch_seconds()</code>, <code>epoch_milliseconds()</code>, and <code>epoch_nanoseconds()</code> returning a string) since R has no native 64-bit integer.</li>
+<li>Temporal’s <code>Instant</code> in JavaScript is a <code>BigInt</code> of epoch nanoseconds; we expose <code><a href="reference/epoch_seconds.html">epoch_nanoseconds()</a></code> as a character/<code>bit64</code>-free double pair only through helper accessors (<code><a href="reference/epoch_seconds.html">epoch_seconds()</a></code>, <code><a href="reference/epoch_seconds.html">epoch_milliseconds()</a></code>, and <code><a href="reference/epoch_seconds.html">epoch_nanoseconds()</a></code> returning a string) since R has no native 64-bit integer.</li>
 </ul><p>Why records rather than a single numeric with attributes (like <code>POSIXct</code>): a single double cannot hold nanosecond instants exactly, and splitting into two integer-valued fields keeps every value exact while staying copy-on-modify friendly.</p>
 </div>
 <div class="section level2">
@@ -155,13 +155,13 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <code>duration(years = 0, months = 0, ..., nanoseconds = 0)</code>; ISO 8601 duration strings</td>
 </tr><tr><td><code>Temporal.Now.*</code></td>
 <td>
-<code>now_instant()</code>, <code>now_zoned_date_time(time_zone = NULL)</code>, <code>now_plain_date(...)</code>, <code>now_plain_time(...)</code>, <code>now_plain_date_time(...)</code>, <code>now_time_zone()</code>
+<code><a href="reference/now_instant.html">now_instant()</a></code>, <code>now_zoned_date_time(time_zone = NULL)</code>, <code>now_plain_date(...)</code>, <code>now_plain_time(...)</code>, <code>now_plain_date_time(...)</code>, <code><a href="reference/now_instant.html">now_time_zone()</a></code>
 </td>
-</tr></tbody></table><p>Every character constructor is a parser; <code>as_instant()</code>, <code><a href="reference/temporal-coercion.html">as_plain_date()</a></code>, etc. are S3 generics with methods for character, base R classes and the other zudate classes.</p>
+</tr></tbody></table><p>Every character constructor is a parser; <code><a href="reference/temporal-coercion.html">as_instant()</a></code>, <code><a href="reference/temporal-coercion.html">as_plain_date()</a></code>, etc. are S3 generics with methods for character, base R classes and the other zudate classes.</p>
 </div>
 <div class="section level3">
 <h3 id="accessors-year-epochmilliseconds-">Accessors (<code>.year</code>, <code>.epochMilliseconds</code>, …)<a class="anchor" aria-label="anchor" href="#accessors-year-epochmilliseconds-"></a></h3>
-<p><code>temporal_fields(x)</code> returns a data frame of all fields. Individual accessors: <code><a href="reference/temporal-fields.html">year()</a></code>, <code><a href="reference/temporal-fields.html">month()</a></code>, <code><a href="reference/temporal-fields.html">day()</a></code>, <code><a href="reference/temporal-fields.html">hour()</a></code>, <code><a href="reference/temporal-fields.html">minute()</a></code>, <code><a href="reference/temporal-fields.html">second()</a></code>, <code><a href="reference/temporal-fields.html">millisecond()</a></code>, <code><a href="reference/temporal-fields.html">microsecond()</a></code>, <code><a href="reference/temporal-fields.html">nanosecond()</a></code>, <code><a href="reference/temporal-fields.html">day_of_week()</a></code>, <code><a href="reference/temporal-fields.html">day_of_year()</a></code>, <code><a href="reference/temporal-fields.html">week_of_year()</a></code>, <code><a href="reference/temporal-fields.html">year_of_week()</a></code>, <code><a href="reference/temporal-fields.html">days_in_month()</a></code>, <code><a href="reference/temporal-fields.html">days_in_year()</a></code>, <code><a href="reference/temporal-fields.html">in_leap_year()</a></code>, <code>epoch_seconds()</code>, <code>epoch_milliseconds()</code>, <code><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset()</a></code>, <code>offset_nanoseconds()</code>, <code>time_zone()</code>, <code>hours_in_day()</code>, <code><a href="reference/duration_total.html">duration_total()</a></code>/<code><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs()</a></code>/<code><a href="https://rdrr.io/r/base/sign.html" class="external-link">sign()</a></code>/<code><a href="reference/duration_total.html">duration_blank()</a></code> for durations (no per-unit duration accessors, which would mask <code><a href="https://rdrr.io/r/base/weekday.POSIXt.html" class="external-link">base::months()</a></code> and clash with lubridate; use <code><a href="reference/temporal-fields.html">temporal_fields()</a></code>). These are implemented in R from the record fields when trivial, in Rust otherwise.</p>
+<p><code>temporal_fields(x)</code> returns a data frame of all fields. Individual accessors: <code><a href="reference/temporal-fields.html">year()</a></code>, <code><a href="reference/temporal-fields.html">month()</a></code>, <code><a href="reference/temporal-fields.html">day()</a></code>, <code><a href="reference/temporal-fields.html">hour()</a></code>, <code><a href="reference/temporal-fields.html">minute()</a></code>, <code><a href="reference/temporal-fields.html">second()</a></code>, <code><a href="reference/temporal-fields.html">millisecond()</a></code>, <code><a href="reference/temporal-fields.html">microsecond()</a></code>, <code><a href="reference/temporal-fields.html">nanosecond()</a></code>, <code><a href="reference/temporal-fields.html">day_of_week()</a></code>, <code><a href="reference/temporal-fields.html">day_of_year()</a></code>, <code><a href="reference/temporal-fields.html">week_of_year()</a></code>, <code><a href="reference/temporal-fields.html">year_of_week()</a></code>, <code><a href="reference/temporal-fields.html">days_in_month()</a></code>, <code><a href="reference/temporal-fields.html">days_in_year()</a></code>, <code><a href="reference/temporal-fields.html">in_leap_year()</a></code>, <code><a href="reference/epoch_seconds.html">epoch_seconds()</a></code>, <code><a href="reference/epoch_seconds.html">epoch_milliseconds()</a></code>, <code><a href="reference/time_zone.html">offset()</a></code>, <code><a href="reference/time_zone.html">offset_nanoseconds()</a></code>, <code><a href="reference/time_zone.html">time_zone()</a></code>, <code><a href="reference/time_zone.html">hours_in_day()</a></code>, <code><a href="reference/duration_total.html">duration_total()</a></code>/<code><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs()</a></code>/<code><a href="https://rdrr.io/r/base/sign.html" class="external-link">sign()</a></code>/<code><a href="reference/duration_total.html">duration_blank()</a></code> for durations (no per-unit duration accessors, which would mask <code><a href="https://rdrr.io/r/base/weekday.POSIXt.html" class="external-link">base::months()</a></code> and clash with lubridate; use <code><a href="reference/temporal-fields.html">temporal_fields()</a></code>). These are implemented in R from the record fields when trivial, in Rust otherwise.</p>
 <p>Accessors are plain functions, not S3 generics: each calls an internal helper (<code>civil_date_fields()</code>, <code>civil_time_fields()</code> in <code>R/accessors.R</code>) that knows which classes carry a date or a time and errors with <code>zudate_type_error</code> otherwise. Adding a type (e.g. <code>ZonedDateTime</code>) means adding a branch there, not a method per accessor. Conversions from other classes use the <code><a href="reference/temporal-coercion.html">as_plain_date()</a></code>/<code><a href="reference/temporal-coercion.html">as_plain_time()</a></code>/<code><a href="reference/temporal-coercion.html">as_plain_date_time()</a></code> S3 generics, while <code>to_*()</code> follow Temporal’s <code>toPlainDate()</code>-style methods and accept only Temporal objects.</p>
 <p>Numeric component arguments follow Temporal’s <code>ToIntegerWithTruncation</code>: doubles are truncated towards zero, non-finite values are a <code>zudate_range_error</code>, non-numbers a <code>zudate_type_error</code>. With <code>overflow = "constrain"</code> a month or day below 1 is still an error (Temporal requires positive integers there), while time fields are clamped in both directions (Temporal’s <code>ConstrainTime</code>).</p>
 </div>
@@ -194,9 +194,9 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 </tr><tr><td>
 <code>x.withPlainTime(t)</code> etc.</td>
 <td>
-<code><a href="reference/temporal_with.html">with_plain_time()</a></code>, <code><a href="reference/temporal_with.html">with_plain_date()</a></code>, <code>with_time_zone()</code>, <code>with_calendar()</code> (iso8601 only)</td>
+<code><a href="reference/temporal_with.html">with_plain_time()</a></code>, <code><a href="reference/temporal_with.html">with_plain_date()</a></code>, <code><a href="reference/time_zone.html">with_time_zone()</a></code>, <code>with_calendar()</code> (iso8601 only)</td>
 </tr><tr><td><code>zdt.startOfDay()</code></td>
-<td><code>start_of_day()</code></td>
+<td><code><a href="reference/time_zone.html">start_of_day()</a></code></td>
 </tr><tr><td><code>zdt.getTimeZoneTransition(dir)</code></td>
 <td><code>time_zone_transition(x, direction = c("next", "previous"))</code></td>
 </tr><tr><td><code>Duration.compare(a, b, {relativeTo})</code></td>
@@ -213,7 +213,7 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 </div>
 <div class="section level3">
 <h3 id="conversion-between-temporal-types">Conversion between Temporal types<a class="anchor" aria-label="anchor" href="#conversion-between-temporal-types"></a></h3>
-<p><code>to_instant()</code>, <code>to_zoned_date_time(x, time_zone, disambiguation =, offset =)</code>, <code><a href="reference/temporal-conversions.html">to_plain_date()</a></code>, <code><a href="reference/temporal-conversions.html">to_plain_time()</a></code>, <code><a href="reference/temporal-conversions.html">to_plain_date_time()</a></code>. <code>ZonedDateTime -&gt; Instant</code> is exact; <code>Instant -&gt; ZonedDateTime</code> needs a time zone; <code>Plain* -&gt; Zoned*</code> goes through disambiguation.</p>
+<p><code><a href="reference/temporal-conversions.html">to_instant()</a></code>, <code>to_zoned_date_time(x, time_zone, disambiguation =, offset =)</code>, <code><a href="reference/temporal-conversions.html">to_plain_date()</a></code>, <code><a href="reference/temporal-conversions.html">to_plain_time()</a></code>, <code><a href="reference/temporal-conversions.html">to_plain_date_time()</a></code>. <code>ZonedDateTime -&gt; Instant</code> is exact; <code>Instant -&gt; ZonedDateTime</code> needs a time zone; <code>Plain* -&gt; Zoned*</code> goes through disambiguation.</p>
 </div>
 <div class="section level3">
 <h3 id="formatting-and-parsing">Formatting and parsing<a class="anchor" aria-label="anchor" href="#formatting-and-parsing"></a></h3>
@@ -266,7 +266,7 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 </tr><tr><td><code>Duration</code></td>
 <td><code>difftime</code></td>
 <td>only when the duration has no calendar units</td>
-</tr></tbody></table><p>Default time zone: Temporal’s <code>Now</code> uses the system zone. We use R’s <code><a href="https://rdrr.io/r/base/timezones.html" class="external-link">Sys.timezone()</a></code> (which honours <code>TZ</code>) rather than <code>jiff</code>’s own system detection so results match base R inside the same session.</p>
+</tr></tbody></table><p>Default time zone: Temporal’s <code>Now</code> uses the system zone. We use the <code>TZ</code> environment variable when it names a valid zone, then R’s <code><a href="https://rdrr.io/r/base/timezones.html" class="external-link">Sys.timezone()</a></code>, then <code>"UTC"</code>, rather than <code>jiff</code>’s own system detection, so results match base R inside the same session. (<code><a href="https://rdrr.io/r/base/timezones.html" class="external-link">Sys.timezone()</a></code> alone is not enough: it caches its first answer and misses a later <code>Sys.setenv(TZ = )</code>.)</p>
 </div>
 </div>
 <div class="section level2">
@@ -403,6 +403,24 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <code>Zoned::until</code> defaults to hours as well</td>
 <td>same</td>
 </tr><tr><td>
+<code>Instant</code> epoch accessors</td>
+<td>
+<code>epochMilliseconds</code>, <code>epochNanoseconds</code> (BigInt)</td>
+<td>
+<code>as_millisecond()</code>, <code>as_nanosecond()</code> (i128)</td>
+<td>
+<code><a href="reference/epoch_seconds.html">epoch_seconds()</a></code>/<code><a href="reference/epoch_seconds.html">epoch_milliseconds()</a></code> floor to doubles; <code><a href="reference/epoch_seconds.html">epoch_nanoseconds()</a></code> is a decimal string; <code>instant_from_epoch(nanoseconds =)</code> accepts strings</td>
+</tr><tr><td>Time zone identifiers</td>
+<td>IANA names and <code>±HH:MM</code>
+</td>
+<td>also POSIX TZ strings</td>
+<td>POSIX TZ strings and sub-minute offsets are rejected; names are canonicalised to the database’s spelling</td>
+</tr><tr><td>
+<code>ZonedDateTime</code> <code>until</code> across zones</td>
+<td>RangeError for calendar units when zones differ</td>
+<td>computes anyway</td>
+<td>R checks and errors (<code>zudate_range_error</code>) when <code>largest_unit</code> is <code>day</code> or larger and the zones differ</td>
+</tr><tr><td>
 <code><a href="https://rdrr.io/r/base/toString.html" class="external-link">toString()</a></code> fractional digits</td>
 <td>
 <code>auto</code> trims trailing zeros</td>
@@ -447,7 +465,8 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <h2 id="id_11-open-questions-decide-before-010-feature-freeze">11. Open questions (decide before 0.1.0 feature freeze)<a class="anchor" aria-label="anchor" href="#id_11-open-questions-decide-before-010-feature-freeze"></a></h2>
 <ol style="list-style-type: decimal"><li>
 <del>Whether <code>Duration</code> fields should be stored as doubles</del> Decided (0.1.0): doubles, validated as integers in R (<code>ToIntegerIfIntegral</code>) and range-checked by <code>jiff::Span</code> in Rust.</li>
-<li>Whether <code>==</code> on <code>ZonedDateTime</code> should be <code>compare</code>-based (chosen) or <code>equals</code>-based.</li>
+<li>
+<del>Whether <code>==</code> on <code>ZonedDateTime</code> should be <code>compare</code>-based</del> Decided (0.1.0): <code>==</code>, <code>&lt;</code>, <code><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort()</a></code> and <code><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique()</a></code> use the exact time only (<code>vec_proxy_equal</code>/<code>vec_proxy_compare</code> drop <code>tz</code>); <code><a href="reference/temporal_compare.html">temporal_equals()</a></code> also compares the zone.</li>
 <li>Whether to export <code>SignedDuration</code> (jiff-only, absolute time). Leaning no: not part of Temporal.</li>
 <li>Whether to ship <code>pillar</code>/<code>tibble</code> methods in 0.1.0 (Suggests) or defer.</li>
 <li>Final function prefix: <code>temporal_*</code> (chosen) versus a shorter <code>tp_*</code>.</li>

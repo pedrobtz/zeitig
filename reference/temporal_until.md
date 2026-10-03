@@ -63,9 +63,11 @@ A duration vector.
 
 The result is balanced up to `largest_unit` and rounded to
 `smallest_unit`. The default largest unit (`"auto"`) is `"day"` for
-plain dates and plain date-times and `"hour"` for plain times; the
-default smallest unit is `"day"` for plain dates and `"nanosecond"`
-otherwise.
+plain dates and plain date-times, `"hour"` for plain times and zoned
+date-times, and `"second"` for instants; the default smallest unit is
+`"day"` for plain dates and `"nanosecond"` otherwise. For zoned
+date-times, calendar units (`largest_unit` of `"day"` or more) require
+both values to have the same time zone.
 
 ## See also
 

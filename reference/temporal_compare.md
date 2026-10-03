@@ -31,6 +31,10 @@ is missing.
 
 ## Details
 
+Zoned date-times compare by their exact time only, so `==` is `TRUE` for
+the same instant in two time zones; `temporal_equals()` additionally
+requires the same time zone, as Temporal's `equals()`.
+
 Character vectors are parsed as the type of the other argument.
 
 ## Examples

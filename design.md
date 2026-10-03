@@ -119,10 +119,14 @@ Notes
   uniform-sign rule and the ranges in Rust and errors with the Temporal
   error wording.
 - Temporal’s `Instant` in JavaScript is a `BigInt` of epoch nanoseconds;
-  we expose `epoch_nanoseconds()` as a character/`bit64`-free double
-  pair only through helper accessors (`epoch_seconds()`,
-  `epoch_milliseconds()`, and `epoch_nanoseconds()` returning a string)
-  since R has no native 64-bit integer.
+  we expose
+  [`epoch_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
+  as a character/`bit64`-free double pair only through helper accessors
+  ([`epoch_seconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md),
+  [`epoch_milliseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md),
+  and
+  [`epoch_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
+  returning a string) since R has no native 64-bit integer.
 
 Why records rather than a single numeric with attributes (like
 `POSIXct`): a single double cannot hold nanosecond instants exactly, and
@@ -148,9 +152,10 @@ and recycle arguments with
 | `PlainDateTime.from(...)` | `plain_date_time(year, month, day, hour, ...)` / character |
 | `ZonedDateTime.from(...)` | `zoned_date_time(year, ..., time_zone =)`; character with `[Zone]` suffix |
 | `Duration.from(...)` | `duration(years = 0, months = 0, ..., nanoseconds = 0)`; ISO 8601 duration strings |
-| `Temporal.Now.*` | `now_instant()`, `now_zoned_date_time(time_zone = NULL)`, `now_plain_date(...)`, `now_plain_time(...)`, `now_plain_date_time(...)`, `now_time_zone()` |
+| `Temporal.Now.*` | [`now_instant()`](https://pedrobtz.github.io/zudate/reference/now_instant.md), `now_zoned_date_time(time_zone = NULL)`, `now_plain_date(...)`, `now_plain_time(...)`, `now_plain_date_time(...)`, [`now_time_zone()`](https://pedrobtz.github.io/zudate/reference/now_instant.md) |
 
-Every character constructor is a parser; `as_instant()`,
+Every character constructor is a parser;
+[`as_instant()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md),
 [`as_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md),
 etc. are S3 generics with methods for character, base R classes and the
 other zudate classes.
@@ -175,9 +180,12 @@ accessors:
 [`days_in_month()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
 [`days_in_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
 [`in_leap_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md),
-`epoch_seconds()`, `epoch_milliseconds()`,
-[`offset()`](https://rdrr.io/r/stats/offset.html),
-`offset_nanoseconds()`, `time_zone()`, `hours_in_day()`,
+[`epoch_seconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md),
+[`epoch_milliseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md),
+[`offset()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+[`offset_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+[`time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+[`hours_in_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
 [`duration_total()`](https://pedrobtz.github.io/zudate/reference/duration_total.md)/[`abs()`](https://rdrr.io/r/base/MathFun.html)/[`sign()`](https://rdrr.io/r/base/sign.html)/[`duration_blank()`](https://pedrobtz.github.io/zudate/reference/duration_total.md)
 for durations (no per-unit duration accessors, which would mask
 [`base::months()`](https://rdrr.io/r/base/weekday.POSIXt.html) and clash
@@ -215,8 +223,8 @@ clamped in both directions (Temporal’s `ConstrainTime`).
 | `x.equals(y)` | `temporal_equals(x, y)` (compares time zone id too, unlike `==` on `ZonedDateTime` which follows `compare`) |
 | `x.round(opts)` | `temporal_round(x, smallest_unit =, rounding_increment = 1, rounding_mode = "halfExpand")` |
 | `x.with({...}, {overflow})` | `temporal_with(x, year = , month = , ...)` |
-| `x.withPlainTime(t)` etc. | [`with_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md), [`with_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md), `with_time_zone()`, `with_calendar()` (iso8601 only) |
-| `zdt.startOfDay()` | `start_of_day()` |
+| `x.withPlainTime(t)` etc. | [`with_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md), [`with_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md), [`with_time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md), `with_calendar()` (iso8601 only) |
+| `zdt.startOfDay()` | [`start_of_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md) |
 | `zdt.getTimeZoneTransition(dir)` | `time_zone_transition(x, direction = c("next", "previous"))` |
 | `Duration.compare(a, b, {relativeTo})` | `duration_compare(a, b, relative_to = NULL)` |
 | `d.negated()`, `d.abs()` | `-d`, `abs(d)` |
@@ -232,7 +240,7 @@ text.
 
 ### Conversion between Temporal types
 
-`to_instant()`,
+[`to_instant()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
 `to_zoned_date_time(x, time_zone, disambiguation =, offset =)`,
 [`to_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
 [`to_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
@@ -267,10 +275,14 @@ time zone; `Plain* -> Zoned*` goes through disambiguation.
 | `Instant`, `ZonedDateTime` | `POSIXct` | lossy below microseconds; documented |
 | `Duration` | `difftime` | only when the duration has no calendar units |
 
-Default time zone: Temporal’s `Now` uses the system zone. We use R’s
-[`Sys.timezone()`](https://rdrr.io/r/base/timezones.html) (which honours
-`TZ`) rather than `jiff`’s own system detection so results match base R
+Default time zone: Temporal’s `Now` uses the system zone. We use the
+`TZ` environment variable when it names a valid zone, then R’s
+[`Sys.timezone()`](https://rdrr.io/r/base/timezones.html), then `"UTC"`,
+rather than `jiff`’s own system detection, so results match base R
 inside the same session.
+([`Sys.timezone()`](https://rdrr.io/r/base/timezones.html) alone is not
+enough: it caches its first answer and misses a later
+`Sys.setenv(TZ = )`.)
 
 ## 5. Options and enumerations
 
@@ -419,6 +431,9 @@ binding constraint on the build. The scheme:
 | `Duration` string with fractional units | allowed on the smallest unit | allowed | same |
 | `ZonedDateTime` equality | `equals` includes time zone id | `Zoned == Zoned` compares instant and zone | `==` follows `compare` (instant only); [`temporal_equals()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md) also compares the zone id |
 | `until`/`since` default units on `ZonedDateTime` | `hour` largest unit | `Zoned::until` defaults to hours as well | same |
+| `Instant` epoch accessors | `epochMilliseconds`, `epochNanoseconds` (BigInt) | `as_millisecond()`, `as_nanosecond()` (i128) | [`epoch_seconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)/[`epoch_milliseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md) floor to doubles; [`epoch_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md) is a decimal string; `instant_from_epoch(nanoseconds =)` accepts strings |
+| Time zone identifiers | IANA names and `±HH:MM` | also POSIX TZ strings | POSIX TZ strings and sub-minute offsets are rejected; names are canonicalised to the database’s spelling |
+| `ZonedDateTime` `until` across zones | RangeError for calendar units when zones differ | computes anyway | R checks and errors (`zudate_range_error`) when `largest_unit` is `day` or larger and the zones differ |
 | [`toString()`](https://rdrr.io/r/base/toString.html) fractional digits | `auto` trims trailing zeros | `Display` prints `auto` precision | same |
 | Leap seconds | not represented | not represented | same |
 | Weeks without `relativeTo` | `Duration.compare`/`total`/`round` need `relativeTo` for weeks | weeks are 7 days with `days_are_24_hours()` | jiff behaviour: weeks count as 7 x 24 hours when no `relative_to` is given |
@@ -446,8 +461,13 @@ shipped.
 1.  ~~Whether `Duration` fields should be stored as doubles~~ Decided
     (0.1.0): doubles, validated as integers in R (`ToIntegerIfIntegral`)
     and range-checked by `jiff::Span` in Rust.
-2.  Whether `==` on `ZonedDateTime` should be `compare`-based (chosen)
-    or `equals`-based.
+2.  ~~Whether `==` on `ZonedDateTime` should be `compare`-based~~
+    Decided (0.1.0): `==`, `<`,
+    [`sort()`](https://rdrr.io/r/base/sort.html) and
+    [`unique()`](https://rdrr.io/r/base/unique.html) use the exact time
+    only (`vec_proxy_equal`/`vec_proxy_compare` drop `tz`);
+    [`temporal_equals()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md)
+    also compares the zone.
 3.  Whether to export `SignedDuration` (jiff-only, absolute time).
     Leaning no: not part of Temporal.
 4.  Whether to ship `pillar`/`tibble` methods in 0.1.0 (Suggests) or

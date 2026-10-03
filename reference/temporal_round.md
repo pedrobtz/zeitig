@@ -20,7 +20,7 @@ temporal_round(
 
 - x:
 
-  A plain time, plain date-time or duration.
+  A plain time, plain date-time, instant, zoned date-time or duration.
 
 - smallest_unit:
 
@@ -48,8 +48,8 @@ temporal_round(
 
 - relative_to:
 
-  Durations only: `NULL`, or a plain date / plain date-time (or string)
-  recycled against `x`.
+  Durations only: `NULL`, or a plain date, plain date-time or zoned
+  date-time (or string) recycled against `x`.
 
 ## Value
 
@@ -57,9 +57,11 @@ An object of the same class as `x`.
 
 ## Details
 
-- Plain times and plain date-times round to `smallest_unit` (at most
-  `"hour"` for times, `"day"` for date-times). `rounding_increment` must
-  divide evenly into the next larger unit.
+- Plain times, plain date-times, instants and zoned date-times round to
+  `smallest_unit` (at most `"hour"` for times and instants, `"day"` for
+  date-times; a zoned day may be 23 or 25 hours long).
+  `rounding_increment` must divide evenly into the next larger unit (for
+  instants, into a day).
 
 - Durations are rounded and balanced between `largest_unit` and
   `smallest_unit`. Without `relative_to`, days are 24 hours and years,

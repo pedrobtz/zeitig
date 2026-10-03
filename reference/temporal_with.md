@@ -2,13 +2,19 @@
 
 `temporal_with()` returns a copy of `x` with some fields replaced, the
 equivalent of Temporal's `.with()`. `with_plain_time()` and
-`with_plain_date()` replace the whole time or date part of a plain
-date-time (`.withPlainTime()`, `.withPlainDate()`).
+`with_plain_date()` replace the whole time or date part of a plain or
+zoned date-time (`.withPlainTime()`, `.withPlainDate()`).
 
 ## Usage
 
 ``` r
-temporal_with(x, ..., overflow = c("constrain", "reject"))
+temporal_with(
+  x,
+  ...,
+  overflow = c("constrain", "reject"),
+  disambiguation = c("compatible", "earlier", "later", "reject"),
+  offset = c("prefer", "use", "ignore", "reject")
+)
 
 with_plain_time(x, time = NULL)
 
@@ -25,13 +31,19 @@ with_plain_date(x, date)
 
   Named fields to replace, recycled with `x` to a common length. Plain
   dates take `year`, `month`, `day`; plain times take `hour`, `minute`,
-  `second`, `millisecond`, `microsecond`, `nanosecond`; plain date-times
-  take both.
+  `second`, `millisecond`, `microsecond`, `nanosecond`; plain and zoned
+  date-times take both.
 
 - overflow:
 
   How to handle out-of-range values: `"constrain"` (the default) clamps,
   `"reject"` raises an error.
+
+- disambiguation, offset:
+
+  Zoned date-times only; see
+  [`zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/zoned_date_time.md).
+  `offset` defaults to `"prefer"` here.
 
 - time:
 
@@ -44,6 +56,15 @@ with_plain_date(x, date)
 ## Value
 
 An object of the same class as `x`.
+
+## Details
+
+For zoned date-times the fields are wall-clock fields in the element's
+time zone; the new local time is resolved with `disambiguation`, and
+`offset = "prefer"` (the default) keeps the current UTC offset when it
+is still valid, so that changing a field inside a DST overlap stays on
+the same side of it. `with_plain_time(x)` without `time` gives the start
+of the day.
 
 ## Examples
 
@@ -65,4 +86,11 @@ with_plain_time(dt) # midnight
 with_plain_date(dt, plain_date(2000, 1, 1))
 #> <plain_date_time[1]>
 #> [1] 2000-01-01T03:24:30
+z <- zoned_date_time("2019-11-03T01:30-04:00[America/New_York]")
+temporal_with(z, minute = 45) # stays at -04:00 in the DST overlap
+#> <zoned_date_time[1]>
+#> [1] 2019-11-03T01:45:00-04:00[America/New_York]
+with_plain_time(z)
+#> <zoned_date_time[1]>
+#> [1] 2019-11-03T00:00:00-04:00[America/New_York]
 ```

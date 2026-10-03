@@ -11,7 +11,10 @@
 <url><loc>https://pedrobtz.github.io/zudate/reference/available_time_zones.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/duration.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/duration_total.html</loc></url>
+<url><loc>https://pedrobtz.github.io/zudate/reference/epoch_seconds.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/index.html</loc></url>
+<url><loc>https://pedrobtz.github.io/zudate/reference/instant.html</loc></url>
+<url><loc>https://pedrobtz.github.io/zudate/reference/now_instant.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/plain_date.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/plain_date_time.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/plain_time.html</loc></url>
@@ -23,6 +26,8 @@
 <url><loc>https://pedrobtz.github.io/zudate/reference/temporal_round.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/temporal_until.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/temporal_with.html</loc></url>
+<url><loc>https://pedrobtz.github.io/zudate/reference/time_zone.html</loc></url>
+<url><loc>https://pedrobtz.github.io/zudate/reference/zoned_date_time.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/zudate-package.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/roadmap.html</loc></url>
 </urlset>

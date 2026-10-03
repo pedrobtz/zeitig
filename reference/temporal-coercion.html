@@ -49,7 +49,11 @@ strings.</p>
 <span></span>
 <span><span class="fu">as_plain_time</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">as_plain_date_time</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">as_plain_date_time</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">as_instant</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">as_zoned_date_time</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -78,10 +82,17 @@ own time zone (the <code>tzone</code> attribute, or the session time zone). <cod
 values are rounded to the microsecond, because a double cannot hold
 nanoseconds of a present-day instant; <code>POSIXlt</code> seconds are rounded to the
 nanosecond.</p></li>
-</ul><p>The reverse conversions use base generics: <code><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date()</a></code> for plain dates and
-plain date-times, and <code><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct()</a></code> / <code><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXlt()</a></code> for plain date-times,
-which interpret the wall-clock time in <code>tz</code> (UTC by default). Local times
-that do not exist in <code>tz</code> (DST gaps) are resolved by the operating system.</p>
+<li><p><code>POSIXct</code> converts to an instant, or to a zoned date-time in its
+<code>tzone</code> (the session time zone, see <code><a href="now_instant.html">now_time_zone()</a></code>, when unset);
+<code>as_zoned_date_time(x, time_zone = )</code> picks another zone.</p></li>
+</ul><p>The reverse conversions use base generics: <code><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date()</a></code> for plain dates,
+plain date-times and zoned date-times (wall-clock date), and
+<code><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct()</a></code> / <code><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXlt()</a></code>. For plain date-times these interpret the
+wall-clock time in <code>tz</code> (UTC by default; local times in DST gaps are
+resolved by the operating system). Instants and zoned date-times convert
+exactly up to the microsecond; zoned date-times keep their time zone when
+all elements share one IANA zone and <code>tz</code> is not given, otherwise <code>tz</code>
+(default UTC) is used.</p>
     </div>
 
     <div class="section level2">
@@ -99,6 +110,14 @@ that do not exist in <code>tz</code> (DST gaps) are resolved by the operating sy
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2020-02-29"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct</a></span><span class="op">(</span><span class="fu"><a href="plain_date_time.html">plain_date_time</a></span><span class="op">(</span><span class="st">"2020-02-29T12:30"</span><span class="op">)</span>, tz <span class="op">=</span> <span class="st">"America/New_York"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2020-02-29 12:30:00 EST"</span>
+<span class="r-in"><span><span class="fu">as_instant</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct</a></span><span class="op">(</span><span class="st">"2020-01-01 12:00:00"</span>, tz <span class="op">=</span> <span class="st">"UTC"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;instant[1]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2020-01-01T12:00:00Z</span>
+<span class="r-in"><span><span class="fu">as_zoned_date_time</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct</a></span><span class="op">(</span><span class="st">"2020-07-01 12:00:00"</span>, tz <span class="op">=</span> <span class="st">"Europe/Paris"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;zoned_date_time[1]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2020-07-01T12:00:00+02:00[Europe/Paris]</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct</a></span><span class="op">(</span><span class="fu"><a href="zoned_date_time.html">zoned_date_time</a></span><span class="op">(</span><span class="st">"2020-07-01T12:00+02:00[Europe/Paris]"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2020-07-01 12:00:00 CEST"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -137,26 +137,35 @@ CI job building with the MSRV (rustc 1.81) from the vendored crates.
 Property tests in Rust: `a + (b - a) == b` for every type pair, round
 trip of strings (deterministic LCG, no extra crate).
 
-## Milestone 4 - Instant, ZonedDateTime, Now
+## Milestone 4 - Instant, ZonedDateTime, Now (done)
 
 `zudate_instant`: constructor from strings and epoch units,
-`epoch_seconds()`, `epoch_milliseconds()`, `epoch_nanoseconds()`
+[`epoch_seconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md),
+[`epoch_milliseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md),
+[`epoch_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
 (string), arithmetic with time-unit durations,
 [`temporal_round()`](https://pedrobtz.github.io/zudate/reference/temporal_round.md),
 `until`/`since`.
 
 `zudate_zoned_date_time`: per-element time zone, constructor with
 `disambiguation` and `offset` options, parsing of `[Zone]` and `[!Zone]`
-annotations, [`offset()`](https://rdrr.io/r/stats/offset.html),
-`offset_nanoseconds()`, `time_zone()`, `hours_in_day()`,
-`start_of_day()`, `time_zone_transition()`, `with_time_zone()`,
+annotations,
+[`offset()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+[`offset_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+[`time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+[`hours_in_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+[`start_of_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+[`time_zone_transition()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+[`with_time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
 calendar-aware `add`/`until`/`round`.
 
 Per-call time zone cache in Rust; invalid identifiers produce
-`zudate_range_error`.
+`zudate_range_error`; `ZUDATE_TZDIR` overrides the database (read once
+per session).
 
-`now_*()` functions; default zone from
-[`Sys.timezone()`](https://rdrr.io/r/base/timezones.html).
+`now_*()` functions; default zone from `TZ`, then
+[`Sys.timezone()`](https://rdrr.io/r/base/timezones.html) (which caches
+and misses later `TZ` changes), then UTC.
 
 `POSIXct` conversions both ways with documented precision loss.
 

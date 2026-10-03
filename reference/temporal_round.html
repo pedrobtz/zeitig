@@ -55,7 +55,8 @@
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>A plain time, plain date-time or duration.</p></dd>
+<dd><p>A plain time, plain date-time, instant, zoned date-time or
+duration.</p></dd>
 
 
 <dt id="arg-smallest-unit">smallest_unit<a class="anchor" aria-label="anchor" href="#arg-smallest-unit"></a></dt>
@@ -83,8 +84,8 @@ zero); see <code><a href="temporal_until.html">temporal_until()</a></code> for t
 
 
 <dt id="arg-relative-to">relative_to<a class="anchor" aria-label="anchor" href="#arg-relative-to"></a></dt>
-<dd><p>Durations only: <code>NULL</code>, or a plain date / plain
-date-time (or string) recycled against <code>x</code>.</p></dd>
+<dd><p>Durations only: <code>NULL</code>, or a plain date, plain
+date-time or zoned date-time (or string) recycled against <code>x</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -94,9 +95,11 @@ date-time (or string) recycled against <code>x</code>.</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
 
-<ul><li><p>Plain times and plain date-times round to <code>smallest_unit</code> (at most
-<code>"hour"</code> for times, <code>"day"</code> for date-times). <code>rounding_increment</code> must
-divide evenly into the next larger unit.</p></li>
+<ul><li><p>Plain times, plain date-times, instants and zoned date-times round to
+<code>smallest_unit</code> (at most <code>"hour"</code> for times and instants, <code>"day"</code> for
+date-times; a zoned day may be 23 or 25 hours long).
+<code>rounding_increment</code> must divide evenly into the next larger unit (for
+instants, into a day).</p></li>
 <li><p>Durations are rounded and balanced between <code>largest_unit</code> and
 <code>smallest_unit</code>. Without <code>relative_to</code>, days are 24 hours and years,
 months and weeks are an error; with it, calendar units are resolved from

@@ -44,5 +44,30 @@
   [`temporal_round()`](https://pedrobtz.github.io/zudate/reference/temporal_round.md)
   (also for durations, with `relative_to`).
 - New
+  [`instant()`](https://pedrobtz.github.io/zudate/reference/instant.md)
+  (Temporal `Instant`) and
+  [`zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/zoned_date_time.md)
+  (Temporal `ZonedDateTime`) classes: RFC 9557 parsing with
+  `disambiguation` and `offset` options, per-element time zones,
+  `epoch_*()` accessors,
+  [`time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+  [`offset()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+  [`offset_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+  [`hours_in_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+  [`start_of_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+  [`time_zone_transition()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+  [`with_time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md),
+  [`to_instant()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
+  [`to_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md),
+  DST-aware arithmetic, rounding and differences, and
+  `POSIXct`/`POSIXlt` conversions.
+- [`now_instant()`](https://pedrobtz.github.io/zudate/reference/now_instant.md),
+  [`now_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/now_instant.md),
+  [`now_plain_date()`](https://pedrobtz.github.io/zudate/reference/now_instant.md),
+  [`now_plain_time()`](https://pedrobtz.github.io/zudate/reference/now_instant.md),
+  [`now_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
+  and
+  [`now_time_zone()`](https://pedrobtz.github.io/zudate/reference/now_instant.md).
+- New
   [`available_time_zones()`](https://pedrobtz.github.io/zudate/reference/available_time_zones.md)
   lists the IANA time zone identifiers known to the time zone database.

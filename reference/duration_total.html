@@ -81,8 +81,8 @@ spellings (<code>"hours"</code>) are accepted.</p></dd>
 
 
 <dt id="arg-relative-to">relative_to<a class="anchor" aria-label="anchor" href="#arg-relative-to"></a></dt>
-<dd><p><code>NULL</code>, or a plain date / plain date-time (or string)
-recycled against <code>x</code>.</p></dd>
+<dd><p><code>NULL</code>, or a plain date, plain date-time or zoned
+date-time (or string) recycled against <code>x</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -93,9 +93,10 @@ integer vector. <code>duration_blank()</code>: a logical vector.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Without <code>relative_to</code>, days are 24 hours long and durations with years,
-months or weeks are an error. With <code>relative_to</code> (a plain date or plain
-date-time, or a string), calendar units are resolved from that starting
-point.</p>
+months are an error. With <code>relative_to</code> (a plain date, plain date-time or
+zoned date-time, or a string), calendar units are resolved from that
+starting point; with a zoned date-time, days follow the time zone's DST
+rules.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

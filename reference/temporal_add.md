@@ -16,7 +16,7 @@ temporal_subtract(x, duration, ..., overflow = c("constrain", "reject"))
 
 - x:
 
-  A plain date, plain time or plain date-time.
+  A plain date, plain time, plain date-time, instant or zoned date-time.
 
 - duration:
 
@@ -46,6 +46,12 @@ An object of the same class as `x`.
   around midnight.
 
 - Plain date-times: calendar units as for dates, then the time.
+
+- Instants: only hours and smaller units are allowed (exact time).
+
+- Zoned date-times: calendar units (years to days) follow the wall clock
+  and are DST-aware (adding one day keeps the local time even when the
+  day has 23 or 25 hours); time units are exact elapsed time.
 
 Subtracting two values of the same type (`x - y`) is
 `temporal_since(x, y)` with default options, giving a duration.
