@@ -13,13 +13,13 @@ Source:
 [`DESCRIPTION`](https://github.com/pedrobtz/zudate/blob/main/DESCRIPTION)
 
 Z P (2026). *zudate: 'Temporal' Date and Time Types Backed by 'jiff'*. R
-package version 0.0.0.9000, <https://pedrobtz.github.io/zudate/>.
+package version 0.1.0, <https://pedrobtz.github.io/zudate/>.
 
     @Manual{,
       title = {zudate: 'Temporal' Date and Time Types Backed by 'jiff'},
       author = {Pedro Z},
       year = {2026},
-      note = {R package version 0.0.0.9000},
+      note = {R package version 0.1.0},
       url = {https://pedrobtz.github.io/zudate/},
     }
 

@@ -208,7 +208,7 @@ when you need nanoseconds.
 
 ## Differences from Temporal
 
-zudate supports only the ISO 8601 calendar, and a few behaviours follow
+zudate supports only the ISO 8601 calendar, and a few behaviors follow
 jiff or R conventions; they are listed in the package’s design notes.
 The most visible ones:
 
