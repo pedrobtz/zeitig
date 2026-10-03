@@ -34,7 +34,7 @@ A named character vector of class \code{table}.
 \code{summary()} gives the minimum, quartiles (as observed values, i.e.
 quantile type 1), maximum and the number of missing values, in Temporal's
 ordering. Durations are ordered by length with 24-hour days, so durations
-with years or months cannot be summarised.
+with years or months cannot be summarized.
 }
 \examples{
 summary(plain_date(2020, 1:12, 1))
