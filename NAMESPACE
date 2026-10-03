@@ -2,7 +2,10 @@
 
 S3method("$<-",savvy_zudate__sealed)
 S3method("[[<-",savvy_zudate__sealed)
-S3method(print,"zudate::Person__bundle")
-export(int_times_int)
-export(to_upper)
+export(available_time_zones)
+import(vctrs)
+importFrom(rlang,
+  abort,
+  arg_match
+)
 useDynLib(zudate, .registration = TRUE)

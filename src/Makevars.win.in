@@ -4,7 +4,7 @@ PROFILE = @PROFILE@
 FEATURE_FLAGS = @FEATURE_FLAGS@
 
 # Add flags if necessary
-RUSTFLAGS = 
+RUSTFLAGS =
 
 TARGET_DIR = $(CURDIR)/rust/target
 LIBDIR = $(TARGET_DIR)/$(TARGET)/$(subst dev,debug,$(PROFILE))
@@ -12,8 +12,15 @@ STATLIB = $(LIBDIR)/libzudate.a
 PKG_LIBS = -L$(LIBDIR) -lzudate -lws2_32 -ladvapi32 -luserenv -lbcrypt -lntdll
 
 # Rtools doesn't have the linker in the location that cargo expects, so we need
-# to overwrite it via configuration.
-CARGO_LINKER = x86_64-w64-mingw32.static.posix-gcc.exe
+# to overwrite it via configuration (set per target by configure.win).
+CARGO_LINKER = @CARGO_LINKER@
+CARGO_LINKER_VAR = @CARGO_LINKER_VAR@
+
+# Vendored crate sources (tools/vendor.sh); see Makevars.in for the scheme.
+CARGO_HOME_DIR = $(CURDIR)/rust/cargo-home
+
+# CRAN allows at most two parallel jobs.
+CARGO_BUILD_ARGS = --target $(TARGET) --lib -j 2 --profile $(PROFILE) $(FEATURE_FLAGS) --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
 all: $(SHLIB) clean_intermediate
 
@@ -25,17 +32,27 @@ $(STATLIB):
 	# in actual, but we need this tweak to please the compiler.
 	mkdir -p $(LIBDIR)/libgcc_mock && touch $(LIBDIR)/libgcc_mock/libgcc_eh.a
 
-	export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER="$(CARGO_LINKER)" && \
+	if [ -f ./rust/vendor.tar.xz ]; then \
+	  rm -rf ./rust/vendor ./rust/cargo-home && \
+	  tar -xf ./rust/vendor.tar.xz -C ./rust && \
+	  mkdir -p ./rust/cargo-home && \
+	  printf '[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "vendor"\n' > ./rust/cargo-home/config.toml; \
+	fi
+
+	export $(CARGO_LINKER_VAR)="$(CARGO_LINKER)" && \
 	  export LIBRARY_PATH="$${LIBRARY_PATH};$(LIBDIR)/libgcc_mock" && \
 	  export CC="$(CC)" && \
 	  export CFLAGS="$(CFLAGS)" && \
 	  export RUSTFLAGS="$(RUSTFLAGS)" && \
-	  cargo build --target $(TARGET) --lib --profile $(PROFILE) $(FEATURE_FLAGS) --manifest-path ./rust/Cargo.toml --target-dir $(TARGET_DIR)
+	  if [ -f ./rust/cargo-home/config.toml ]; then \
+	    export CARGO_HOME="$(CARGO_HOME_DIR)" && export CARGO_NET_OFFLINE=true; \
+	  fi && \
+	  cargo build $(CARGO_BUILD_ARGS)
 
 clean_intermediate: $(SHLIB)
 	rm -f $(STATLIB)
 
 clean:
-	rm -Rf $(SHLIB) $(OBJECTS) $(STATLIB) ./rust/target
+	rm -Rf $(SHLIB) $(OBJECTS) $(STATLIB) ./rust/target ./rust/vendor ./rust/cargo-home
 
 .PHONY: all clean_intermediate clean

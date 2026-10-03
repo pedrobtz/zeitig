@@ -1,15 +1,33 @@
 Package: zudate
-Title: What the Package Does (One Line, Title Case)
+Title: 'Temporal' Date and Time Types Backed by 'jiff'
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Authors@R: c(
+    person("Pedro", "Z", , "pedrobtz@gmail.com", role = c("aut", "cre")),
+    person("The authors of the dependency Rust crates", role = "cph",
+           comment = "see inst/AUTHORS for details")
+  )
+Description: Implements the 'TC39 Temporal' date and time model
+    <https://tc39.es/proposal-temporal/docs/> (instants, plain dates, plain
+    times, plain date-times, zoned date-times and durations) as vectorised R
+    classes. All calendar and time zone arithmetic, parsing and formatting is
+    delegated to the 'Rust' crate 'jiff' <https://docs.rs/jiff>, which is
+    bundled with the package, giving nanosecond precision, 'RFC 9557' string
+    support and time-zone-aware arithmetic with 'Temporal' semantics.
 License: MIT + file LICENSE
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-Suggests: 
+URL: https://pedrobtz.github.io/zudate/, https://github.com/pedrobtz/zudate
+BugReports: https://github.com/pedrobtz/zudate/issues
+Depends:
+    R (>= 4.1)
+Imports:
+    rlang (>= 1.1.0),
+    vctrs (>= 0.6.0)
+Suggests:
+    knitr,
+    pillar,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-SystemRequirements: Cargo (Rust's package manager), rustc
-URL: https://pedrobtz.github.io/zudate/
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+SystemRequirements: Cargo (Rust's package manager), rustc (>= 1.81)
 Config/roxygen2/version: 8.1.0

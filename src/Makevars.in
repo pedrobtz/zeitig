@@ -11,13 +11,28 @@ LIBDIR = $(TARGET_DIR)/$(TARGET)/$(subst dev,debug,$(PROFILE))
 STATLIB = $(LIBDIR)/libzudate.a
 PKG_LIBS = -L$(LIBDIR) -lzudate
 
-CARGO_BUILD_ARGS = --lib --profile $(PROFILE) $(FEATURE_FLAGS) --manifest-path=./rust/Cargo.toml --target-dir $(TARGET_DIR)
+# Vendored crate sources (tools/vendor.sh). When the tarball is present the
+# build is fully offline: the tarball is extracted to ./rust/vendor, CARGO_HOME
+# points inside the build tree (so ~/.cargo is never touched) and its
+# config.toml redirects crates-io to the vendored directory.
+# The vendored directory is given relative to the parent of CARGO_HOME (i.e.
+# ./rust), which keeps absolute and drive-letter paths out of the config.
+CARGO_HOME_DIR = $(CURDIR)/rust/cargo-home
+
+# CRAN allows at most two parallel jobs.
+CARGO_BUILD_ARGS = --lib -j 2 --profile $(PROFILE) $(FEATURE_FLAGS) --manifest-path=./rust/Cargo.toml --target-dir $(TARGET_DIR)
 
 all: $(SHLIB) clean_intermediate
 
 $(SHLIB): $(STATLIB)
 
 $(STATLIB):
+	if [ -f ./rust/vendor.tar.xz ]; then \
+	  rm -rf ./rust/vendor ./rust/cargo-home && \
+	  tar -xf ./rust/vendor.tar.xz -C ./rust && \
+	  mkdir -p ./rust/cargo-home && \
+	  printf '[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "vendor"\n' > ./rust/cargo-home/config.toml; \
+	fi
 	# In some environments, ~/.cargo/bin might not be included in PATH, so we need
 	# to set it here to ensure cargo can be invoked. It is appended to PATH and
 	# therefore is only used if cargo is absent from the user's PATH.
@@ -26,6 +41,9 @@ $(STATLIB):
 	  export CFLAGS="$(CFLAGS)" && \
 	  export RUSTFLAGS="$(RUSTFLAGS)" && \
 	  @BEFORE_CARGO_BUILD@ \
+	  if [ -f ./rust/cargo-home/config.toml ]; then \
+	    export CARGO_HOME="$(CARGO_HOME_DIR)" && export CARGO_NET_OFFLINE=true; \
+	  fi && \
 	  if [ "$(TARGET)" != "wasm32-unknown-emscripten" ]; then \
 	    cargo build $(CARGO_BUILD_ARGS); \
 	  else \
@@ -39,6 +57,6 @@ clean_intermediate: $(SHLIB)
 	rm -f $(STATLIB)
 
 clean:
-	rm -Rf $(SHLIB) $(OBJECTS) $(STATLIB) ./rust/target
+	rm -Rf $(SHLIB) $(OBJECTS) $(STATLIB) ./rust/target ./rust/vendor ./rust/cargo-home
 
 .PHONY: all clean_intermediate clean

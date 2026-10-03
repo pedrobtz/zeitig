@@ -12,20 +12,20 @@ Status legend: `[ ]` not started, `[~]` in progress, `[x]` done.
 - [x] CI: R-CMD-check (quick on PR, full on main), coverage badge, pkgdown deploy.
 - [x] `CLAUDE.md`, `design.md`, `roadmap.md`.
 
-## Milestone 1 - Build foundations
+## Milestone 1 - Build foundations (done)
 
 Make the package CRAN-buildable before writing features, so every later PR is checked under the real
 constraints.
 
-- [ ] Pin dependencies in `src/rust/Cargo.toml`: `jiff = { version = "0.2", default-features = false, features = ["std", "tz-system", "tz-fat", "tzdb-zoneinfo", "tzdb-bundle-platform", "perf-inline"] }`, `savvy = "0.11"`; edition 2021; commit `Cargo.lock`.
-- [ ] Release profile: `opt-level = 3`, `lto = true`, `codegen-units = 1`, `strip = true`, keep `panic = "abort"`.
-- [ ] `tools/vendor.sh`: `cargo vendor` -> `src/rust/vendor.tar.xz`; regenerate `inst/AUTHORS` and `LICENSE.note` from the vendored crates' metadata.
-- [ ] `src/Makevars.in` / `src/Makevars.win.in`: extract the tarball, write `.cargo/config.toml` pointing at `vendor/`, build with `--offline -j 2`, set `CARGO_HOME` inside the build tree; `cleanup`/`cleanup.win` remove extracted sources.
-- [ ] `configure.win`: pick `x86_64-pc-windows-gnu` or `aarch64-pc-windows-gnullvm` from the architecture.
-- [ ] `DESCRIPTION`: real title/description, authors (including the `cph` entry for crate authors), `SystemRequirements` with MSRV, `Imports: vctrs, rlang`, `Suggests: testthat, knitr, rmarkdown, pillar`.
-- [ ] Remove the template examples (`to_upper`, `int_times_int`, `Person`) once the first real function exists.
-- [ ] CI job: build the tarball, install it with networking disabled (`CARGO_NET_OFFLINE=true`, no `~/.cargo/registry`), run tests.
-- [ ] Measure tarball size; must stay under 5 MB.
+- [x] Pin dependencies in `src/rust/Cargo.toml`: `jiff = { version = "0.2", default-features = false, features = ["std", "tz-system", "tz-fat", "tzdb-zoneinfo", "tzdb-bundle-platform", "perf-inline"] }`, `savvy = "0.11"`; edition 2021; commit `Cargo.lock`. (MSRV 1.81, from savvy.)
+- [x] Release profile: `opt-level = 3`, `lto = true`, `codegen-units = 1`, `strip = true`, keep `panic = "abort"`.
+- [x] `tools/vendor.sh`: `cargo vendor` -> `src/rust/vendor.tar.xz`; regenerate `inst/AUTHORS` and `LICENSE.note` from the vendored crates' metadata.
+- [x] `src/Makevars.in` / `src/Makevars.win.in`: extract the tarball, write a cargo config pointing at `vendor/` (in a build-local `CARGO_HOME`), build with `--offline -j 2`, set `CARGO_HOME` inside the build tree; `cleanup`/`cleanup.win` remove extracted sources.
+- [x] `configure.win`: pick `x86_64-pc-windows-gnu` or `aarch64-pc-windows-gnullvm` from the architecture.
+- [x] `DESCRIPTION`: real title/description, authors (including the `cph` entry for crate authors), `SystemRequirements` with MSRV, `Imports: vctrs, rlang`, `Suggests: testthat, knitr, rmarkdown, pillar`.
+- [x] Remove the template examples (`to_upper`, `int_times_int`, `Person`) once the first real function exists.
+- [x] CI job: build the tarball, install it with networking disabled (`CARGO_NET_OFFLINE=true`, no `~/.cargo/registry`), run tests.
+- [x] Measure tarball size; must stay under 5 MB. (1.5 MB; enforced by the offline-install job.)
 
 ## Milestone 2 - Core civil types
 
