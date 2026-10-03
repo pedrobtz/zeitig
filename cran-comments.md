@@ -23,12 +23,17 @@ packages (https://cran.r-project.org/web/packages/using_rust.html):
 * `SystemRequirements` states the minimum Rust version (1.81), which is
   checked in CI.
 
+## Method references
+
+There is no publication describing the methods. The package implements the
+TC39 'Temporal' specification, which is linked in the Description field
+(<https://tc39.es/proposal-temporal/docs/>).
+
 ## Test environments
 
 * GitHub Actions: Ubuntu (R release, oldrel-1), macOS (arm64, R release),
   Windows (R release, Rtools); r-devel containers with clang 23 and GCC 16.
 * Offline installation from the source tarball on Linux, macOS and Windows.
-* TODO before submission: win-builder (release, devel) and R-hub Rust images.
 
 ## R CMD check results
 
