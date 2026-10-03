@@ -111,7 +111,10 @@ and `LICENSE.note`; it is deterministic) or the build fails with "no matching pa
 - `.github/workflows/R-CMD-check.yaml` and `coverage.yaml` call reusable workflows from
   `pedrobtz/r-actions@v1` with `rust: true`. On pull requests the check runs the `quick` profile; a
   push to `main` or the `full-ci` label on a PR runs the `full` matrix. The warning
-  "Rust compilation" is allow-listed; any other `R CMD check` WARNING fails CI.
+  "Rust compilation" is allow-listed; any other `R CMD check` WARNING fails CI. The workflow turns
+  on the "CRAN incoming feasibility" step (`_R_CHECK_CRAN_INCOMING_=true`, off by default in
+  `r-actions`), so URLs are checked as in CRAN's pretest; problems there are NOTEs, so read the
+  log. The version comparison with CRAN is skipped (`_R_CHECK_CRAN_INCOMING_SKIP_VERSIONS_`).
 - The coverage workflow commits `.github/badges/coverage.svg` to `main`; do not edit that file.
 - `pkgdown.yaml` deploys the site to the `gh-pages` branch (`_pkgdown.yml`, Bootstrap 5).
 

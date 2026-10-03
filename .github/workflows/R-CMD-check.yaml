@@ -22,6 +22,15 @@ jobs:
       rust: true
       allowed-warnings: |
         Rust compilation
+      # Run the "CRAN incoming feasibility" step that the shared workflow turns
+      # off by default: it checks every URL (DESCRIPTION, Rd, README, NEWS,
+      # vignettes) the way CRAN's pretest does. The version comparison with
+      # CRAN is skipped, because it warns "Insufficient package version" on
+      # every commit between a release and the next version bump.
+      env: |
+        _R_CHECK_CRAN_INCOMING_=true
+        _R_CHECK_CRAN_INCOMING_REMOTE_=true
+        _R_CHECK_CRAN_INCOMING_SKIP_VERSIONS_=true
       # Quick on each push to a pull request, full after merge. The
       # `full-ci` label runs the full set on a pull request before merging.
       profile: ${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'full-ci') && 'quick' || 'full' }}
