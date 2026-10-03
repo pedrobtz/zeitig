@@ -20,3 +20,5 @@
 ^Meta$
 ^cran-comments\.md$
 ^vignettes/articles$
+^\.claude$
+^skills-lock\.json$

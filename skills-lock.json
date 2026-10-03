@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "cran-extrachecks": {
+      "source": "posit-dev/skills",
+      "sourceType": "github",
+      "skillPath": "r-lib/cran-extrachecks/SKILL.md",
+      "computedHash": "dcada0cec7ac5d0a10031af91dabffc8357f3dc93bb6ae7fa843e2127375c876"
+    }
+  }
+}
