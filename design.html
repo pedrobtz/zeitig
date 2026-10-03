@@ -161,7 +161,7 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 </div>
 <div class="section level3">
 <h3 id="accessors-year-epochmilliseconds-">Accessors (<code>.year</code>, <code>.epochMilliseconds</code>, …)<a class="anchor" aria-label="anchor" href="#accessors-year-epochmilliseconds-"></a></h3>
-<p><code>temporal_fields(x)</code> returns a data frame of all fields. Individual accessors: <code><a href="reference/temporal-fields.html">year()</a></code>, <code><a href="reference/temporal-fields.html">month()</a></code>, <code><a href="reference/temporal-fields.html">day()</a></code>, <code><a href="reference/temporal-fields.html">hour()</a></code>, <code><a href="reference/temporal-fields.html">minute()</a></code>, <code><a href="reference/temporal-fields.html">second()</a></code>, <code><a href="reference/temporal-fields.html">millisecond()</a></code>, <code><a href="reference/temporal-fields.html">microsecond()</a></code>, <code><a href="reference/temporal-fields.html">nanosecond()</a></code>, <code><a href="reference/temporal-fields.html">day_of_week()</a></code>, <code><a href="reference/temporal-fields.html">day_of_year()</a></code>, <code><a href="reference/temporal-fields.html">week_of_year()</a></code>, <code><a href="reference/temporal-fields.html">year_of_week()</a></code>, <code><a href="reference/temporal-fields.html">days_in_month()</a></code>, <code><a href="reference/temporal-fields.html">days_in_year()</a></code>, <code><a href="reference/temporal-fields.html">in_leap_year()</a></code>, <code>epoch_seconds()</code>, <code>epoch_milliseconds()</code>, <code><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset()</a></code>, <code>offset_nanoseconds()</code>, <code>time_zone()</code>, <code>hours_in_day()</code>, <code>total()</code>/<code><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs()</a></code>/<code><a href="https://rdrr.io/r/base/sign.html" class="external-link">sign()</a></code>/<code>blank()</code> for durations. These are implemented in R from the record fields when trivial, in Rust otherwise.</p>
+<p><code>temporal_fields(x)</code> returns a data frame of all fields. Individual accessors: <code><a href="reference/temporal-fields.html">year()</a></code>, <code><a href="reference/temporal-fields.html">month()</a></code>, <code><a href="reference/temporal-fields.html">day()</a></code>, <code><a href="reference/temporal-fields.html">hour()</a></code>, <code><a href="reference/temporal-fields.html">minute()</a></code>, <code><a href="reference/temporal-fields.html">second()</a></code>, <code><a href="reference/temporal-fields.html">millisecond()</a></code>, <code><a href="reference/temporal-fields.html">microsecond()</a></code>, <code><a href="reference/temporal-fields.html">nanosecond()</a></code>, <code><a href="reference/temporal-fields.html">day_of_week()</a></code>, <code><a href="reference/temporal-fields.html">day_of_year()</a></code>, <code><a href="reference/temporal-fields.html">week_of_year()</a></code>, <code><a href="reference/temporal-fields.html">year_of_week()</a></code>, <code><a href="reference/temporal-fields.html">days_in_month()</a></code>, <code><a href="reference/temporal-fields.html">days_in_year()</a></code>, <code><a href="reference/temporal-fields.html">in_leap_year()</a></code>, <code>epoch_seconds()</code>, <code>epoch_milliseconds()</code>, <code><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset()</a></code>, <code>offset_nanoseconds()</code>, <code>time_zone()</code>, <code>hours_in_day()</code>, <code><a href="reference/duration_total.html">duration_total()</a></code>/<code><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs()</a></code>/<code><a href="https://rdrr.io/r/base/sign.html" class="external-link">sign()</a></code>/<code><a href="reference/duration_total.html">duration_blank()</a></code> for durations (no per-unit duration accessors, which would mask <code><a href="https://rdrr.io/r/base/weekday.POSIXt.html" class="external-link">base::months()</a></code> and clash with lubridate; use <code><a href="reference/temporal-fields.html">temporal_fields()</a></code>). These are implemented in R from the record fields when trivial, in Rust otherwise.</p>
 <p>Accessors are plain functions, not S3 generics: each calls an internal helper (<code>civil_date_fields()</code>, <code>civil_time_fields()</code> in <code>R/accessors.R</code>) that knows which classes carry a date or a time and errors with <code>zudate_type_error</code> otherwise. Adding a type (e.g. <code>ZonedDateTime</code>) means adding a branch there, not a method per accessor. Conversions from other classes use the <code><a href="reference/temporal-coercion.html">as_plain_date()</a></code>/<code><a href="reference/temporal-coercion.html">as_plain_time()</a></code>/<code><a href="reference/temporal-coercion.html">as_plain_date_time()</a></code> S3 generics, while <code>to_*()</code> follow Temporal’s <code>toPlainDate()</code>-style methods and accept only Temporal objects.</p>
 <p>Numeric component arguments follow Temporal’s <code>ToIntegerWithTruncation</code>: doubles are truncated towards zero, non-finite values are a <code>zudate_range_error</code>, non-numbers a <code>zudate_type_error</code>. With <code>overflow = "constrain"</code> a month or day below 1 is still an error (Temporal requires positive integers there), while time fields are clamped in both directions (Temporal’s <code>ConstrainTime</code>).</p>
 </div>
@@ -413,6 +413,26 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <td>not represented</td>
 <td>not represented</td>
 <td>same</td>
+</tr><tr><td>Weeks without <code>relativeTo</code>
+</td>
+<td>
+<code>Duration.compare</code>/<code>total</code>/<code>round</code> need <code>relativeTo</code> for weeks</td>
+<td>weeks are 7 days with <code>days_are_24_hours()</code>
+</td>
+<td>jiff behaviour: weeks count as 7 x 24 hours when no <code>relative_to</code> is given</td>
+</tr><tr><td>
+<code>Duration</code> operators</td>
+<td>no <code>&lt;</code>/<code>==</code> (<code>valueOf</code> throws)</td>
+<td>
+<code>Span</code> has no <code>Ord</code>; <code>fieldwise()</code> equality</td>
+<td>
+<code>&lt;</code>, <code><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort()</a></code> order by length with 24-hour days (error for years/months); <code>==</code> compares fields (<code>PT1H != PT60M</code>); <code><a href="reference/duration_total.html">duration_compare()</a></code> compares lengths</td>
+</tr><tr><td><code>PlainDate - PlainDate</code></td>
+<td>n/a (no operators)</td>
+<td>
+<code>Date - Date</code> is a <code>Span</code> in days</td>
+<td>
+<code>x - y</code> is <code>temporal_since(x, y)</code> with default options</td>
 </tr></tbody></table><p>Anything discovered later goes in this table before the behaviour is shipped.</p>
 </div>
 <div class="section level2">
@@ -425,7 +445,8 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 </ul></div>
 <div class="section level2">
 <h2 id="id_11-open-questions-decide-before-010-feature-freeze">11. Open questions (decide before 0.1.0 feature freeze)<a class="anchor" aria-label="anchor" href="#id_11-open-questions-decide-before-010-feature-freeze"></a></h2>
-<ol style="list-style-type: decimal"><li>Whether <code>Duration</code> fields should be stored as doubles (chosen above, for range) or as integers with a separate overflow check; doubles are simpler and exact up to 2^53.</li>
+<ol style="list-style-type: decimal"><li>
+<del>Whether <code>Duration</code> fields should be stored as doubles</del> Decided (0.1.0): doubles, validated as integers in R (<code>ToIntegerIfIntegral</code>) and range-checked by <code>jiff::Span</code> in Rust.</li>
 <li>Whether <code>==</code> on <code>ZonedDateTime</code> should be <code>compare</code>-based (chosen) or <code>equals</code>-based.</li>
 <li>Whether to export <code>SignedDuration</code> (jiff-only, absolute time). Leaning no: not part of Temporal.</li>
 <li>Whether to ship <code>pillar</code>/<code>tibble</code> methods in 0.1.0 (Suggests) or defer.</li>

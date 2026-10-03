@@ -165,7 +165,9 @@ CRAN compliance”.
   for each record layout live in `src/rust/src/cols.rs`.
 - Rust functions exported through savvy are internal and prefixed `rs_`
   (no `@export`); the documented, exported R API lives in hand-written
-  `R/*.R` files that call them.
+  `R/*.R` files that call them. Comment them with `//`, not `///`: savvy
+  copies doc comments into `R/000-wrappers.R` as roxygen, which creates
+  `man/rs_*.Rd` pages.
 - `.github/workflows/offline-install.yaml` builds the tarball and
   installs it with networking blocked on Linux, macOS and Windows; it
   also enforces the 5 MB tarball limit.

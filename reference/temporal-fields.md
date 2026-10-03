@@ -51,7 +51,8 @@ temporal_fields(x)
 - x:
 
   A Temporal object: date fields need a plain date or plain date-time,
-  time fields a plain time or plain date-time.
+  time fields a plain time or plain date-time; `temporal_fields()` also
+  accepts durations.
 
 ## Value
 
@@ -78,7 +79,8 @@ data frame).
 - `days_in_week()`, `days_in_month()`, `days_in_year()`,
   `months_in_year()`, `in_leap_year()`.
 
-`temporal_fields()` returns all the component fields as a data frame.
+`temporal_fields()` returns all the component fields as a data frame;
+for durations these are the ten fields from `years` to `nanoseconds`.
 
 ## Examples
 

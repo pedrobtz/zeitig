@@ -107,34 +107,42 @@ for the civil types.
 Tests from Temporal docs examples for each method; `NA` and zero-length
 inputs in every test file.
 
-## Milestone 3 - Duration and arithmetic
+## Milestone 3 - Duration and arithmetic (done)
 
 `zudate_duration` record class, constructor from components and ISO 8601
 strings, uniform-sign and range validation.
 
-`temporal_add()`/`temporal_subtract()` and `+`/`-` via `vec_arith` for
-Plain\* types.
+[`temporal_add()`](https://pedrobtz.github.io/zudate/reference/temporal_add.md)/[`temporal_subtract()`](https://pedrobtz.github.io/zudate/reference/temporal_add.md)
+and `+`/`-` via `vec_arith` for Plain\* types.
 
-`temporal_until()`/`temporal_since()` with `largest_unit`,
-`smallest_unit`, `rounding_increment`, `rounding_mode`.
+[`temporal_until()`](https://pedrobtz.github.io/zudate/reference/temporal_until.md)/[`temporal_since()`](https://pedrobtz.github.io/zudate/reference/temporal_until.md)
+with `largest_unit`, `smallest_unit`, `rounding_increment`,
+`rounding_mode`.
 
-`temporal_round()` for Plain\* types and durations (`relative_to` for
-calendar units).
+[`temporal_round()`](https://pedrobtz.github.io/zudate/reference/temporal_round.md)
+for Plain\* types and durations (`relative_to` for calendar units).
 
-`duration_total()`, `duration_compare()`,
+[`duration_total()`](https://pedrobtz.github.io/zudate/reference/duration_total.md),
+[`duration_compare()`](https://pedrobtz.github.io/zudate/reference/duration_total.md),
 [`abs()`](https://rdrr.io/r/base/MathFun.html), unary `-`,
-[`sign()`](https://rdrr.io/r/base/sign.html), `blank()`.
+[`sign()`](https://rdrr.io/r/base/sign.html),
+[`duration_blank()`](https://pedrobtz.github.io/zudate/reference/duration_total.md).
 
-`difftime` conversions.
+`difftime` conversions
+([`as_duration()`](https://pedrobtz.github.io/zudate/reference/as_duration.md),
+[`as_difftime()`](https://pedrobtz.github.io/zudate/reference/as_duration.md)).
+
+CI job building with the MSRV (rustc 1.81) from the vendored crates.
 
 Property tests in Rust: `a + (b - a) == b` for every type pair, round
-trip of strings.
+trip of strings (deterministic LCG, no extra crate).
 
 ## Milestone 4 - Instant, ZonedDateTime, Now
 
 `zudate_instant`: constructor from strings and epoch units,
 `epoch_seconds()`, `epoch_milliseconds()`, `epoch_nanoseconds()`
-(string), arithmetic with time-unit durations, `temporal_round()`,
+(string), arithmetic with time-unit durations,
+[`temporal_round()`](https://pedrobtz.github.io/zudate/reference/temporal_round.md),
 `until`/`since`.
 
 `zudate_zoned_date_time`: per-element time zone, constructor with

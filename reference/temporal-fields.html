@@ -90,7 +90,8 @@ and return <code>NA</code> for missing elements.</p>
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>A Temporal object: date fields need a plain date or plain
-date-time, time fields a plain time or plain date-time.</p></dd>
+date-time, time fields a plain time or plain date-time;
+<code>temporal_fields()</code> also accepts durations.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -112,7 +113,8 @@ the sub-second part is split into the three remaining fields, each in
 year that week belongs to (which differs from <code>year()</code> around New Year).</p></li>
 <li><p><code>days_in_week()</code>, <code>days_in_month()</code>, <code>days_in_year()</code>,
 <code>months_in_year()</code>, <code>in_leap_year()</code>.</p></li>
-</ul><p><code>temporal_fields()</code> returns all the component fields as a data frame.</p>
+</ul><p><code>temporal_fields()</code> returns all the component fields as a data frame; for
+durations these are the ten fields from <code>years</code> to <code>nanoseconds</code>.</p>
     </div>
 
     <div class="section level2">
