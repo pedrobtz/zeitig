@@ -70,12 +70,6 @@ is_plain_time <- function(x) {
 }
 
 #' @export
-format.zudate_plain_time <- function(x, ...) {
-  f <- vec_data(x)
-  zudate_call(rs_plain_time_format(f$second_of_day, f$nanos))
-}
-
-#' @export
 as.character.zudate_plain_time <- function(x, ...) {
   format(x)
 }

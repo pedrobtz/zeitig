@@ -146,11 +146,6 @@ instant_fields_of <- function(x, call = rlang::caller_env()) {
 }
 
 #' @export
-format.zudate_instant <- function(x, ...) {
-  zudate_call(rs_instant_format(instant_data(x)))
-}
-
-#' @export
 as.character.zudate_instant <- function(x, ...) {
   format(x)
 }

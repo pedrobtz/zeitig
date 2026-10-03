@@ -7,6 +7,7 @@ SEXP savvy_rs_duration_round__ffi(SEXP c_arg__x, SEXP c_arg__largest, SEXP c_arg
 SEXP savvy_rs_duration_sort_key__ffi(SEXP c_arg__x);
 SEXP savvy_rs_duration_total__ffi(SEXP c_arg__x, SEXP c_arg__unit, SEXP c_arg__relative);
 SEXP savvy_rs_duration_validate__ffi(SEXP c_arg__x);
+SEXP savvy_rs_format__ffi(SEXP c_arg__x, SEXP c_arg__kind, SEXP c_arg__digits, SEXP c_arg__minute, SEXP c_arg__offset, SEXP c_arg__time_zone_name, SEXP c_arg__calendar_name, SEXP c_arg__time_zone);
 SEXP savvy_rs_instant_add__ffi(SEXP c_arg__x, SEXP c_arg__duration);
 SEXP savvy_rs_instant_diff__ffi(SEXP c_arg__x, SEXP c_arg__y, SEXP c_arg__largest, SEXP c_arg__smallest, SEXP c_arg__increment, SEXP c_arg__mode, SEXP c_arg__since);
 SEXP savvy_rs_instant_epoch_nanoseconds__ffi(SEXP c_arg__x);
@@ -36,6 +37,8 @@ SEXP savvy_rs_plain_time_format__ffi(SEXP c_arg__second_of_day, SEXP c_arg__nano
 SEXP savvy_rs_plain_time_from_parts__ffi(SEXP c_arg__hour, SEXP c_arg__minute, SEXP c_arg__second, SEXP c_arg__millisecond, SEXP c_arg__microsecond, SEXP c_arg__nanosecond, SEXP c_arg__reject);
 SEXP savvy_rs_plain_time_parse__ffi(SEXP c_arg__x);
 SEXP savvy_rs_plain_time_round__ffi(SEXP c_arg__second_of_day, SEXP c_arg__nanos, SEXP c_arg__smallest, SEXP c_arg__increment, SEXP c_arg__mode);
+SEXP savvy_rs_strftime__ffi(SEXP c_arg__x, SEXP c_arg__kind, SEXP c_arg__format);
+SEXP savvy_rs_strptime__ffi(SEXP c_arg__x, SEXP c_arg__format, SEXP c_arg__kind);
 SEXP savvy_rs_time_zone_canonical__ffi(SEXP c_arg__x);
 SEXP savvy_rs_zoned_add__ffi(SEXP c_arg__x, SEXP c_arg__duration, SEXP c_arg__reject);
 SEXP savvy_rs_zoned_civil__ffi(SEXP c_arg__x);

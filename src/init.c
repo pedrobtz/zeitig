@@ -84,6 +84,11 @@ SEXP savvy_rs_duration_validate__impl(SEXP c_arg__x) {
     return handle_result(res);
 }
 
+SEXP savvy_rs_format__impl(SEXP c_arg__x, SEXP c_arg__kind, SEXP c_arg__digits, SEXP c_arg__minute, SEXP c_arg__offset, SEXP c_arg__time_zone_name, SEXP c_arg__calendar_name, SEXP c_arg__time_zone) {
+    SEXP res = savvy_rs_format__ffi(c_arg__x, c_arg__kind, c_arg__digits, c_arg__minute, c_arg__offset, c_arg__time_zone_name, c_arg__calendar_name, c_arg__time_zone);
+    return handle_result(res);
+}
+
 SEXP savvy_rs_instant_add__impl(SEXP c_arg__x, SEXP c_arg__duration) {
     SEXP res = savvy_rs_instant_add__ffi(c_arg__x, c_arg__duration);
     return handle_result(res);
@@ -229,6 +234,16 @@ SEXP savvy_rs_plain_time_round__impl(SEXP c_arg__second_of_day, SEXP c_arg__nano
     return handle_result(res);
 }
 
+SEXP savvy_rs_strftime__impl(SEXP c_arg__x, SEXP c_arg__kind, SEXP c_arg__format) {
+    SEXP res = savvy_rs_strftime__ffi(c_arg__x, c_arg__kind, c_arg__format);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_strptime__impl(SEXP c_arg__x, SEXP c_arg__format, SEXP c_arg__kind) {
+    SEXP res = savvy_rs_strptime__ffi(c_arg__x, c_arg__format, c_arg__kind);
+    return handle_result(res);
+}
+
 SEXP savvy_rs_time_zone_canonical__impl(SEXP c_arg__x) {
     SEXP res = savvy_rs_time_zone_canonical__ffi(c_arg__x);
     return handle_result(res);
@@ -300,6 +315,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_rs_duration_sort_key__impl", (DL_FUNC) &savvy_rs_duration_sort_key__impl, 1},
     {"savvy_rs_duration_total__impl", (DL_FUNC) &savvy_rs_duration_total__impl, 3},
     {"savvy_rs_duration_validate__impl", (DL_FUNC) &savvy_rs_duration_validate__impl, 1},
+    {"savvy_rs_format__impl", (DL_FUNC) &savvy_rs_format__impl, 8},
     {"savvy_rs_instant_add__impl", (DL_FUNC) &savvy_rs_instant_add__impl, 2},
     {"savvy_rs_instant_diff__impl", (DL_FUNC) &savvy_rs_instant_diff__impl, 7},
     {"savvy_rs_instant_epoch_nanoseconds__impl", (DL_FUNC) &savvy_rs_instant_epoch_nanoseconds__impl, 1},
@@ -329,6 +345,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_rs_plain_time_from_parts__impl", (DL_FUNC) &savvy_rs_plain_time_from_parts__impl, 7},
     {"savvy_rs_plain_time_parse__impl", (DL_FUNC) &savvy_rs_plain_time_parse__impl, 1},
     {"savvy_rs_plain_time_round__impl", (DL_FUNC) &savvy_rs_plain_time_round__impl, 5},
+    {"savvy_rs_strftime__impl", (DL_FUNC) &savvy_rs_strftime__impl, 3},
+    {"savvy_rs_strptime__impl", (DL_FUNC) &savvy_rs_strptime__impl, 3},
     {"savvy_rs_time_zone_canonical__impl", (DL_FUNC) &savvy_rs_time_zone_canonical__impl, 1},
     {"savvy_rs_zoned_add__impl", (DL_FUNC) &savvy_rs_zoned_add__impl, 3},
     {"savvy_rs_zoned_civil__impl", (DL_FUNC) &savvy_rs_zoned_civil__impl, 1},

@@ -25,5 +25,11 @@
   differences, and `POSIXct`/`POSIXlt` conversions.
 * `now_instant()`, `now_zoned_date_time()`, `now_plain_date()`,
   `now_plain_time()`, `now_plain_date_time()` and `now_time_zone()`.
+* `format()` supports Temporal's `toString()` options
+  (`fractional_second_digits`, `smallest_unit`, `rounding_mode`, `offset`,
+  `time_zone_name`, `calendar_name`, `time_zone`), and
+  `temporal_strftime()`/`temporal_strptime()` expose jiff's strftime.
+* `summary()` methods; vignettes `vignette("zudate")` and
+  `vignette("time-zones")`.
 * New `available_time_zones()` lists the IANA time zone identifiers known to
   the time zone database.

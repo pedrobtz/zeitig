@@ -62,15 +62,15 @@ Rust column loops, option handling, error mapping) that the remaining types copy
 - [x] `temporal_equals()` vs `==` semantics as decided in `design.md` section 11.
 - [x] Tests covering DST gaps and overlaps in at least three zones, fixed offsets, `Etc/UTC`, and the `TZ`/`TZDIR` environment handling on all CI platforms.
 
-## Milestone 5 - Formatting, parsing, polish
+## Milestone 5 - Formatting, parsing, polish (done)
 
-- [ ] `format()` options: `fractional_second_digits`, `smallest_unit`, `rounding_mode`, `offset`, `time_zone_name`, `calendar_name`.
-- [ ] `temporal_strftime()` / `temporal_strptime()`.
-- [ ] `pillar` methods (tibble columns), `str()` output, `summary()`.
-- [ ] `as_*()` S3 generics complete for character, base classes and all zudate classes.
-- [ ] `README.md` with install instructions and a worked example; `vignettes/zudate.Rmd` (overview and Temporal mapping) and `vignettes/time-zones.Rmd`.
-- [ ] pkgdown reference grouped by Temporal type.
-- [ ] Deviation table in `design.md` section 9 reviewed against the final behaviour.
+- [x] `format()` options: `fractional_second_digits`, `smallest_unit`, `rounding_mode`, `offset`, `time_zone_name`, `calendar_name`.
+- [x] `temporal_strftime()` / `temporal_strptime()`.
+- [x] `pillar` methods (tibble columns), `str()` output, `summary()`. (tibble columns and `str()` come from vctrs' `vctrs_vctr` methods using `format()`/`vec_ptype_abbr()`; no direct pillar dependency needed.)
+- [x] `as_*()` S3 generics complete for character, base classes and all zudate classes (`as_plain_date/time/date_time()`, `as_instant()`, `as_zoned_date_time()`, `as_duration()`, `as_difftime()`).
+- [x] `README.md` with install instructions and a worked example; `vignettes/zudate.Rmd` (overview and Temporal mapping) and `vignettes/time-zones.Rmd`.
+- [x] pkgdown reference grouped by Temporal type.
+- [x] Deviation table in `design.md` section 9 reviewed against the final behaviour.
 
 ## Milestone 6 - CRAN release 0.1.0
 

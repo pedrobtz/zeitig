@@ -59,12 +59,6 @@ is_plain_date <- function(x) {
 }
 
 #' @export
-format.zudate_plain_date <- function(x, ...) {
-  f <- vec_data(x)
-  zudate_call(rs_plain_date_format(f$year, f$month, f$day))
-}
-
-#' @export
 as.character.zudate_plain_date <- function(x, ...) {
   format(x)
 }
