@@ -88,22 +88,21 @@ Initial CRAN release.
   Temporal implementation, including a selection of test262 cases. Every
   remaining difference is listed in
   [`vignette("temporal-differences")`](https://pedrobtz.github.io/zeitig/articles/temporal-differences.md).
-  Fixed while bringing zeitig in line:
+  Behaviour it checks includes:
   - `[!u-ca=iso8601]` annotations are accepted. Other calendar
-    annotations are an error instead of being ignored.
+    annotations are an error.
   - UTC offsets of 24 hours or more are an error. So are offsets with
-    fractional seconds for instants and zoned date-times, which were
-    silently truncated.
+    fractional seconds for instants and zoned date-times.
   - [`temporal_since()`](https://pedrobtz.github.io/zeitig/reference/temporal_until.md)
-    with calendar units and the `halfEven` rounding mode in several
-    cases give Temporal’s results. So do day rounding increments with
-    `largest_unit = "week"`, and the rounding of instants before 1970.
-  - A `+00:00` time zone is no longer turned into `UTC`.
+    with calendar units, the `halfEven` rounding mode, day rounding
+    increments with `largest_unit = "week"`, and the rounding of
+    instants before 1970 give Temporal’s results, where ‘jiff’ alone
+    would differ.
+  - A `+00:00` time zone is kept apart from `UTC`.
     [`temporal_equals()`](https://pedrobtz.github.io/zeitig/reference/temporal_compare.md)
     treats `UTC`, `Etc/UTC`, `Etc/GMT` and `GMT` as the same zone.
   - [`instant_from_epoch()`](https://pedrobtz.github.io/zeitig/reference/instant.md)
-    gives an error for out-of-range nanoseconds instead of crashing the
-    R session.
+    gives an error for out-of-range nanoseconds.
   - [`temporal_add()`](https://pedrobtz.github.io/zeitig/reference/temporal_add.md)
     and
     [`temporal_subtract()`](https://pedrobtz.github.io/zeitig/reference/temporal_add.md)

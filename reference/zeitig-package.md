@@ -3,12 +3,12 @@
 Implements the 'Temporal' date and time model of Ecma Technical
 Committee 39 (TC39) <https://tc39.es/proposal-temporal/docs/> (instants,
 plain dates, plain times, plain date-times, zoned date-times and
-durations) as vectorised R classes. All calendar and time zone
+durations) as vectorised 'R' classes. All calendar and time zone
 arithmetic, parsing and formatting is delegated to the 'Rust' crate
 'jiff' <https://docs.rs/jiff>, which is bundled with the package, giving
-nanosecond precision, Internet Extended Date/Time Format (IXDTF, RFC
-9557) string support and time-zone-aware arithmetic with 'Temporal'
-semantics.
+nanosecond precision, support for strings in the Internet Extended
+Date/Time Format (IXDTF) of Request for Comments (RFC) 9557, and
+time-zone-aware arithmetic with 'Temporal' semantics.
 
 ## See also
 

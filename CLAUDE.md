@@ -135,8 +135,12 @@ CRAN compliance”.
   workflows from `pedrobtz/r-actions@v1` with `rust: true`. On pull
   requests the check runs the `quick` profile; a push to `main` or the
   `full-ci` label on a PR runs the `full` matrix. The warning “Rust
-  compilation” is allow-listed; any other `R CMD check` WARNING fails
-  CI.
+  compilation” is allow-listed; any other `R CMD check` WARNING
+  fails CI. The workflow turns on the “CRAN incoming feasibility” step
+  (`_R_CHECK_CRAN_INCOMING_=true`, off by default in `r-actions`), so
+  URLs are checked as in CRAN’s pretest; problems there are NOTEs, so
+  read the log. The version comparison with CRAN is skipped
+  (`_R_CHECK_CRAN_INCOMING_SKIP_VERSIONS_`).
 - The coverage workflow commits `.github/badges/coverage.svg` to `main`;
   do not edit that file.
 - `pkgdown.yaml` deploys the site to the `gh-pages` branch

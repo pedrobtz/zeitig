@@ -34,16 +34,16 @@ value or on a whole column.
 
 now_instant()                          # exact time, no time zone
 #> <instant[1]>
-#> [1] 2026-10-03T16:03:56.623147356Z
+#> [1] 2026-10-03T21:44:48.201985644Z
 now_zoned_date_time("Europe/Berlin")   # exact time seen in a time zone
 #> <zoned_date_time[1]>
-#> [1] 2026-10-03T18:03:56.625646167+02:00[Europe/Berlin]
+#> [1] 2026-10-03T23:44:48.204419964+02:00[Europe/Berlin]
 now_plain_date("Asia/Tokyo")           # today's date in Tokyo
 #> <plain_date[1]>
 #> [1] 2026-10-04
 now_plain_time()                       # wall-clock time in the session time zone
 #> <plain_time[1]>
-#> [1] 16:03:56.629800156
+#> [1] 21:44:48.207810553
 now_time_zone()
 #> [1] "UTC"
 ```
