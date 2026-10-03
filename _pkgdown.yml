@@ -1,4 +1,4 @@
-url: https://pedrobtz.github.io/zietig/
+url: https://pedrobtz.github.io/zeitig/
 template:
   bootstrap: 5
 
@@ -44,11 +44,11 @@ reference:
       - now_instant
   - title: Package
     contents:
-      - zietig-package
+      - zeitig-package
 
 articles:
   - title: Articles
     navbar: ~
     contents:
-      - zietig
+      - zeitig
       - time-zones

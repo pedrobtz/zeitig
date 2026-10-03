@@ -2,16 +2,16 @@
 % Please edit documentation in R/format.R
 \name{temporal-format}
 \alias{temporal-format}
-\alias{format.zietig_plain_date}
-\alias{format.zietig_plain_time}
-\alias{format.zietig_plain_date_time}
-\alias{format.zietig_instant}
-\alias{format.zietig_zoned_date_time}
+\alias{format.zeitig_plain_date}
+\alias{format.zeitig_plain_time}
+\alias{format.zeitig_plain_date_time}
+\alias{format.zeitig_instant}
+\alias{format.zeitig_zoned_date_time}
 \title{Format Temporal objects as strings}
 \usage{
-\method{format}{zietig_plain_date}(x, ..., calendar_name = "auto")
+\method{format}{zeitig_plain_date}(x, ..., calendar_name = "auto")
 
-\method{format}{zietig_plain_time}(
+\method{format}{zeitig_plain_time}(
   x,
   ...,
   fractional_second_digits = "auto",
@@ -19,7 +19,7 @@
   rounding_mode = "trunc"
 )
 
-\method{format}{zietig_plain_date_time}(
+\method{format}{zeitig_plain_date_time}(
   x,
   ...,
   fractional_second_digits = "auto",
@@ -28,7 +28,7 @@
   calendar_name = "auto"
 )
 
-\method{format}{zietig_instant}(
+\method{format}{zeitig_instant}(
   x,
   ...,
   fractional_second_digits = "auto",
@@ -37,7 +37,7 @@
   time_zone = NULL
 )
 
-\method{format}{zietig_zoned_date_time}(
+\method{format}{zeitig_zoned_date_time}(
   x,
   ...,
   fractional_second_digits = "auto",

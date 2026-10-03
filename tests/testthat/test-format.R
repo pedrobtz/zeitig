@@ -20,7 +20,7 @@ test_that("format() options on zoned date-times", {
     format(x, time_zone_name = "never", calendar_name = "critical"),
     "2020-01-01T15:23:30.123456789+01:00[!u-ca=iso8601]"
   )
-  expect_error(format(x, fractional_second_digits = 10), class = "zietig_range_error")
+  expect_error(format(x, fractional_second_digits = 10), class = "zeitig_range_error")
   expect_error(format(x, smallest_unit = "hour"))
   expect_error(format(x, offset = "always"))
 })
@@ -70,8 +70,8 @@ test_that("temporal_strftime()", {
     c("2024", "16:24:59.5")
   )
   expect_equal(temporal_strftime(plain_date(c(2024, NA), 7, 15), "%Y"), c("2024", NA))
-  expect_error(temporal_strftime(plain_date(2024, 7, 15), "%H"), class = "zietig_range_error")
-  expect_error(temporal_strftime("2024-07-15", "%Y"), class = "zietig_type_error")
+  expect_error(temporal_strftime(plain_date(2024, 7, 15), "%H"), class = "zeitig_range_error")
+  expect_error(temporal_strftime("2024-07-15", "%Y"), class = "zeitig_type_error")
 })
 
 test_that("temporal_strptime()", {
@@ -97,11 +97,11 @@ test_that("temporal_strptime()", {
   )
   expect_error(
     temporal_strptime("2024-07-15", "%d/%m/%Y", "plain_date"),
-    class = "zietig_range_error"
+    class = "zeitig_range_error"
   )
   expect_error(
     temporal_strptime("2024-07-15 16:24", "%Y-%m-%d %H:%M", "instant"),
-    class = "zietig_range_error"
+    class = "zeitig_range_error"
   )
   expect_error(temporal_strptime("x", "%Y", "duration"))
 })

@@ -5,7 +5,7 @@ test_that("adding to plain dates follows Temporal", {
   expect_error(
     temporal_add(d, "P1M", overflow = "reject"),
     "out of range",
-    class = "zietig_range_error"
+    class = "zeitig_range_error"
   )
   expect_equal(
     format(temporal_add(plain_date(2021, 1, 15), "P1M", overflow = "reject")),
@@ -18,7 +18,7 @@ test_that("adding to plain dates follows Temporal", {
   # time units are balanced into whole days, the rest is ignored
   expect_equal(format(plain_date(2021, 1, 1) + duration(hours = 47)), "2021-01-02")
   expect_equal(format(plain_date(2020, 2, 29) + duration(years = 1)), "2021-02-28")
-  expect_error(plain_date(9999, 12, 31) + duration(days = 1), class = "zietig_range_error")
+  expect_error(plain_date(9999, 12, 31) + duration(days = 1), class = "zeitig_range_error")
 })
 
 test_that("adding to plain times wraps", {
@@ -32,7 +32,7 @@ test_that("adding to plain date-times", {
   dt <- plain_date_time("2020-02-29T12:00")
   expect_equal(format(dt - duration(years = 1)), "2019-02-28T12:00:00")
   expect_equal(format(dt + duration(hours = 13)), "2020-03-01T01:00:00")
-  expect_error(temporal_add(dt, "P1Y", overflow = "reject"), class = "zietig_range_error")
+  expect_error(temporal_add(dt, "P1Y", overflow = "reject"), class = "zeitig_range_error")
   expect_equal(format(temporal_add(dt, "P1Y", overflow = "constrain")), "2021-02-28T12:00:00")
 })
 
@@ -61,7 +61,7 @@ test_that("until / since on plain dates", {
     format(temporal_until(a, b, smallest_unit = "year", rounding_mode = "halfExpand")),
     "P12Y"
   )
-  expect_error(temporal_until(a, b, smallest_unit = "hour"), class = "zietig_range_error")
+  expect_error(temporal_until(a, b, smallest_unit = "hour"), class = "zeitig_range_error")
   expect_error(temporal_until(a, plain_time(1)))
 })
 
@@ -96,7 +96,7 @@ test_that("rounding plain times and date-times", {
   )
   expect_equal(format(temporal_round(t, "millisecond")), "19:39:09.068")
   expect_equal(format(temporal_round(plain_time(23, 59, 59, 500), "second")), "00:00:00")
-  expect_error(temporal_round(t, "minute", rounding_increment = 7), class = "zietig_range_error")
+  expect_error(temporal_round(t, "minute", rounding_increment = 7), class = "zeitig_range_error")
   dt <- plain_date_time("1995-12-07T03:24:30.000003500")
   expect_equal(format(temporal_round(dt, "second")), "1995-12-07T03:24:30")
   expect_equal(format(temporal_round(dt, "day")), "1995-12-07T00:00:00")
@@ -104,9 +104,9 @@ test_that("rounding plain times and date-times", {
     format(temporal_round(plain_date_time("1995-12-07T12:00"), "day")),
     "1995-12-08T00:00:00"
   )
-  expect_error(temporal_round(t), class = "zietig_type_error")
-  expect_error(temporal_round(plain_date(2020, 1, 1), "day"), class = "zietig_type_error")
-  expect_error(temporal_round(t, "hour", relative_to = "2020-01-01"), class = "zietig_type_error")
+  expect_error(temporal_round(t), class = "zeitig_type_error")
+  expect_error(temporal_round(plain_date(2020, 1, 1), "day"), class = "zeitig_type_error")
+  expect_error(temporal_round(t, "hour", relative_to = "2020-01-01"), class = "zeitig_type_error")
 })
 
 test_that("round trip a + (b - a) == b", {
@@ -125,5 +125,5 @@ test_that("unsupported operators error", {
   )
   expect_error(plain_date(2020, 1, 1) * 2, class = "vctrs_error_incompatible_op")
   expect_error(plain_date(2020, 1, 1) - plain_time(1), class = "vctrs_error_incompatible_op")
-  expect_error(temporal_add(1, duration(days = 1)), class = "zietig_type_error")
+  expect_error(temporal_add(1, duration(days = 1)), class = "zeitig_type_error")
 })

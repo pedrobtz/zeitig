@@ -1,4 +1,4 @@
-Package: zietig
+Package: zeitig
 Title: 'Temporal' Date and Time Types Backed by 'jiff'
 Version: 0.1.0
 Authors@R: c(
@@ -14,8 +14,8 @@ Description: Implements the 'TC39 Temporal' date and time model
     bundled with the package, giving nanosecond precision, 'RFC 9557' string
     support and time-zone-aware arithmetic with 'Temporal' semantics.
 License: MIT + file LICENSE
-URL: https://pedrobtz.github.io/zietig/, https://github.com/pedrobtz/zietig
-BugReports: https://github.com/pedrobtz/zietig/issues
+URL: https://pedrobtz.github.io/zeitig/, https://github.com/pedrobtz/zeitig
+BugReports: https://github.com/pedrobtz/zeitig/issues
 Depends:
     R (>= 4.1)
 Imports:

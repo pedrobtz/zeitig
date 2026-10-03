@@ -1,6 +1,6 @@
 #' Plain date-times
 #'
-#' A `zietig_plain_date_time` is a calendar date and a wall-clock time with
+#' A `zeitig_plain_date_time` is a calendar date and a wall-clock time with
 #' nanosecond precision but no time zone, the equivalent of
 #' [`Temporal.PlainDateTime`](https://tc39.es/proposal-temporal/docs/plaindatetime.html).
 #'
@@ -16,7 +16,7 @@
 #'   character vector to parse.
 #' @param overflow How to handle out-of-range values: `"constrain"` (the
 #'   default) clamps each component to its range, `"reject"` raises an error.
-#' @returns A `zietig_plain_date_time` vector.
+#' @returns A `zeitig_plain_date_time` vector.
 #' @family plain date-time
 #' @export
 #' @examples
@@ -41,18 +41,18 @@ plain_date_time <- function(year, month, day, hour = 0L, minute = 0L, second = 0
     microsecond = as_int_field(microsecond),
     nanosecond = as_int_field(nanosecond)
   ))
-  date <- zietig_call(rs_plain_date_from_parts(f$year, f$month, f$day, reject))
+  date <- zeitig_call(rs_plain_date_from_parts(f$year, f$month, f$day, reject))
   time <- plain_time_parts(f, reject)
   new_plain_date_time_from(date, time)
 }
 
 plain_date_time_parse <- function(x, call = rlang::caller_env()) {
   check_character(x, call = call)
-  new_plain_date_time_fields(zietig_call(rs_plain_date_time_parse(unname(x)), call = call))
+  new_plain_date_time_fields(zeitig_call(rs_plain_date_time_parse(unname(x)), call = call))
 }
 
 new_plain_date_time_fields <- function(fields) {
-  new_rcrd(fields, class = "zietig_plain_date_time")
+  new_rcrd(fields, class = "zeitig_plain_date_time")
 }
 
 # Combine date fields and time fields (lists or records) of the same length;
@@ -75,22 +75,22 @@ is_record <- function(x) inherits(x, "vctrs_rcrd")
 #' @param x An object to test.
 #' @export
 is_plain_date_time <- function(x) {
-  inherits(x, "zietig_plain_date_time")
+  inherits(x, "zeitig_plain_date_time")
 }
 
 #' @export
-as.character.zietig_plain_date_time <- function(x, ...) {
+as.character.zeitig_plain_date_time <- function(x, ...) {
   format(x)
 }
 
 #' @export
-vec_ptype_abbr.zietig_plain_date_time <- function(x, ...) "pdttm"
+vec_ptype_abbr.zeitig_plain_date_time <- function(x, ...) "pdttm"
 
 #' @export
-vec_ptype_full.zietig_plain_date_time <- function(x, ...) "plain_date_time"
+vec_ptype_full.zeitig_plain_date_time <- function(x, ...) "plain_date_time"
 
 #' @export
-vec_ptype2.zietig_plain_date_time.zietig_plain_date_time <- function(x, y, ...) {
+vec_ptype2.zeitig_plain_date_time.zeitig_plain_date_time <- function(x, y, ...) {
   new_plain_date_time_fields(list(
     year = integer(), month = integer(), day = integer(),
     second_of_day = integer(), nanos = integer()
@@ -98,10 +98,10 @@ vec_ptype2.zietig_plain_date_time.zietig_plain_date_time <- function(x, y, ...) 
 }
 
 #' @export
-vec_cast.zietig_plain_date_time.zietig_plain_date_time <- function(x, to, ...) x
+vec_cast.zeitig_plain_date_time.zeitig_plain_date_time <- function(x, to, ...) x
 
 #' @export
-vec_cast.zietig_plain_date_time.character <- function(x, to, ...) plain_date_time_parse(x)
+vec_cast.zeitig_plain_date_time.character <- function(x, to, ...) plain_date_time_parse(x)
 
 #' @export
-vec_cast.character.zietig_plain_date_time <- function(x, to, ...) format(x)
+vec_cast.character.zeitig_plain_date_time <- function(x, to, ...) format(x)

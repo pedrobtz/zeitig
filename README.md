@@ -1,11 +1,11 @@
-# zietig
+# zeitig
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/pedrobtz/zietig/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pedrobtz/zietig/actions/workflows/R-CMD-check.yaml)
-[![coverage](https://raw.githubusercontent.com/pedrobtz/zietig/main/.github/badges/coverage.svg)](https://github.com/pedrobtz/zietig/actions/workflows/coverage.yaml)
+[![R-CMD-check](https://github.com/pedrobtz/zeitig/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pedrobtz/zeitig/actions/workflows/R-CMD-check.yaml)
+[![coverage](https://raw.githubusercontent.com/pedrobtz/zeitig/main/.github/badges/coverage.svg)](https://github.com/pedrobtz/zeitig/actions/workflows/coverage.yaml)
 <!-- badges: end -->
 
-zietig brings the [TC39 Temporal](https://tc39.es/proposal-temporal/docs/) date/time model to R:
+zeitig brings the [TC39 Temporal](https://tc39.es/proposal-temporal/docs/) date/time model to R:
 `PlainDate`, `PlainTime`, `PlainDateTime`, `Instant`, `ZonedDateTime` and `Duration` as
 vectorised R classes with nanosecond precision, RFC 9557 strings, DST-aware arithmetic and
 Temporal's rounding and disambiguation rules. All date/time logic is delegated to the Rust crate
@@ -13,12 +13,12 @@ Temporal's rounding and disambiguation rules. All date/time logic is delegated t
 
 ## Installation
 
-You can install the development version of zietig from [GitHub](https://github.com/pedrobtz/zietig)
+You can install the development version of zeitig from [GitHub](https://github.com/pedrobtz/zeitig)
 with:
 
 ``` r
 # install.packages("pak")
-pak::pak("pedrobtz/zietig")
+pak::pak("pedrobtz/zeitig")
 ```
 
 Building from source needs a Rust toolchain (`cargo` and `rustc` >= 1.81, see
@@ -28,7 +28,7 @@ is needed during installation.
 ## Example
 
 ``` r
-library(zietig)
+library(zeitig)
 
 # Calendar arithmetic clamps to the end of the month, as in Temporal
 plain_date(2021, 1, 31) + duration(months = 1)
@@ -60,4 +60,4 @@ epoch_nanoseconds(x)
 #> [1] "1553906700123456789"
 ```
 
-See `vignette("zietig")` for an overview and `vignette("time-zones")` for time zone handling.
+See `vignette("zeitig")` for an overview and `vignette("time-zones")` for time zone handling.

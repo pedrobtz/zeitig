@@ -9,7 +9,7 @@ civil_date_fields <- function(x, arg = rlang::caller_arg(x), call = rlang::calle
   if (is_zoned_date_time(x)) {
     return(zoned_civil(x, call = call)[c("year", "month", "day")])
   }
-  zietig_type_error(
+  zeitig_type_error(
     sprintf(
       "`%s` must be a plain date, plain date-time or zoned date-time, not %s.",
       arg, obj_type_friendly(x)
@@ -25,7 +25,7 @@ civil_time_fields <- function(x, arg = rlang::caller_arg(x), call = rlang::calle
   if (is_zoned_date_time(x)) {
     return(zoned_civil(x, call = call)[c("second_of_day", "nanos")])
   }
-  zietig_type_error(
+  zeitig_type_error(
     sprintf(
       "`%s` must be a plain time, plain date-time or zoned date-time, not %s.",
       arg, obj_type_friendly(x)
@@ -36,12 +36,12 @@ civil_time_fields <- function(x, arg = rlang::caller_arg(x), call = rlang::calle
 
 # Wall-clock fields of a zoned date-time, as a list of plain date-time fields.
 zoned_civil <- function(x, call = rlang::caller_env()) {
-  zietig_call(rs_zoned_civil(zoned_data(x)), call = call)
+  zeitig_call(rs_zoned_civil(zoned_data(x)), call = call)
 }
 
 date_field <- function(x, field, call = rlang::caller_env()) {
   f <- civil_date_fields(x, arg = "x", call = call)
-  zietig_call(rs_plain_date_field(f$year, f$month, f$day, field), call = call)
+  zeitig_call(rs_plain_date_field(f$year, f$month, f$day, field), call = call)
 }
 
 time_field <- function(x, field, call = rlang::caller_env()) {
@@ -194,7 +194,7 @@ temporal_fields <- function(x) {
     ))
   }
   if (length(out) == 0) {
-    zietig_type_error(sprintf("`x` must be a Temporal object, not %s.", obj_type_friendly(x)))
+    zeitig_type_error(sprintf("`x` must be a Temporal object, not %s.", obj_type_friendly(x)))
   }
   new_data_frame(out, n = vec_size(x))
 }

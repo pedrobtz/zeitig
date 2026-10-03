@@ -34,24 +34,24 @@ temporal_summary <- function(object, ...) {
 
 #' @rdname temporal-summary
 #' @export
-summary.zietig_plain_date <- temporal_summary
+summary.zeitig_plain_date <- temporal_summary
 
 #' @rdname temporal-summary
 #' @export
-summary.zietig_plain_time <- temporal_summary
+summary.zeitig_plain_time <- temporal_summary
 
 #' @rdname temporal-summary
 #' @export
-summary.zietig_plain_date_time <- temporal_summary
+summary.zeitig_plain_date_time <- temporal_summary
 
 #' @rdname temporal-summary
 #' @export
-summary.zietig_instant <- temporal_summary
+summary.zeitig_instant <- temporal_summary
 
 #' @rdname temporal-summary
 #' @export
-summary.zietig_zoned_date_time <- temporal_summary
+summary.zeitig_zoned_date_time <- temporal_summary
 
 #' @rdname temporal-summary
 #' @export
-summary.zietig_duration <- temporal_summary
+summary.zeitig_duration <- temporal_summary

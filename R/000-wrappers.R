@@ -5,7 +5,7 @@
 #   first, which allows users to override the functions defined here (e.g., a
 #   print() method for an enum).
 
-#' @useDynLib zietig, .registration = TRUE
+#' @useDynLib zeitig, .registration = TRUE
 #' @keywords internal
 NULL
 
@@ -26,13 +26,13 @@ NULL
 # Prohibit modifying environments
 
 #' @export
-`$<-.savvy_zietig__sealed` <- function(x, name, value) {
+`$<-.savvy_zeitig__sealed` <- function(x, name, value) {
   class <- gsub("__bundle$", "", class(x)[1])
   stop(class, " cannot be modified", call. = FALSE)
 }
 
 #' @export
-`[[<-.savvy_zietig__sealed` <- function(x, i, value) {
+`[[<-.savvy_zeitig__sealed` <- function(x, i, value) {
   class <- gsub("__bundle$", "", class(x)[1])
   stop(class, " cannot be modified", call. = FALSE)
 }

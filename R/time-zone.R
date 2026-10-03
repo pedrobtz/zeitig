@@ -1,7 +1,7 @@
 #' Available time zones
 #'
 #' Lists the IANA time zone identifiers known to the time zone database used
-#' by zietig. On Linux and macOS this is the system database (`/usr/share/zoneinfo`
+#' by zeitig. On Linux and macOS this is the system database (`/usr/share/zoneinfo`
 #' or the directory in the `TZDIR` environment variable); on Windows it is the
 #' copy of the IANA database bundled with the package.
 #'

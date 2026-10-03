@@ -1,6 +1,6 @@
-# zietig design (target: 0.1.0 on CRAN)
+# zeitig design (target: 0.1.0 on CRAN)
 
-`zietig` brings the [TC39 Temporal](https://tc39.es/proposal-temporal/docs/) date/time model to R.
+`zeitig` brings the [TC39 Temporal](https://tc39.es/proposal-temporal/docs/) date/time model to R.
 All date/time logic is delegated to the Rust crate [`jiff`](https://docs.rs/jiff) (0.2.x), which was
 itself designed after Temporal and implements the same semantics (RFC 9557 strings, nanosecond
 precision, time-zone-aware arithmetic, disambiguation rules, rounding modes, calendar-aware spans).
@@ -78,12 +78,12 @@ record ordering (lexicographic over fields) equals Temporal's `compare()`.
 
 | R class            | Temporal type   | Record fields (type)                                                                 | jiff type            |
 |--------------------|-----------------|---------------------------------------------------------------------------------------|----------------------|
-| `zietig_instant`   | `Instant`       | `seconds` (double, integral, since 1970-01-01T00:00Z), `nanos` (integer, 0..1e9-1)   | `Timestamp`          |
-| `zietig_plain_date`| `PlainDate`     | `year` (integer), `month` (integer), `day` (integer)                                   | `civil::Date`        |
-| `zietig_plain_time`| `PlainTime`     | `second_of_day` (integer, 0..86399), `nanos` (integer, 0..1e9-1)                      | `civil::Time`        |
-| `zietig_plain_date_time` | `PlainDateTime` | date fields + time fields                                                        | `civil::DateTime`    |
-| `zietig_zoned_date_time` | `ZonedDateTime` | `seconds`, `nanos`, `tz` (character, IANA id or `[+hh:mm]` fixed offset)         | `Zoned`              |
-| `zietig_duration`  | `Duration`      | `years`, `months`, `weeks`, `days`, `hours`, `minutes`, `seconds`, `milliseconds`, `microseconds`, `nanoseconds` (all double, integral, same sign) | `Span`               |
+| `zeitig_instant`   | `Instant`       | `seconds` (double, integral, since 1970-01-01T00:00Z), `nanos` (integer, 0..1e9-1)   | `Timestamp`          |
+| `zeitig_plain_date`| `PlainDate`     | `year` (integer), `month` (integer), `day` (integer)                                   | `civil::Date`        |
+| `zeitig_plain_time`| `PlainTime`     | `second_of_day` (integer, 0..86399), `nanos` (integer, 0..1e9-1)                      | `civil::Time`        |
+| `zeitig_plain_date_time` | `PlainDateTime` | date fields + time fields                                                        | `civil::DateTime`    |
+| `zeitig_zoned_date_time` | `ZonedDateTime` | `seconds`, `nanos`, `tz` (character, IANA id or `[+hh:mm]` fixed offset)         | `Zoned`              |
+| `zeitig_duration`  | `Duration`      | `years`, `months`, `weeks`, `days`, `hours`, `minutes`, `seconds`, `milliseconds`, `microseconds`, `nanoseconds` (all double, integral, same sign) | `Span`               |
 
 Notes
 
@@ -124,7 +124,7 @@ Temporal has a method. All functions are vectorised and recycle arguments with `
 | `Temporal.Now.*`                      | `now_instant()`, `now_zoned_date_time(time_zone = NULL)`, `now_plain_date(...)`, `now_plain_time(...)`, `now_plain_date_time(...)`, `now_time_zone()` |
 
 Every character constructor is a parser; `as_instant()`, `as_plain_date()`, etc. are S3 generics
-with methods for character, base R classes and the other zietig classes.
+with methods for character, base R classes and the other zeitig classes.
 
 ### Accessors (`.year`, `.epochMilliseconds`, ...)
 
@@ -138,13 +138,13 @@ lubridate; use `temporal_fields()`). These are implemented in R from the record 
 
 Accessors are plain functions, not S3 generics: each calls an internal helper
 (`civil_date_fields()`, `civil_time_fields()` in `R/accessors.R`) that knows which classes carry
-a date or a time and errors with `zietig_type_error` otherwise. Adding a type (e.g.
+a date or a time and errors with `zeitig_type_error` otherwise. Adding a type (e.g.
 `ZonedDateTime`) means adding a branch there, not a method per accessor. Conversions from other
 classes use the `as_plain_date()`/`as_plain_time()`/`as_plain_date_time()` S3 generics, while
 `to_*()` follow Temporal's `toPlainDate()`-style methods and accept only Temporal objects.
 
 Numeric component arguments follow Temporal's `ToIntegerWithTruncation`: doubles are truncated
-towards zero, non-finite values are a `zietig_range_error`, non-numbers a `zietig_type_error`.
+towards zero, non-finite values are a `zeitig_range_error`, non-numbers a `zeitig_type_error`.
 With `overflow = "constrain"` a month or day below 1 is still an error (Temporal requires positive
 integers there), while time fields are clamped in both directions (Temporal's `ConstrainTime`).
 
@@ -223,10 +223,10 @@ from the Temporal docs.
 
 - All Rust entry points return `savvy::Result`. `jiff::Error` is converted with its message
   (e.g. `"parameter 'day' with value 31 is not in the required range of 1..=30"`); the R wrapper
-  rethrows it as a condition of class `zietig_error` with the element index appended
+  rethrows it as a condition of class `zeitig_error` with the element index appended
   (`"... (element 3)"`) when a vector operation fails.
 - Temporal distinguishes `RangeError` and `TypeError`. R conditions carry a subclass
-  `zietig_range_error` / `zietig_type_error`; input-type problems are detected in R before calling
+  `zeitig_range_error` / `zeitig_type_error`; input-type problems are detected in R before calling
   Rust.
 - `NA` is never an error. Rust receives `NA` as R's sentinel values via savvy's `is_na()` and emits
   `NA` fields in the output.
@@ -265,7 +265,7 @@ constraint on the build. The scheme:
    drops `tzdb-concatenated` (Android only), `serde`, `logging` and `jiff-static`.
 4. **Time zone database.** On Linux/macOS `jiff` reads `/usr/share/zoneinfo` (or `TZDIR`). On
    Windows it uses the bundled `jiff-tzdb` because Windows has no zoneinfo. CRAN's check machines
-   all satisfy one of these. `ZIETIG_TZDIR` is honoured as an override for testing. Document in
+   all satisfy one of these. `ZEITIG_TZDIR` is honoured as an override for testing. Document in
    the package that the database version therefore follows the OS on Unix and the vendored crate on
    Windows.
 5. **Authorship and licences.** `DESCRIPTION` adds
@@ -284,7 +284,7 @@ constraint on the build. The scheme:
    `aarch64-pc-windows-gnullvm` (linker `aarch64-w64-mingw32.static.posix-clang`, best effort).
 8. **Installed size.** The static library is deleted after linking (already done); release profile
    sets `opt-level = 3`, `lto = true`, `codegen-units = 1`, `strip = true`. `strip` does not apply
-   to a `staticlib`, so the linked `zietig.so` keeps the debug info of the precompiled Rust
+   to a `staticlib`, so the linked `zeitig.so` keeps the debug info of the precompiled Rust
    standard library: about 6 MB on Linux, 2.3 MB after `strip --strip-debug`. We accept the
    installed-size NOTE rather than strip in Makevars (R's `--strip` install option and CRAN's own
    binary builds handle it).
@@ -312,7 +312,7 @@ constraint on the build. The scheme:
 
 | Area | Temporal | jiff | 0.1.0 behaviour |
 |------|----------|------|-----------------|
-| Calendars | pluggable, `iso8601` default | ISO only | `calendar = "iso8601"` accepted, anything else errors with `zietig_range_error` |
+| Calendars | pluggable, `iso8601` default | ISO only | `calendar = "iso8601"` accepted, anything else errors with `zeitig_range_error` |
 | `overflow: "constrain"` in `from()`/`with()` | clamps day to month length | `civil::Date::new` rejects | R/Rust clamps `day` to `days_in_month` before calling `jiff` when `overflow = "constrain"`; `reject` passes through |
 | Date arithmetic across month ends | constrain (Jan 31 + 1 month = Feb 28) | same | no adaptation needed |
 | `Instant` range | ±1e8 days from epoch | ±9999 years (`Timestamp::MIN/MAX`) | jiff's range; documented; values outside error |
@@ -322,7 +322,7 @@ constraint on the build. The scheme:
 | `until`/`since` default units on `ZonedDateTime` | `hour` largest unit | `Zoned::until` defaults to hours as well | same |
 | `Instant` epoch accessors | `epochMilliseconds`, `epochNanoseconds` (BigInt) | `as_millisecond()`, `as_nanosecond()` (i128) | `epoch_seconds()`/`epoch_milliseconds()` floor to doubles; `epoch_nanoseconds()` is a decimal string; `instant_from_epoch(nanoseconds =)` accepts strings |
 | Time zone identifiers | IANA names and `±HH:MM` | also POSIX TZ strings | POSIX TZ strings and sub-minute offsets are rejected; names are canonicalised to the database's spelling |
-| `ZonedDateTime` `until` across zones | RangeError for calendar units when zones differ | computes anyway | R checks and errors (`zietig_range_error`) when `largest_unit` is `day` or larger and the zones differ |
+| `ZonedDateTime` `until` across zones | RangeError for calendar units when zones differ | computes anyway | R checks and errors (`zeitig_range_error`) when `largest_unit` is `day` or larger and the zones differ |
 | `toString()` fractional digits | `auto` trims trailing zeros | `Display` prints `auto` precision | same |
 | Leap seconds | not represented | not represented | same |
 | Weeks without `relativeTo` | `Duration.compare`/`total`/`round` need `relativeTo` for weeks | weeks are 7 days with `days_are_24_hours()` | jiff behaviour: weeks count as 7 x 24 hours when no `relative_to` is given |
@@ -330,7 +330,7 @@ constraint on the build. The scheme:
 | `PlainDate - PlainDate` | n/a (no operators) | `Date - Date` is a `Span` in days | `x - y` is `temporal_since(x, y)` with default options |
 
 | `toString()` offset of zoned values | rounded to whole minutes | printed with seconds when non-zero (`+00:19:32`) | jiff's form, so strings round-trip exactly; only visible for pre-1900 LMT offsets |
-| `toString({ smallestUnit: "minute" })` | `HH:MM` | no direct printer option | implemented in zietig's own formatter (`src/rust/src/format.rs`), which reproduces jiff's `Display` for default options (unit-tested) |
+| `toString({ smallestUnit: "minute" })` | `HH:MM` | no direct printer option | implemented in zeitig's own formatter (`src/rust/src/format.rs`), which reproduces jiff's `Display` for default options (unit-tested) |
 | `strftime`/`strptime` | not part of Temporal | `jiff::fmt::strtime` | exposed as `temporal_strftime()`/`temporal_strptime()` with jiff's directive set |
 
 Reviewed against the behaviour at the end of milestone 5; every row above is covered by a test.

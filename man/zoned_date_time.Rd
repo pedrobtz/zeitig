@@ -50,10 +50,10 @@ default) clamps each component to its range, \code{"reject"} raises an error.}
 \item{x}{An object to test.}
 }
 \value{
-A \code{zietig_zoned_date_time} vector.
+A \code{zeitig_zoned_date_time} vector.
 }
 \description{
-A \code{zietig_zoned_date_time} is an exact time together with the time zone
+A \code{zeitig_zoned_date_time} is an exact time together with the time zone
 used to view it, the equivalent of
 \href{https://tc39.es/proposal-temporal/docs/zoneddatetime.html}{\code{Temporal.ZonedDateTime}}
 (and of \code{jiff::Zoned}). Each element carries its own time zone: an IANA

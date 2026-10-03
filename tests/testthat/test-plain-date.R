@@ -1,6 +1,6 @@
 test_that("plain_date() builds dates from components", {
   d <- plain_date(2006, 8, 24)
-  expect_s3_class(d, "zietig_plain_date")
+  expect_s3_class(d, "zeitig_plain_date")
   expect_equal(format(d), "2006-08-24")
   expect_equal(format(plain_date(2020L, 1:3, 31L)), c("2020-01-31", "2020-02-29", "2020-03-31"))
   # fractions truncate towards zero (ToIntegerWithTruncation)
@@ -10,23 +10,23 @@ test_that("plain_date() builds dates from components", {
 test_that("overflow = 'constrain' clamps, 'reject' errors", {
   expect_equal(format(plain_date(2021, 2, 31)), "2021-02-28")
   expect_equal(format(plain_date(2021, 13, 1)), "2021-12-01")
-  expect_error(plain_date(2021, 2, 31, overflow = "reject"), "1..=28", class = "zietig_range_error")
-  expect_error(plain_date(2021, 13, 1, overflow = "reject"), class = "zietig_range_error")
+  expect_error(plain_date(2021, 2, 31, overflow = "reject"), "1..=28", class = "zeitig_range_error")
+  expect_error(plain_date(2021, 13, 1, overflow = "reject"), class = "zeitig_range_error")
   # non-positive months and days are always an error
-  expect_error(plain_date(2021, 0, 1), class = "zietig_range_error")
-  expect_error(plain_date(2021, 1, 0), class = "zietig_range_error")
-  expect_error(plain_date(10000, 1, 1), class = "zietig_range_error")
+  expect_error(plain_date(2021, 0, 1), class = "zeitig_range_error")
+  expect_error(plain_date(2021, 1, 0), class = "zeitig_range_error")
+  expect_error(plain_date(10000, 1, 1), class = "zeitig_range_error")
   expect_error(plain_date(2021, 1, 1, overflow = "nope"))
 })
 
 test_that("errors report the failing element", {
   expect_error(plain_date(2021, 1, c(1, 2, 40), overflow = "reject"), "element 3")
-  expect_error(plain_date(c("2020-01-01", "2020-13-01")), "element 2", class = "zietig_range_error")
+  expect_error(plain_date(c("2020-01-01", "2020-13-01")), "element 2", class = "zeitig_range_error")
 })
 
 test_that("bad argument types are type errors", {
-  expect_error(plain_date(2021, "a", 1), class = "zietig_type_error")
-  expect_error(plain_date(2021, Inf, 1), class = "zietig_range_error")
+  expect_error(plain_date(2021, "a", 1), class = "zeitig_type_error")
+  expect_error(plain_date(2021, Inf, 1), class = "zeitig_range_error")
   expect_error(plain_date(1, 1, 1, 1))
 })
 
@@ -44,8 +44,8 @@ test_that("plain_date() parses RFC 9557 strings", {
     c("2006-08-24", "2006-08-24", "2006-08-24", "2019-11-18", "-000001-01-01", NA)
   )
   # UTC designator is not allowed for plain types
-  expect_error(plain_date("2006-08-24T15:43:27Z"), class = "zietig_range_error")
-  expect_error(plain_date("not a date"), class = "zietig_range_error")
+  expect_error(plain_date("2006-08-24T15:43:27Z"), class = "zeitig_range_error")
+  expect_error(plain_date("not a date"), class = "zeitig_range_error")
   expect_error(plain_date(c("2006-08-24", "2006-02-30")), "element 2")
 })
 
@@ -90,8 +90,8 @@ test_that("date fields match Temporal", {
 })
 
 test_that("time fields are not available on dates", {
-  expect_error(hour(plain_date(2020, 1, 1)), class = "zietig_type_error")
-  expect_error(year(1), class = "zietig_type_error")
+  expect_error(hour(plain_date(2020, 1, 1)), class = "zeitig_type_error")
+  expect_error(year(1), class = "zeitig_type_error")
 })
 
 test_that("temporal_with() replaces fields", {
@@ -99,14 +99,14 @@ test_that("temporal_with() replaces fields", {
   expect_equal(format(temporal_with(d, day = 31, month = 2)), "2006-02-28")
   expect_error(
     temporal_with(d, day = 31, month = 2, overflow = "reject"),
-    class = "zietig_range_error"
+    class = "zeitig_range_error"
   )
   expect_equal(
     format(temporal_with(d, year = 2000:2002)),
     c("2000-01-24", "2001-01-24", "2002-01-24")
   )
-  expect_error(temporal_with(d, hour = 1), "unknown field", class = "zietig_type_error")
-  expect_error(temporal_with(d, 1), class = "zietig_type_error")
+  expect_error(temporal_with(d, hour = 1), "unknown field", class = "zeitig_type_error")
+  expect_error(temporal_with(d, 1), class = "zeitig_type_error")
   # a missing element stays missing
   expect_true(is.na(temporal_with(plain_date(NA, 1, 1), year = 2000)))
 })

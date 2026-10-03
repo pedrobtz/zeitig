@@ -54,27 +54,27 @@ temporal_add_impl <- function(x, d, reject, call = rlang::caller_env()) {
   d <- duration_data(args$d)
   if (is_plain_date(x)) {
     f <- vec_data(x)
-    new_plain_date_fields(zietig_call(
+    new_plain_date_fields(zeitig_call(
       rs_plain_date_add(f$year, f$month, f$day, d, reject),
       call = call
     ))
   } else if (is_plain_time(x)) {
     f <- vec_data(x)
-    new_plain_time_fields(zietig_call(
+    new_plain_time_fields(zeitig_call(
       rs_plain_time_add(f$second_of_day, f$nanos, d),
       call = call
     ))
   } else if (is_plain_date_time(x)) {
-    new_plain_date_time_fields(zietig_call(
+    new_plain_date_time_fields(zeitig_call(
       rs_plain_date_time_add(unclass(vec_data(x)), d, reject),
       call = call
     ))
   } else if (is_instant(x)) {
-    new_instant_fields(zietig_call(rs_instant_add(instant_data(x), d), call = call))
+    new_instant_fields(zeitig_call(rs_instant_add(instant_data(x), d), call = call))
   } else if (is_zoned_date_time(x)) {
-    new_zoned_fields(zietig_call(rs_zoned_add(zoned_data(x), d, reject), call = call))
+    new_zoned_fields(zeitig_call(rs_zoned_add(zoned_data(x), d, reject), call = call))
   } else {
-    zietig_type_error(
+    zeitig_type_error(
       sprintf("Can't add a duration to %s.", obj_type_friendly(x)),
       call = call
     )
@@ -153,12 +153,12 @@ temporal_diff <- function(x, y, largest_unit, smallest_unit, rounding_increment,
   } else if (is_zoned_date_time(x)) {
     rs_zoned_diff
   } else {
-    zietig_type_error(
+    zeitig_type_error(
       sprintf("Can't compute a difference between %s.", obj_type_friendly(x)),
       call = call
     )
   }
-  new_duration_fields(zietig_call(
+  new_duration_fields(zeitig_call(
     fn(
       unclass(vec_data(x)), unclass(vec_data(y)), largest_unit, smallest_unit,
       rounding_increment, rounding_mode, since
@@ -211,42 +211,42 @@ temporal_round <- function(x, smallest_unit = NULL, ..., rounding_increment = 1,
   rounding_mode <- arg_rounding_mode(rounding_mode)
   if (is_duration(x)) {
     if (is.null(smallest_unit) && is.null(largest_unit)) {
-      zietig_type_error("At least one of `smallest_unit` and `largest_unit` must be given.")
+      zeitig_type_error("At least one of `smallest_unit` and `largest_unit` must be given.")
     }
     smallest_unit <- arg_unit(smallest_unit %||% "nanosecond")
     largest_unit <- arg_unit(largest_unit %||% "auto", auto = TRUE)
     args <- with_relative(x, relative_to)
-    return(new_duration_fields(zietig_call(rs_duration_round(
+    return(new_duration_fields(zeitig_call(rs_duration_round(
       duration_data(args$x), largest_unit, smallest_unit, rounding_increment, rounding_mode,
       args$relative
     ))))
   }
   if (!is.null(largest_unit) || !is.null(relative_to)) {
-    zietig_type_error("`largest_unit` and `relative_to` are only used for durations.")
+    zeitig_type_error("`largest_unit` and `relative_to` are only used for durations.")
   }
   if (is.null(smallest_unit)) {
-    zietig_type_error("`smallest_unit` must be given.")
+    zeitig_type_error("`smallest_unit` must be given.")
   }
   smallest_unit <- arg_unit(smallest_unit)
   if (is_plain_time(x)) {
     f <- vec_data(x)
-    new_plain_time_fields(zietig_call(rs_plain_time_round(
+    new_plain_time_fields(zeitig_call(rs_plain_time_round(
       f$second_of_day, f$nanos, smallest_unit, rounding_increment, rounding_mode
     )))
   } else if (is_plain_date_time(x)) {
-    new_plain_date_time_fields(zietig_call(rs_plain_date_time_round(
+    new_plain_date_time_fields(zeitig_call(rs_plain_date_time_round(
       unclass(vec_data(x)), smallest_unit, rounding_increment, rounding_mode
     )))
   } else if (is_instant(x)) {
-    new_instant_fields(zietig_call(rs_instant_round(
+    new_instant_fields(zeitig_call(rs_instant_round(
       instant_data(x), smallest_unit, rounding_increment, rounding_mode
     )))
   } else if (is_zoned_date_time(x)) {
-    new_zoned_fields(zietig_call(rs_zoned_round(
+    new_zoned_fields(zeitig_call(rs_zoned_round(
       zoned_data(x), smallest_unit, rounding_increment, rounding_mode
     )))
   } else {
-    zietig_type_error(sprintf("Can't round %s.", obj_type_friendly(x)))
+    zeitig_type_error(sprintf("Can't round %s.", obj_type_friendly(x)))
   }
 }
 
@@ -269,64 +269,64 @@ temporal_arith <- function(op, x, y) {
 }
 
 #' @export
-#' @method vec_arith zietig_plain_date
-vec_arith.zietig_plain_date <- function(op, x, y, ...) {
-  UseMethod("vec_arith.zietig_plain_date", y)
+#' @method vec_arith zeitig_plain_date
+vec_arith.zeitig_plain_date <- function(op, x, y, ...) {
+  UseMethod("vec_arith.zeitig_plain_date", y)
 }
 
 #' @export
-#' @method vec_arith.zietig_plain_date default
-vec_arith.zietig_plain_date.default <- function(op, x, y, ...) temporal_arith(op, x, y)
+#' @method vec_arith.zeitig_plain_date default
+vec_arith.zeitig_plain_date.default <- function(op, x, y, ...) temporal_arith(op, x, y)
 
 #' @export
-#' @method vec_arith zietig_plain_time
-vec_arith.zietig_plain_time <- function(op, x, y, ...) {
-  UseMethod("vec_arith.zietig_plain_time", y)
+#' @method vec_arith zeitig_plain_time
+vec_arith.zeitig_plain_time <- function(op, x, y, ...) {
+  UseMethod("vec_arith.zeitig_plain_time", y)
 }
 
 #' @export
-#' @method vec_arith.zietig_plain_time default
-vec_arith.zietig_plain_time.default <- function(op, x, y, ...) temporal_arith(op, x, y)
+#' @method vec_arith.zeitig_plain_time default
+vec_arith.zeitig_plain_time.default <- function(op, x, y, ...) temporal_arith(op, x, y)
 
 #' @export
-#' @method vec_arith zietig_plain_date_time
-vec_arith.zietig_plain_date_time <- function(op, x, y, ...) {
-  UseMethod("vec_arith.zietig_plain_date_time", y)
+#' @method vec_arith zeitig_plain_date_time
+vec_arith.zeitig_plain_date_time <- function(op, x, y, ...) {
+  UseMethod("vec_arith.zeitig_plain_date_time", y)
 }
 
 #' @export
-#' @method vec_arith.zietig_plain_date_time default
-vec_arith.zietig_plain_date_time.default <- function(op, x, y, ...) temporal_arith(op, x, y)
+#' @method vec_arith.zeitig_plain_date_time default
+vec_arith.zeitig_plain_date_time.default <- function(op, x, y, ...) temporal_arith(op, x, y)
 
 #' @export
-#' @method vec_arith zietig_instant
-vec_arith.zietig_instant <- function(op, x, y, ...) {
-  UseMethod("vec_arith.zietig_instant", y)
+#' @method vec_arith zeitig_instant
+vec_arith.zeitig_instant <- function(op, x, y, ...) {
+  UseMethod("vec_arith.zeitig_instant", y)
 }
 
 #' @export
-#' @method vec_arith.zietig_instant default
-vec_arith.zietig_instant.default <- function(op, x, y, ...) temporal_arith(op, x, y)
+#' @method vec_arith.zeitig_instant default
+vec_arith.zeitig_instant.default <- function(op, x, y, ...) temporal_arith(op, x, y)
 
 #' @export
-#' @method vec_arith zietig_zoned_date_time
-vec_arith.zietig_zoned_date_time <- function(op, x, y, ...) {
-  UseMethod("vec_arith.zietig_zoned_date_time", y)
+#' @method vec_arith zeitig_zoned_date_time
+vec_arith.zeitig_zoned_date_time <- function(op, x, y, ...) {
+  UseMethod("vec_arith.zeitig_zoned_date_time", y)
 }
 
 #' @export
-#' @method vec_arith.zietig_zoned_date_time default
-vec_arith.zietig_zoned_date_time.default <- function(op, x, y, ...) temporal_arith(op, x, y)
+#' @method vec_arith.zeitig_zoned_date_time default
+vec_arith.zeitig_zoned_date_time.default <- function(op, x, y, ...) temporal_arith(op, x, y)
 
 #' @export
-#' @method vec_arith zietig_duration
-vec_arith.zietig_duration <- function(op, x, y, ...) {
-  UseMethod("vec_arith.zietig_duration", y)
+#' @method vec_arith zeitig_duration
+vec_arith.zeitig_duration <- function(op, x, y, ...) {
+  UseMethod("vec_arith.zeitig_duration", y)
 }
 
 #' @export
-#' @method vec_arith.zietig_duration default
-vec_arith.zietig_duration.default <- function(op, x, y, ...) {
+#' @method vec_arith.zeitig_duration default
+vec_arith.zeitig_duration.default <- function(op, x, y, ...) {
   if (op == "+" && is_temporal_point(y)) {
     return(temporal_add_impl(y, x, reject = FALSE))
   }
@@ -334,21 +334,21 @@ vec_arith.zietig_duration.default <- function(op, x, y, ...) {
 }
 
 #' @export
-#' @method vec_arith.zietig_duration zietig_duration
-vec_arith.zietig_duration.zietig_duration <- function(op, x, y, ...) {
+#' @method vec_arith.zeitig_duration zeitig_duration
+vec_arith.zeitig_duration.zeitig_duration <- function(op, x, y, ...) {
   if (op != "+" && op != "-") {
     stop_incompatible_op(op, x, y)
   }
   if (op == "-") y <- -y
   args <- vec_recycle_common(x = x, y = y)
-  new_duration_fields(zietig_call(
+  new_duration_fields(zeitig_call(
     rs_duration_add(duration_data(args$x), duration_data(args$y))
   ))
 }
 
 #' @export
-#' @method vec_arith.zietig_duration MISSING
-vec_arith.zietig_duration.MISSING <- function(op, x, y, ...) {
+#' @method vec_arith.zeitig_duration MISSING
+vec_arith.zeitig_duration.MISSING <- function(op, x, y, ...) {
   switch(op,
     "-" = duration_map(x, function(v) -v),
     "+" = x,

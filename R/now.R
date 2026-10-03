@@ -21,7 +21,7 @@
 #' now_plain_date_time()
 #' now_time_zone()
 now_instant <- function() {
-  new_instant_fields(zietig_call(rs_now()))
+  new_instant_fields(zeitig_call(rs_now()))
 }
 
 #' @rdname now_instant
@@ -59,7 +59,7 @@ default_time_zone <- function() {
   # TZ first: Sys.timezone() caches its answer and misses later changes.
   for (tz in c(Sys.getenv("TZ"), Sys.timezone())) {
     if (length(tz) == 1L && !is.na(tz) && nzchar(tz)) {
-      ok <- tryCatch(zietig_call(rs_time_zone_canonical(tz)), error = function(e) NA_character_)
+      ok <- tryCatch(zeitig_call(rs_time_zone_canonical(tz)), error = function(e) NA_character_)
       if (!is.na(ok)) {
         return(ok)
       }

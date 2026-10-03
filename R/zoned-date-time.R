@@ -1,6 +1,6 @@
 #' Zoned date-times
 #'
-#' A `zietig_zoned_date_time` is an exact time together with the time zone
+#' A `zeitig_zoned_date_time` is an exact time together with the time zone
 #' used to view it, the equivalent of
 #' [`Temporal.ZonedDateTime`](https://tc39.es/proposal-temporal/docs/zoneddatetime.html)
 #' (and of `jiff::Zoned`). Each element carries its own time zone: an IANA
@@ -26,7 +26,7 @@
 #'   the string is not valid for the time zone, `"use"` keeps the exact time
 #'   given by the offset, `"ignore"` keeps the wall-clock time, `"prefer"` uses
 #'   the offset when it is valid and the wall-clock time otherwise.
-#' @returns A `zietig_zoned_date_time` vector.
+#' @returns A `zeitig_zoned_date_time` vector.
 #' @family zoned date-time
 #' @export
 #' @examples
@@ -49,7 +49,7 @@ zoned_date_time <- function(year, month, day, hour = 0L, minute = 0L, second = 0
     return(zoned_date_time_parse(year, disambiguation, offset))
   }
   if (missing(time_zone)) {
-    zietig_type_error("`time_zone` must be given.")
+    zeitig_type_error("`time_zone` must be given.")
   }
   pdt <- plain_date_time(
     year, month, day, hour, minute, second, millisecond, microsecond, nanosecond,
@@ -61,7 +61,7 @@ zoned_date_time <- function(year, month, day, hour = 0L, minute = 0L, second = 0
 zoned_date_time_parse <- function(x, disambiguation = "compatible", offset = "reject",
                                   call = rlang::caller_env()) {
   check_character(x, call = call)
-  new_zoned_fields(zietig_call(rs_zoned_parse(unname(x), disambiguation, offset), call = call))
+  new_zoned_fields(zeitig_call(rs_zoned_parse(unname(x), disambiguation, offset), call = call))
 }
 
 zoned_from_plain <- function(pdt, time_zone, disambiguation = "compatible", offset = NULL,
@@ -69,7 +69,7 @@ zoned_from_plain <- function(pdt, time_zone, disambiguation = "compatible", offs
   check_time_zone(time_zone, call = call)
   offset <- offset %||% NA_integer_
   args <- vec_recycle_common(x = pdt, tz = time_zone, offset = offset, .call = call)
-  new_zoned_fields(zietig_call(
+  new_zoned_fields(zeitig_call(
     rs_zoned_from_civil(
       unclass(vec_data(args$x)), args$tz, disambiguation, args$offset, offset_mode
     ),
@@ -79,7 +79,7 @@ zoned_from_plain <- function(pdt, time_zone, disambiguation = "compatible", offs
 
 check_time_zone <- function(x, arg = rlang::caller_arg(x), call = rlang::caller_env()) {
   if (!is.character(x)) {
-    zietig_type_error(
+    zeitig_type_error(
       sprintf("`%s` must be a character vector of time zone identifiers.", arg),
       call = call
     )
@@ -87,7 +87,7 @@ check_time_zone <- function(x, arg = rlang::caller_arg(x), call = rlang::caller_
 }
 
 new_zoned_fields <- function(fields) {
-  new_rcrd(fields, class = "zietig_zoned_date_time")
+  new_rcrd(fields, class = "zeitig_zoned_date_time")
 }
 
 zoned_data <- function(x) {
@@ -98,43 +98,43 @@ zoned_data <- function(x) {
 #' @param x An object to test.
 #' @export
 is_zoned_date_time <- function(x) {
-  inherits(x, "zietig_zoned_date_time")
+  inherits(x, "zeitig_zoned_date_time")
 }
 
 #' @export
-as.character.zietig_zoned_date_time <- function(x, ...) {
+as.character.zeitig_zoned_date_time <- function(x, ...) {
   format(x)
 }
 
 #' @export
-vec_ptype_abbr.zietig_zoned_date_time <- function(x, ...) "zdttm"
+vec_ptype_abbr.zeitig_zoned_date_time <- function(x, ...) "zdttm"
 
 #' @export
-vec_ptype_full.zietig_zoned_date_time <- function(x, ...) "zoned_date_time"
+vec_ptype_full.zeitig_zoned_date_time <- function(x, ...) "zoned_date_time"
 
 #' @export
-vec_ptype2.zietig_zoned_date_time.zietig_zoned_date_time <- function(x, y, ...) {
+vec_ptype2.zeitig_zoned_date_time.zeitig_zoned_date_time <- function(x, y, ...) {
   new_zoned_fields(list(seconds = double(), nanos = integer(), tz = character()))
 }
 
 #' @export
-vec_cast.zietig_zoned_date_time.zietig_zoned_date_time <- function(x, to, ...) x
+vec_cast.zeitig_zoned_date_time.zeitig_zoned_date_time <- function(x, to, ...) x
 
 #' @export
-vec_cast.zietig_zoned_date_time.character <- function(x, to, ...) zoned_date_time_parse(x)
+vec_cast.zeitig_zoned_date_time.character <- function(x, to, ...) zoned_date_time_parse(x)
 
 #' @export
-vec_cast.character.zietig_zoned_date_time <- function(x, to, ...) format(x)
+vec_cast.character.zeitig_zoned_date_time <- function(x, to, ...) format(x)
 
 # `==`, `<`, sort() and unique() use the exact time only, like
 # ZonedDateTime.compare(); temporal_equals() also compares the time zone.
 #' @export
-vec_proxy_equal.zietig_zoned_date_time <- function(x, ...) {
+vec_proxy_equal.zeitig_zoned_date_time <- function(x, ...) {
   new_data_frame(zoned_data(x)[c("seconds", "nanos")])
 }
 
 #' @export
-vec_proxy_compare.zietig_zoned_date_time <- function(x, ...) {
+vec_proxy_compare.zeitig_zoned_date_time <- function(x, ...) {
   new_data_frame(zoned_data(x)[c("seconds", "nanos")])
 }
 
@@ -164,52 +164,52 @@ vec_proxy_compare.zietig_zoned_date_time <- function(x, ...) {
 #' time_zone_transition(x, "next")
 #' with_time_zone(x, "Asia/Tokyo")
 time_zone <- function(x) {
-  check_class(x, "zietig_zoned_date_time", "a zoned date-time")
+  check_class(x, "zeitig_zoned_date_time", "a zoned date-time")
   zoned_data(x)$tz
 }
 
 #' @rdname time_zone
 #' @export
 offset <- function(x) {
-  check_class(x, "zietig_zoned_date_time", "a zoned date-time")
-  zietig_call(rs_zoned_offset(zoned_data(x)))$string
+  check_class(x, "zeitig_zoned_date_time", "a zoned date-time")
+  zeitig_call(rs_zoned_offset(zoned_data(x)))$string
 }
 
 #' @rdname time_zone
 #' @export
 offset_nanoseconds <- function(x) {
-  check_class(x, "zietig_zoned_date_time", "a zoned date-time")
-  zietig_call(rs_zoned_offset(zoned_data(x)))$seconds * 1e9
+  check_class(x, "zeitig_zoned_date_time", "a zoned date-time")
+  zeitig_call(rs_zoned_offset(zoned_data(x)))$seconds * 1e9
 }
 
 #' @rdname time_zone
 #' @export
 hours_in_day <- function(x) {
-  check_class(x, "zietig_zoned_date_time", "a zoned date-time")
-  zietig_call(rs_zoned_hours_in_day(zoned_data(x)))
+  check_class(x, "zeitig_zoned_date_time", "a zoned date-time")
+  zeitig_call(rs_zoned_hours_in_day(zoned_data(x)))
 }
 
 #' @rdname time_zone
 #' @export
 start_of_day <- function(x) {
-  check_class(x, "zietig_zoned_date_time", "a zoned date-time")
-  new_zoned_fields(zietig_call(rs_zoned_start_of_day(zoned_data(x))))
+  check_class(x, "zeitig_zoned_date_time", "a zoned date-time")
+  new_zoned_fields(zeitig_call(rs_zoned_start_of_day(zoned_data(x))))
 }
 
 #' @rdname time_zone
 #' @param direction `"next"` or `"previous"`.
 #' @export
 time_zone_transition <- function(x, direction = c("next", "previous")) {
-  check_class(x, "zietig_zoned_date_time", "a zoned date-time")
+  check_class(x, "zeitig_zoned_date_time", "a zoned date-time")
   direction <- arg_match(direction)
-  new_zoned_fields(zietig_call(rs_zoned_transition(zoned_data(x), direction == "next")))
+  new_zoned_fields(zeitig_call(rs_zoned_transition(zoned_data(x), direction == "next")))
 }
 
 #' @rdname time_zone
 #' @param time_zone Time zone identifiers, recycled against `x`.
 #' @export
 with_time_zone <- function(x, time_zone) {
-  check_class(x, "zietig_zoned_date_time", "a zoned date-time")
+  check_class(x, "zeitig_zoned_date_time", "a zoned date-time")
   instant_to_zoned(instant_data(x), time_zone)
 }
 
@@ -217,7 +217,7 @@ instant_to_zoned <- function(fields, time_zone, call = rlang::caller_env()) {
   check_time_zone(time_zone, call = call)
   inst <- new_instant_fields(fields)
   args <- vec_recycle_common(x = inst, tz = time_zone, .call = call)
-  new_zoned_fields(zietig_call(
+  new_zoned_fields(zeitig_call(
     rs_instant_to_zoned(instant_data(args$x), args$tz),
     call = call
   ))

@@ -30,10 +30,10 @@ precision). \code{years} may instead be a character vector to parse.}
 \item{x}{An object to test.}
 }
 \value{
-A \code{zietig_duration} vector.
+A \code{zeitig_duration} vector.
 }
 \description{
-A \code{zietig_duration} is a length of time expressed in calendar and clock
+A \code{zeitig_duration} is a length of time expressed in calendar and clock
 units, the equivalent of
 \href{https://tc39.es/proposal-temporal/docs/duration.html}{\code{Temporal.Duration}}
 (and of \code{jiff::Span}). Each element stores ten integer fields that must all

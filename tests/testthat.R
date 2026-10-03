@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(zietig)
+library(zeitig)
 
-test_check("zietig")
+test_check("zeitig")
