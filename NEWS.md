@@ -9,5 +9,12 @@
   `with_plain_time()`, `with_plain_date()`, `to_plain_*()` conversions,
   `temporal_compare()`/`temporal_equals()` and conversions to and from `Date`,
   `POSIXct` and `POSIXlt`.
+* New `duration()` class (Temporal `Duration`, backed by `jiff::Span`) with
+  ISO 8601 parsing and formatting, `abs()`, `sign()`, unary `-`, `+`/`-`
+  between durations, `duration_total()`, `duration_compare()`,
+  `duration_blank()`, `as_duration()`/`as_difftime()`.
+* Arithmetic for plain types: `temporal_add()`, `temporal_subtract()`,
+  `+`/`-` operators, `temporal_until()`, `temporal_since()` and
+  `temporal_round()` (also for durations, with `relative_to`).
 * New `available_time_zones()` lists the IANA time zone identifiers known to
   the time zone database.

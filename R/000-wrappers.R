@@ -43,6 +43,56 @@ NULL
 }
 
 
+`rs_duration_add` <- function(`x`, `y`) {
+  .Call(savvy_rs_duration_add__impl, `x`, `y`)
+}
+
+
+`rs_duration_compare` <- function(`x`, `y`, `relative` = NULL) {
+  .Call(savvy_rs_duration_compare__impl, `x`, `y`, `relative`)
+}
+
+
+`rs_duration_format` <- function(`x`) {
+  .Call(savvy_rs_duration_format__impl, `x`)
+}
+
+
+`rs_duration_parse` <- function(`x`) {
+  .Call(savvy_rs_duration_parse__impl, `x`)
+}
+
+
+`rs_duration_round` <- function(`x`, `largest`, `smallest`, `increment`, `mode`, `relative` = NULL) {
+  .Call(savvy_rs_duration_round__impl, `x`, `largest`, `smallest`, `increment`, `mode`, `relative`)
+}
+
+
+`rs_duration_sort_key` <- function(`x`) {
+  .Call(savvy_rs_duration_sort_key__impl, `x`)
+}
+
+
+`rs_duration_total` <- function(`x`, `unit`, `relative` = NULL) {
+  .Call(savvy_rs_duration_total__impl, `x`, `unit`, `relative`)
+}
+
+
+`rs_duration_validate` <- function(`x`) {
+  .Call(savvy_rs_duration_validate__impl, `x`)
+}
+
+
+`rs_plain_date_add` <- function(`year`, `month`, `day`, `duration`, `reject`) {
+  .Call(savvy_rs_plain_date_add__impl, `year`, `month`, `day`, `duration`, `reject`)
+}
+
+
+`rs_plain_date_diff` <- function(`x`, `y`, `largest`, `smallest`, `increment`, `mode`, `since`) {
+  .Call(savvy_rs_plain_date_diff__impl, `x`, `y`, `largest`, `smallest`, `increment`, `mode`, `since`)
+}
+
+
 `rs_plain_date_field` <- function(`year`, `month`, `day`, `field`) {
   .Call(savvy_rs_plain_date_field__impl, `year`, `month`, `day`, `field`)
 }
@@ -68,6 +118,16 @@ NULL
 }
 
 
+`rs_plain_date_time_add` <- function(`x`, `duration`, `reject`) {
+  .Call(savvy_rs_plain_date_time_add__impl, `x`, `duration`, `reject`)
+}
+
+
+`rs_plain_date_time_diff` <- function(`x`, `y`, `largest`, `smallest`, `increment`, `mode`, `since`) {
+  .Call(savvy_rs_plain_date_time_diff__impl, `x`, `y`, `largest`, `smallest`, `increment`, `mode`, `since`)
+}
+
+
 `rs_plain_date_time_format` <- function(`year`, `month`, `day`, `second_of_day`, `nanos`) {
   .Call(savvy_rs_plain_date_time_format__impl, `year`, `month`, `day`, `second_of_day`, `nanos`)
 }
@@ -78,8 +138,23 @@ NULL
 }
 
 
+`rs_plain_date_time_round` <- function(`x`, `smallest`, `increment`, `mode`) {
+  .Call(savvy_rs_plain_date_time_round__impl, `x`, `smallest`, `increment`, `mode`)
+}
+
+
 `rs_plain_date_to_epoch_days` <- function(`year`, `month`, `day`) {
   .Call(savvy_rs_plain_date_to_epoch_days__impl, `year`, `month`, `day`)
+}
+
+
+`rs_plain_time_add` <- function(`second_of_day`, `nanos`, `duration`) {
+  .Call(savvy_rs_plain_time_add__impl, `second_of_day`, `nanos`, `duration`)
+}
+
+
+`rs_plain_time_diff` <- function(`x`, `y`, `largest`, `smallest`, `increment`, `mode`, `since`) {
+  .Call(savvy_rs_plain_time_diff__impl, `x`, `y`, `largest`, `smallest`, `increment`, `mode`, `since`)
 }
 
 
@@ -95,6 +170,11 @@ NULL
 
 `rs_plain_time_parse` <- function(`x`) {
   .Call(savvy_rs_plain_time_parse__impl, `x`)
+}
+
+
+`rs_plain_time_round` <- function(`second_of_day`, `nanos`, `smallest`, `increment`, `mode`) {
+  .Call(savvy_rs_plain_time_round__impl, `second_of_day`, `nanos`, `smallest`, `increment`, `mode`)
 }
 
 
