@@ -3,7 +3,7 @@
 #' `summary()` gives the minimum, quartiles (as observed values, i.e.
 #' quantile type 1), maximum and the number of missing values, in Temporal's
 #' ordering. Durations are ordered by length with 24-hour days, so durations
-#' with years or months cannot be summarised.
+#' with years or months cannot be summarized.
 #'
 #' @param object A Temporal vector.
 #' @param ... Not used.

@@ -129,7 +129,7 @@ microsecond. Use the Temporal types (or `epoch_nanoseconds()`) when you need nan
 
 ## Differences from Temporal
 
-zudate supports only the ISO 8601 calendar, and a few behaviours follow jiff or R conventions;
+zudate supports only the ISO 8601 calendar, and a few behaviors follow jiff or R conventions;
 they are listed in the package's design notes. The most visible ones:
 
 * `x - y` for two values of the same type is `temporal_since(x, y)`.

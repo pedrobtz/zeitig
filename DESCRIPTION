@@ -1,6 +1,6 @@
 Package: zudate
 Title: 'Temporal' Date and Time Types Backed by 'jiff'
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: c(
     person("Pedro", "Z", , "pedrobtz@gmail.com", role = c("aut", "cre")),
     person("The authors of the dependency Rust crates", role = "cph",
@@ -28,6 +28,7 @@ Suggests:
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Encoding: UTF-8
+Language: en-US
 Roxygen: list(markdown = TRUE)
 SystemRequirements: Cargo (Rust's package manager), rustc (>= 1.81)
 Config/roxygen2/version: 8.1.0

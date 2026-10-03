@@ -1,4 +1,6 @@
-# zudate (development version)
+# zudate 0.1.0
+
+Initial CRAN release.
 
 * Rust dependencies (`jiff`, `savvy`) are vendored and the package builds
   offline from the source tarball.
