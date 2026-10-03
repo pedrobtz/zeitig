@@ -31,10 +31,10 @@ default) clamps every component to its range (e.g. \code{hour = 25} becomes 23),
 \item{x}{An object to test.}
 }
 \value{
-A \code{zudate_plain_time} vector.
+A \code{zeitig_plain_time} vector.
 }
 \description{
-A \code{zudate_plain_time} is a wall-clock time of day with nanosecond precision
+A \code{zeitig_plain_time} is a wall-clock time of day with nanosecond precision
 and no date or time zone, the equivalent of
 \href{https://tc39.es/proposal-temporal/docs/plaintime.html}{\code{Temporal.PlainTime}}.
 }

@@ -70,7 +70,7 @@ format_options <- function(x, kind, fractional_second_digits = "auto", smallest_
     fsd <- fractional_second_digits
     valid <- is.numeric(fsd) && length(fsd) == 1 && !is.na(fsd) && fsd %in% 0:9
     if (!valid) {
-      zudate_range_error(
+      zeitig_range_error(
         "`fractional_second_digits` must be \"auto\" or a whole number from 0 to 9.",
         call = call
       )
@@ -99,7 +99,7 @@ format_options <- function(x, kind, fractional_second_digits = "auto", smallest_
     time_zone <- vec_recycle(time_zone, vec_size(x), call = call)
   }
   fields <- unclass(vec_data(x))
-  zudate_call(
+  zeitig_call(
     rs_format(
       fields, kind, digits, minute, offset, time_zone_name, calendar_name, time_zone
     ),
@@ -109,34 +109,34 @@ format_options <- function(x, kind, fractional_second_digits = "auto", smallest_
 
 #' @rdname temporal-format
 #' @export
-format.zudate_plain_date <- function(x, ..., calendar_name = "auto") {
+format.zeitig_plain_date <- function(x, ..., calendar_name = "auto") {
   if (identical(calendar_name, "auto")) {
     f <- vec_data(x)
-    return(zudate_call(rs_plain_date_format(f$year, f$month, f$day)))
+    return(zeitig_call(rs_plain_date_format(f$year, f$month, f$day)))
   }
   format_options(x, "plain_date", calendar_name = calendar_name)
 }
 
 #' @rdname temporal-format
 #' @export
-format.zudate_plain_time <- function(x, ..., fractional_second_digits = "auto",
+format.zeitig_plain_time <- function(x, ..., fractional_second_digits = "auto",
                                      smallest_unit = NULL, rounding_mode = "trunc") {
   if (is_default_precision(fractional_second_digits, smallest_unit)) {
     f <- vec_data(x)
-    return(zudate_call(rs_plain_time_format(f$second_of_day, f$nanos)))
+    return(zeitig_call(rs_plain_time_format(f$second_of_day, f$nanos)))
   }
   format_options(x, "plain_time", fractional_second_digits, smallest_unit, rounding_mode)
 }
 
 #' @rdname temporal-format
 #' @export
-format.zudate_plain_date_time <- function(x, ..., fractional_second_digits = "auto",
+format.zeitig_plain_date_time <- function(x, ..., fractional_second_digits = "auto",
                                           smallest_unit = NULL, rounding_mode = "trunc",
                                           calendar_name = "auto") {
   defaults <- is_default_precision(fractional_second_digits, smallest_unit)
   if (defaults && identical(calendar_name, "auto")) {
     f <- vec_data(x)
-    return(zudate_call(rs_plain_date_time_format(
+    return(zeitig_call(rs_plain_date_time_format(
       f$year, f$month, f$day, f$second_of_day, f$nanos
     )))
   }
@@ -148,12 +148,12 @@ format.zudate_plain_date_time <- function(x, ..., fractional_second_digits = "au
 
 #' @rdname temporal-format
 #' @export
-format.zudate_instant <- function(x, ..., fractional_second_digits = "auto",
+format.zeitig_instant <- function(x, ..., fractional_second_digits = "auto",
                                   smallest_unit = NULL, rounding_mode = "trunc",
                                   time_zone = NULL) {
   defaults <- is_default_precision(fractional_second_digits, smallest_unit)
   if (defaults && is.null(time_zone)) {
-    return(zudate_call(rs_instant_format(instant_data(x))))
+    return(zeitig_call(rs_instant_format(instant_data(x))))
   }
   format_options(
     x, "instant", fractional_second_digits, smallest_unit, rounding_mode,
@@ -163,7 +163,7 @@ format.zudate_instant <- function(x, ..., fractional_second_digits = "auto",
 
 #' @rdname temporal-format
 #' @export
-format.zudate_zoned_date_time <- function(x, ..., fractional_second_digits = "auto",
+format.zeitig_zoned_date_time <- function(x, ..., fractional_second_digits = "auto",
                                           smallest_unit = NULL, rounding_mode = "trunc",
                                           offset = "auto", time_zone_name = "auto",
                                           calendar_name = "auto") {
@@ -171,7 +171,7 @@ format.zudate_zoned_date_time <- function(x, ..., fractional_second_digits = "au
     identical(offset, "auto") && identical(time_zone_name, "auto") &&
     identical(calendar_name, "auto")
   if (defaults) {
-    return(zudate_call(rs_zoned_format(zoned_data(x))))
+    return(zeitig_call(rs_zoned_format(zoned_data(x))))
   }
   format_options(
     x, "zoned_date_time", fractional_second_digits, smallest_unit, rounding_mode,
@@ -195,7 +195,7 @@ temporal_kind <- function(x, call = rlang::caller_env()) {
   } else if (is_zoned_date_time(x)) {
     "zoned_date_time"
   } else {
-    zudate_type_error(
+    zeitig_type_error(
       sprintf("`x` must be a Temporal date or time, not %s.", obj_type_friendly(x)),
       call = call
     )
@@ -234,7 +234,7 @@ temporal_strftime <- function(x, format) {
   kind <- temporal_kind(x)
   check_character(format)
   args <- vec_recycle_common(x = x, format = format)
-  zudate_call(rs_strftime(unclass(vec_data(args$x)), kind, args$format))
+  zeitig_call(rs_strftime(unclass(vec_data(args$x)), kind, args$format))
 }
 
 #' @rdname temporal_strftime
@@ -248,7 +248,7 @@ temporal_strptime <- function(x, format,
   check_character(format)
   class <- arg_match(class)
   args <- vec_recycle_common(x = unname(x), format = format)
-  fields <- zudate_call(rs_strptime(args$x, args$format, class))
+  fields <- zeitig_call(rs_strptime(args$x, args$format, class))
   switch(class,
     plain_date = new_plain_date_fields(fields),
     plain_time = new_plain_time_fields(fields),

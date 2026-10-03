@@ -8,12 +8,12 @@ use savvy::{savvy, OwnedStringSexp, StringSexp};
 
 use crate::cols::{elt_error, is_na_str};
 
-/// The database used for every lookup. `ZUDATE_TZDIR` (read once per
+/// The database used for every lookup. `ZEITIG_TZDIR` (read once per
 /// session) points at a zoneinfo directory to use instead of jiff's default
 /// (the system database, honouring `TZDIR`; the bundled copy on Windows).
 pub(crate) fn db() -> &'static TimeZoneDatabase {
     static DB: OnceLock<TimeZoneDatabase> = OnceLock::new();
-    DB.get_or_init(|| match std::env::var_os("ZUDATE_TZDIR") {
+    DB.get_or_init(|| match std::env::var_os("ZEITIG_TZDIR") {
         Some(dir) if !dir.is_empty() => {
             TimeZoneDatabase::from_dir(dir).unwrap_or_else(|_| jiff::tz::db().clone())
         }

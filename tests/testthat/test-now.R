@@ -1,16 +1,16 @@
 test_that("now_*() return current values", {
   a <- now_instant()
-  expect_s3_class(a, "zudate_instant")
+  expect_s3_class(a, "zeitig_instant")
   expect_length(a, 1)
   ct <- Sys.time()
   expect_lt(abs(as.double(as.POSIXct(a)) - as.double(ct)), 60)
   z <- now_zoned_date_time("Asia/Tokyo")
   expect_equal(time_zone(z), "Asia/Tokyo")
-  expect_s3_class(now_plain_date("UTC"), "zudate_plain_date")
-  expect_s3_class(now_plain_time("UTC"), "zudate_plain_time")
-  expect_s3_class(now_plain_date_time("UTC"), "zudate_plain_date_time")
+  expect_s3_class(now_plain_date("UTC"), "zeitig_plain_date")
+  expect_s3_class(now_plain_time("UTC"), "zeitig_plain_time")
+  expect_s3_class(now_plain_date_time("UTC"), "zeitig_plain_date_time")
   expect_type(now_time_zone(), "character")
-  expect_error(now_zoned_date_time("Not/AZone"), class = "zudate_range_error")
+  expect_error(now_zoned_date_time("Not/AZone"), class = "zeitig_range_error")
 })
 
 test_that("the default time zone follows TZ", {

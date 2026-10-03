@@ -40,9 +40,9 @@ test_that("plain_date_time -> POSIXct/POSIXlt", {
 })
 
 test_that("as_*() reject unsupported inputs", {
-  expect_error(as_plain_date(1), class = "zudate_type_error")
-  expect_error(as_plain_time(TRUE), class = "zudate_type_error")
-  expect_error(as_plain_date_time(list()), class = "zudate_type_error")
+  expect_error(as_plain_date(1), class = "zeitig_type_error")
+  expect_error(as_plain_time(TRUE), class = "zeitig_type_error")
+  expect_error(as_plain_date_time(list()), class = "zeitig_type_error")
   expect_equal(format(as_plain_date(plain_date_time("2020-01-01T10:00"))), "2020-01-01")
   expect_equal(format(as_plain_time(plain_date_time("2020-01-01T10:00"))), "10:00:00")
   expect_equal(format(as_plain_date_time(plain_date(2020, 1, 1))), "2020-01-01T00:00:00")

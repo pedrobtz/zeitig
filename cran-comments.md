@@ -1,6 +1,6 @@
 ## Submission
 
-Initial submission of zudate 0.1.0, an implementation of the TC39 Temporal
+Initial submission of zeitig 0.1.0, an implementation of the TC39 Temporal
 date/time model backed by the Rust crate 'jiff'.
 
 ## Rust

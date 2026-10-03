@@ -1,6 +1,6 @@
 #' Instants
 #'
-#' A `zudate_instant` is an exact point in time with nanosecond precision and
+#' A `zeitig_instant` is an exact point in time with nanosecond precision and
 #' no time zone or calendar, the equivalent of
 #' [`Temporal.Instant`](https://tc39.es/proposal-temporal/docs/instant.html)
 #' (and of `jiff::Timestamp`). The supported range is years -9999 to 9999.
@@ -12,7 +12,7 @@
 #' cannot hold present-day epoch nanoseconds exactly.
 #'
 #' @param x A character vector to parse, or an object to test.
-#' @returns A `zudate_instant` vector.
+#' @returns A `zeitig_instant` vector.
 #' @family instant
 #' @export
 #' @examples
@@ -22,7 +22,7 @@
 #' instant_from_epoch(nanoseconds = "1553906700000000001")
 instant <- function(x) {
   check_character(x)
-  new_instant_fields(zudate_call(rs_instant_parse(unname(x))))
+  new_instant_fields(zeitig_call(rs_instant_parse(unname(x))))
 }
 
 #' @rdname instant
@@ -34,7 +34,7 @@ instant <- function(x) {
 instant_from_epoch <- function(seconds = NULL, milliseconds = NULL, nanoseconds = NULL) {
   given <- !vapply(list(seconds, milliseconds, nanoseconds), is.null, logical(1))
   if (sum(given) != 1L) {
-    zudate_type_error("Exactly one of `seconds`, `milliseconds` and `nanoseconds` must be given.")
+    zeitig_type_error("Exactly one of `seconds`, `milliseconds` and `nanoseconds` must be given.")
   }
   if (!is.null(nanoseconds)) {
     if (is.numeric(nanoseconds)) {
@@ -44,7 +44,7 @@ instant_from_epoch <- function(seconds = NULL, milliseconds = NULL, nanoseconds 
       ))
     }
     check_character(nanoseconds)
-    return(new_instant_fields(zudate_call(rs_instant_from_epoch_nanoseconds(nanoseconds))))
+    return(new_instant_fields(zeitig_call(rs_instant_from_epoch_nanoseconds(nanoseconds))))
   }
   if (!is.null(seconds)) {
     s <- as_epoch_number(seconds)
@@ -60,7 +60,7 @@ instant_from_epoch <- function(seconds = NULL, milliseconds = NULL, nanoseconds 
   carry <- !is.na(nanos) & nanos >= 1e9
   secs[carry] <- secs[carry] + 1
   nanos[carry] <- 0
-  new_instant_fields(zudate_call(rs_instant_validate(list(
+  new_instant_fields(zeitig_call(rs_instant_validate(list(
     seconds = as.double(secs), nanos = as.integer(nanos)
   ))))
 }
@@ -70,7 +70,7 @@ as_epoch_number <- function(x, arg = rlang::caller_arg(x), call = rlang::caller_
     return(rep(NA_real_, length(x)))
   }
   if (!is.numeric(x)) {
-    zudate_type_error(
+    zeitig_type_error(
       sprintf("`%s` must be a number, not %s.", arg, obj_type_friendly(x)),
       call = call
     )
@@ -78,7 +78,7 @@ as_epoch_number <- function(x, arg = rlang::caller_arg(x), call = rlang::caller_
   x <- as.double(unclass(x))
   bad <- !is.na(x) & !is.finite(x)
   if (any(bad)) {
-    zudate_range_error(sprintf("`%s` must be finite (element %d).", arg, which(bad)[[1]]),
+    zeitig_range_error(sprintf("`%s` must be finite (element %d).", arg, which(bad)[[1]]),
       call = call
     )
   }
@@ -86,7 +86,7 @@ as_epoch_number <- function(x, arg = rlang::caller_arg(x), call = rlang::caller_
 }
 
 new_instant_fields <- function(fields) {
-  new_rcrd(fields, class = "zudate_instant")
+  new_rcrd(fields, class = "zeitig_instant")
 }
 
 instant_data <- function(x) {
@@ -97,7 +97,7 @@ instant_data <- function(x) {
 #' @rdname instant
 #' @export
 is_instant <- function(x) {
-  inherits(x, "zudate_instant")
+  inherits(x, "zeitig_instant")
 }
 
 #' Epoch time
@@ -132,48 +132,48 @@ epoch_milliseconds <- function(x) {
 #' @export
 epoch_nanoseconds <- function(x) {
   f <- instant_fields_of(x)
-  zudate_call(rs_instant_epoch_nanoseconds(f))
+  zeitig_call(rs_instant_epoch_nanoseconds(f))
 }
 
 instant_fields_of <- function(x, call = rlang::caller_env()) {
   if (is_instant(x) || is_zoned_date_time(x)) {
     return(instant_data(x))
   }
-  zudate_type_error(
+  zeitig_type_error(
     sprintf("`x` must be an instant or zoned date-time, not %s.", obj_type_friendly(x)),
     call = call
   )
 }
 
 #' @export
-as.character.zudate_instant <- function(x, ...) {
+as.character.zeitig_instant <- function(x, ...) {
   format(x)
 }
 
 #' @export
-vec_ptype_abbr.zudate_instant <- function(x, ...) "inst"
+vec_ptype_abbr.zeitig_instant <- function(x, ...) "inst"
 
 #' @export
-vec_ptype_full.zudate_instant <- function(x, ...) "instant"
+vec_ptype_full.zeitig_instant <- function(x, ...) "instant"
 
 #' @export
-vec_ptype2.zudate_instant.zudate_instant <- function(x, y, ...) {
+vec_ptype2.zeitig_instant.zeitig_instant <- function(x, y, ...) {
   new_instant_fields(list(seconds = double(), nanos = integer()))
 }
 
 #' @export
-vec_cast.zudate_instant.zudate_instant <- function(x, to, ...) x
+vec_cast.zeitig_instant.zeitig_instant <- function(x, to, ...) x
 
 #' @export
-vec_cast.zudate_instant.character <- function(x, to, ...) instant(x)
+vec_cast.zeitig_instant.character <- function(x, to, ...) instant(x)
 
 #' @export
-vec_cast.character.zudate_instant <- function(x, to, ...) format(x)
+vec_cast.character.zeitig_instant <- function(x, to, ...) format(x)
 
 #' @export
-vec_cast.zudate_instant.POSIXct <- function(x, to, ...) as_instant(x)
+vec_cast.zeitig_instant.POSIXct <- function(x, to, ...) as_instant(x)
 
 #' @export
-vec_cast.POSIXct.zudate_instant <- function(x, to, ...) {
+vec_cast.POSIXct.zeitig_instant <- function(x, to, ...) {
   as.POSIXct(x, tz = attr(to, "tzone") %||% "")
 }

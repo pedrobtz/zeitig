@@ -8,8 +8,8 @@ RUSTFLAGS =
 
 TARGET_DIR = $(CURDIR)/rust/target
 LIBDIR = $(TARGET_DIR)/$(TARGET)/$(subst dev,debug,$(PROFILE))
-STATLIB = $(LIBDIR)/libzudate.a
-PKG_LIBS = -L$(LIBDIR) -lzudate
+STATLIB = $(LIBDIR)/libzeitig.a
+PKG_LIBS = -L$(LIBDIR) -lzeitig
 
 # Vendored crate sources (tools/vendor.sh). When the tarball is present the
 # build is fully offline: the tarball is extracted to ./rust/vendor, CARGO_HOME

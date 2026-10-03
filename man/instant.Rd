@@ -21,10 +21,10 @@ integers. Fractional seconds are rounded to the microsecond; fractional
 milliseconds and nanoseconds are truncated.}
 }
 \value{
-A \code{zudate_instant} vector.
+A \code{zeitig_instant} vector.
 }
 \description{
-A \code{zudate_instant} is an exact point in time with nanosecond precision and
+A \code{zeitig_instant} is an exact point in time with nanosecond precision and
 no time zone or calendar, the equivalent of
 \href{https://tc39.es/proposal-temporal/docs/instant.html}{\code{Temporal.Instant}}
 (and of \code{jiff::Timestamp}). The supported range is years -9999 to 9999.

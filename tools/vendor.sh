@@ -45,7 +45,7 @@ authors <- vapply(pkgs, function(p) {
 }, "")
 writeLines(
   c(
-    "The zudate package bundles the following Rust crates in",
+    "The zeitig package bundles the following Rust crates in",
     "src/rust/vendor.tar.xz. Their authors and licences are:",
     "",
     authors
@@ -60,7 +60,7 @@ by_license <- split(
   licenses
 )
 note <- c(
-  "The zudate package itself is licensed under the MIT licence (see LICENSE).",
+  "The zeitig package itself is licensed under the MIT licence (see LICENSE).",
   "",
   "It bundles the sources of the Rust crates listed in inst/AUTHORS",
   "(src/rust/vendor.tar.xz). All of them are available under permissive",

@@ -1,11 +1,11 @@
 test_that("plain_date_time() builds date-times from components", {
   x <- plain_date_time(1995, 12, 7, 3, 24, 30, 0, 3, 500)
-  expect_s3_class(x, "zudate_plain_date_time")
+  expect_s3_class(x, "zeitig_plain_date_time")
   expect_equal(format(x), "1995-12-07T03:24:30.0000035")
   expect_equal(format(plain_date_time(2020, 1, 1)), "2020-01-01T00:00:00")
   expect_equal(format(plain_date_time(2021, 2, 31, 25)), "2021-02-28T23:00:00")
-  expect_error(plain_date_time(2021, 2, 31, overflow = "reject"), class = "zudate_range_error")
-  expect_error(plain_date_time(2021, 2, 1, 24, overflow = "reject"), class = "zudate_range_error")
+  expect_error(plain_date_time(2021, 2, 31, overflow = "reject"), class = "zeitig_range_error")
+  expect_error(plain_date_time(2021, 2, 1, 24, overflow = "reject"), class = "zeitig_range_error")
 })
 
 test_that("plain_date_time() parses strings", {
@@ -23,7 +23,7 @@ test_that("plain_date_time() parses strings", {
       "1995-12-07T03:24:30", NA
     )
   )
-  expect_error(plain_date_time("1995-12-07T03:24:30Z"), class = "zudate_range_error")
+  expect_error(plain_date_time("1995-12-07T03:24:30Z"), class = "zeitig_range_error")
 })
 
 test_that("fields", {
@@ -64,9 +64,9 @@ test_that("conversions between civil types", {
   expect_equal(format(with_plain_time(dt)), "1995-12-07T00:00:00")
   expect_equal(format(with_plain_date(dt, "2000-01-01")), "2000-01-01T03:24:30.5")
   expect_true(is.na(with_plain_date(dt, plain_date(NA, 1, 1))))
-  expect_error(to_plain_date(plain_date(2000, 1, 1)), class = "zudate_type_error")
-  expect_error(to_plain_date_time(dt), class = "zudate_type_error")
-  expect_error(with_plain_time(plain_date(2000, 1, 1)), class = "zudate_type_error")
+  expect_error(to_plain_date(plain_date(2000, 1, 1)), class = "zeitig_type_error")
+  expect_error(to_plain_date_time(dt), class = "zeitig_type_error")
+  expect_error(with_plain_time(plain_date(2000, 1, 1)), class = "zeitig_type_error")
 })
 
 test_that("temporal_with() on date-times", {
