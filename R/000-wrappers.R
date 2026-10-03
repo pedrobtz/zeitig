@@ -43,3 +43,58 @@ NULL
 }
 
 
+`rs_plain_date_field` <- function(`year`, `month`, `day`, `field`) {
+  .Call(savvy_rs_plain_date_field__impl, `year`, `month`, `day`, `field`)
+}
+
+
+`rs_plain_date_format` <- function(`year`, `month`, `day`) {
+  .Call(savvy_rs_plain_date_format__impl, `year`, `month`, `day`)
+}
+
+
+`rs_plain_date_from_epoch_days` <- function(`days`) {
+  .Call(savvy_rs_plain_date_from_epoch_days__impl, `days`)
+}
+
+
+`rs_plain_date_from_parts` <- function(`year`, `month`, `day`, `reject`) {
+  .Call(savvy_rs_plain_date_from_parts__impl, `year`, `month`, `day`, `reject`)
+}
+
+
+`rs_plain_date_parse` <- function(`x`) {
+  .Call(savvy_rs_plain_date_parse__impl, `x`)
+}
+
+
+`rs_plain_date_time_format` <- function(`year`, `month`, `day`, `second_of_day`, `nanos`) {
+  .Call(savvy_rs_plain_date_time_format__impl, `year`, `month`, `day`, `second_of_day`, `nanos`)
+}
+
+
+`rs_plain_date_time_parse` <- function(`x`) {
+  .Call(savvy_rs_plain_date_time_parse__impl, `x`)
+}
+
+
+`rs_plain_date_to_epoch_days` <- function(`year`, `month`, `day`) {
+  .Call(savvy_rs_plain_date_to_epoch_days__impl, `year`, `month`, `day`)
+}
+
+
+`rs_plain_time_format` <- function(`second_of_day`, `nanos`) {
+  .Call(savvy_rs_plain_time_format__impl, `second_of_day`, `nanos`)
+}
+
+
+`rs_plain_time_from_parts` <- function(`hour`, `minute`, `second`, `millisecond`, `microsecond`, `nanosecond`, `reject`) {
+  .Call(savvy_rs_plain_time_from_parts__impl, `hour`, `minute`, `second`, `millisecond`, `microsecond`, `nanosecond`, `reject`)
+}
+
+
+`rs_plain_time_parse` <- function(`x`) {
+  .Call(savvy_rs_plain_time_parse__impl, `x`)
+}
+
+
