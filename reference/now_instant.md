@@ -42,19 +42,19 @@ applies to `POSIXct` values without a `tzone` attribute.
 ``` r
 now_instant()
 #> <instant[1]>
-#> [1] 2026-10-03T11:39:54.005883211Z
+#> [1] 2026-10-03T13:12:13.954496539Z
 now_zoned_date_time("Asia/Tokyo")
 #> <zoned_date_time[1]>
-#> [1] 2026-10-03T20:39:54.006837509+09:00[Asia/Tokyo]
+#> [1] 2026-10-03T22:12:13.955516317+09:00[Asia/Tokyo]
 now_plain_date()
 #> <plain_date[1]>
 #> [1] 2026-10-03
 now_plain_time("UTC")
 #> <plain_time[1]>
-#> [1] 11:39:54.009476045
+#> [1] 13:12:13.958337518
 now_plain_date_time()
 #> <plain_date_time[1]>
-#> [1] 2026-10-03T11:39:54.010527174
+#> [1] 2026-10-03T13:12:13.959511685
 now_time_zone()
 #> [1] "UTC"
 ```

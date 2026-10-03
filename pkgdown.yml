@@ -2,9 +2,10 @@ pandoc: 3.8.3
 pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
+  articles/cookbook: cookbook.html
   time-zones: time-zones.html
   zeitig: zeitig.html
-last_built: 2026-10-03T11:39Z
+last_built: 2026-10-03T13:12Z
 urls:
   reference: https://pedrobtz.github.io/zeitig/reference
   article: https://pedrobtz.github.io/zeitig/articles
