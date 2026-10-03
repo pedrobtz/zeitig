@@ -1,0 +1,86 @@
+# Proves the CRAN tarball builds from the vendored crates alone: build the
+# source tarball, then install it with cargo forbidden from reaching the
+# network and with no cargo registry cache, and run the tests against the
+# installed package.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+name: offline-install
+
+permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  offline-install:
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }}
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Add the Windows GNU Rust target
+        if: runner.os == 'Windows'
+        shell: bash
+        run: rustup target add x86_64-pc-windows-gnu
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          extra-packages: any::testthat
+          needs: check
+
+      - name: Build the source tarball
+        shell: bash
+        run: |
+          set -eu
+          R CMD build --no-build-vignettes --no-manual .
+          ls -la zudate_*.tar.gz
+          size=$(wc -c < zudate_*.tar.gz)
+          echo "tarball size: ${size} bytes"
+          # CRAN's guideline is 5 MB for the source package.
+          test "${size}" -lt 5000000
+
+      - name: Install offline
+        shell: bash
+        env:
+          CARGO_NET_OFFLINE: "true"
+          # Any network access (cargo, cc, curl) goes to a closed port. The
+          # lower-case variants are exported below: env keys are
+          # case-insensitive in workflow files.
+          HTTP_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          ALL_PROXY: http://127.0.0.1:9
+        run: |
+          set -eu
+          export http_proxy="${HTTP_PROXY}" https_proxy="${HTTPS_PROXY}"
+          rm -rf "${CARGO_HOME:-$HOME/.cargo}/registry" "${CARGO_HOME:-$HOME/.cargo}/git"
+          mkdir -p lib
+          R CMD INSTALL --library=lib zudate_*.tar.gz
+
+      - name: Test the installed package
+        shell: Rscript {0}
+        run: |
+          .libPaths(c("lib", .libPaths()))
+          library(zudate)
+          testthat::test_dir("tests/testthat", package = "zudate", load_package = "installed", stop_on_failure = TRUE)

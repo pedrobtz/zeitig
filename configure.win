@@ -36,8 +36,28 @@ if [ -n "${SAVVY_FEATURES}" ]; then
   FEATURE_FLAGS="--features '${SAVVY_FEATURES}'"
 fi
 
+# Pick the Rust target from the architecture of R's C compiler (Rtools x86_64
+# uses the GNU toolchain, Rtools aarch64 the LLVM one).
+# cf. https://github.com/apache/sedona-db/pull/1137
+CC="$("${R_HOME}/bin/R" CMD config CC)"
+case "$($CC -dumpmachine)" in
+  aarch64*|arm64*)
+    TARGET="aarch64-pc-windows-gnullvm"
+    CARGO_LINKER_VAR="CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER"
+    CARGO_LINKER="aarch64-w64-mingw32.static.posix-clang.exe"
+    ;;
+  *)
+    TARGET="x86_64-pc-windows-gnu"
+    CARGO_LINKER_VAR="CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER"
+    CARGO_LINKER="x86_64-w64-mingw32.static.posix-gcc.exe"
+    ;;
+esac
+echo "using Rust target: '${TARGET}'"
+
 sed \
-  -e "s/@TARGET@/x86_64-pc-windows-gnu/" \
+  -e "s/@TARGET@/${TARGET}/" \
+  -e "s/@CARGO_LINKER_VAR@/${CARGO_LINKER_VAR}/" \
+  -e "s/@CARGO_LINKER@/${CARGO_LINKER}/" \
   -e "s/@PROFILE@/${PROFILE}/" \
   -e "s/@FEATURE_FLAGS@/${FEATURE_FLAGS}/" \
   src/Makevars.win.in > src/Makevars.win

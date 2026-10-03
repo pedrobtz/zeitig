@@ -4,23 +4,30 @@
 \name{zudate-package}
 \alias{zudate}
 \alias{zudate-package}
-\title{zudate: What the Package Does (One Line, Title Case)}
+\title{zudate: 'Temporal' Date and Time Types Backed by 'jiff'}
 \description{
-What the package does (one paragraph).
+Implements the 'TC39 Temporal' date and time model \url{https://tc39.es/proposal-temporal/docs/} (instants, plain dates, plain times, plain date-times, zoned date-times and durations) as vectorised R classes. All calendar and time zone arithmetic, parsing and formatting is delegated to the 'Rust' crate 'jiff' \url{https://docs.rs/jiff}, which is bundled with the package, giving nanosecond precision, 'RFC 9557' string support and time-zone-aware arithmetic with 'Temporal' semantics.
 }
 \seealso{
 Useful links:
 \itemize{
   \item \url{https://pedrobtz.github.io/zudate/}
+  \item \url{https://github.com/pedrobtz/zudate}
+  \item Report bugs at \url{https://github.com/pedrobtz/zudate/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com}
+\strong{Maintainer}: Pedro Z \email{pedrobtz@gmail.com}
 
 Authors:
 \itemize{
-  \item First Last \email{first.last@example.com}
+  \item Pedro Z \email{pedrobtz@gmail.com}
+}
+
+Other contributors:
+\itemize{
+  \item The authors of the dependency Rust crates (see inst/AUTHORS for details) [copyright holder]
 }
 
 }
