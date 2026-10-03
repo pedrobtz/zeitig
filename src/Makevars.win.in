@@ -34,7 +34,7 @@ $(STATLIB):
 
 	if [ -f ./rust/vendor.tar.xz ]; then \
 	  rm -rf ./rust/vendor ./rust/cargo-home && \
-	  tar -xf ./rust/vendor.tar.xz -C ./rust && \
+	  "$(R_HOME)/bin$(R_ARCH_BIN)/Rscript" --vanilla -e 'untar("rust/vendor.tar.xz", exdir = "rust", tar = "internal")' && \
 	  mkdir -p ./rust/cargo-home && \
 	  printf '[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "vendor"\n' > ./rust/cargo-home/config.toml; \
 	fi
