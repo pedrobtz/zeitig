@@ -3,6 +3,9 @@
 <url><loc>https://pedrobtz.github.io/zudate/CLAUDE.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/LICENSE-text.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/LICENSE.html</loc></url>
+<url><loc>https://pedrobtz.github.io/zudate/articles/index.html</loc></url>
+<url><loc>https://pedrobtz.github.io/zudate/articles/time-zones.html</loc></url>
+<url><loc>https://pedrobtz.github.io/zudate/articles/zudate.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/authors.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/design.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/index.html</loc></url>
@@ -21,9 +24,12 @@
 <url><loc>https://pedrobtz.github.io/zudate/reference/temporal-coercion.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/temporal-conversions.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/temporal-fields.html</loc></url>
+<url><loc>https://pedrobtz.github.io/zudate/reference/temporal-format.html</loc></url>
+<url><loc>https://pedrobtz.github.io/zudate/reference/temporal-summary.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/temporal_add.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/temporal_compare.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/temporal_round.html</loc></url>
+<url><loc>https://pedrobtz.github.io/zudate/reference/temporal_strftime.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/temporal_until.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/temporal_with.html</loc></url>
 <url><loc>https://pedrobtz.github.io/zudate/reference/time_zone.html</loc></url>

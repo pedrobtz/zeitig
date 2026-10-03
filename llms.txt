@@ -1,21 +1,17 @@
 # zudate
 
 zudate brings the [TC39
-Temporal](https://tc39.es/proposal-temporal/docs/) date/time model
-(`Instant`, `PlainDate`, `PlainTime`, `PlainDateTime`, `ZonedDateTime`,
-`Duration`) to R as vectorised classes, with all date/time logic
-delegated to the Rust crate [jiff](https://docs.rs/jiff). The package is
-under active development towards 0.1.0; see `roadmap.md` for progress.
-
-Building from source needs a Rust toolchain (`cargo` and `rustc` \>=
-1.81, see <https://www.rust-lang.org/tools/install>). All Rust
-dependencies are bundled, so no network access is needed during
-installation.
+Temporal](https://tc39.es/proposal-temporal/docs/) date/time model to R:
+`PlainDate`, `PlainTime`, `PlainDateTime`, `Instant`, `ZonedDateTime`
+and `Duration` as vectorised R classes with nanosecond precision, RFC
+9557 strings, DST-aware arithmetic and Temporal’s rounding and
+disambiguation rules. All date/time logic is delegated to the Rust crate
+[jiff](https://docs.rs/jiff), which is bundled with the package.
 
 ## Installation
 
 You can install the development version of zudate from
-[GitHub](https://github.com/) with:
+[GitHub](https://github.com/pedrobtz/zudate) with:
 
 ``` r
 
@@ -23,23 +19,97 @@ You can install the development version of zudate from
 pak::pak("pedrobtz/zudate")
 ```
 
+Building from source needs a Rust toolchain (`cargo` and `rustc` \>=
+1.81, see <https://www.rust-lang.org/tools/install>). All Rust
+dependencies are bundled, so no network access is needed during
+installation.
+
 ## Example
 
 ``` r
 
 library(zudate)
-head(available_time_zones())
+
+# Calendar arithmetic clamps to the end of the month, as in Temporal
+plain_date(2021, 1, 31) + duration(months = 1)
+#> <plain_date[1]>
+#> [1] 2021-02-28
+
+# Differences, balanced and rounded
+temporal_until(plain_date(2006, 8, 24), plain_date(2019, 1, 31), largest_unit = "year")
+#> <duration[1]>
+#> [1] P12Y5M7D
+
+# Time zones: one calendar day later is still noon, but only 23 hours elapsed
+z <- zoned_date_time("2020-03-07T12:00-05:00[America/New_York]")
+z + duration(days = 1)
+#> <zoned_date_time[1]>
+#> [1] 2020-03-08T12:00:00-04:00[America/New_York]
+(z + duration(days = 1)) - z
+#> <duration[1]>
+#> [1] PT23H
+
+# Local times in a DST gap are resolved explicitly
+zoned_date_time(2019, 3, 10, 2, 30, time_zone = "America/New_York", disambiguation = "earlier")
+#> <zoned_date_time[1]>
+#> [1] 2019-03-10T01:30:00-05:00[America/New_York]
+
+# Nanosecond precision, exactly
+x <- instant("2019-03-30T00:45:00.123456789Z")
+epoch_nanoseconds(x)
+#> [1] "1553906700123456789"
 ```
+
+See
+[`vignette("zudate")`](https://pedrobtz.github.io/zudate/articles/zudate.md)
+for an overview and
+[`vignette("time-zones")`](https://pedrobtz.github.io/zudate/articles/time-zones.md)
+for time zone handling.
 
 # Package index
 
-## All functions
+## Plain dates and times
 
-- [`as_duration()`](https://pedrobtz.github.io/zudate/reference/as_duration.md)
-  [`as_difftime()`](https://pedrobtz.github.io/zudate/reference/as_duration.md)
-  : Coerce to and from durations
+Calendar dates and wall-clock times without a time zone.
+
+- [`plain_date()`](https://pedrobtz.github.io/zudate/reference/plain_date.md)
+  [`is_plain_date()`](https://pedrobtz.github.io/zudate/reference/plain_date.md)
+  : Plain dates
+- [`plain_time()`](https://pedrobtz.github.io/zudate/reference/plain_time.md)
+  [`is_plain_time()`](https://pedrobtz.github.io/zudate/reference/plain_time.md)
+  : Plain times
+- [`plain_date_time()`](https://pedrobtz.github.io/zudate/reference/plain_date_time.md)
+  [`is_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/plain_date_time.md)
+  : Plain date-times
+
+## Exact time
+
+Instants and zoned date-times.
+
+- [`instant()`](https://pedrobtz.github.io/zudate/reference/instant.md)
+  [`instant_from_epoch()`](https://pedrobtz.github.io/zudate/reference/instant.md)
+  [`is_instant()`](https://pedrobtz.github.io/zudate/reference/instant.md)
+  : Instants
+- [`epoch_seconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
+  [`epoch_milliseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
+  [`epoch_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
+  : Epoch time
+- [`zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/zoned_date_time.md)
+  [`is_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/zoned_date_time.md)
+  : Zoned date-times
+- [`time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
+  [`offset()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
+  [`offset_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
+  [`hours_in_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
+  [`start_of_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
+  [`time_zone_transition()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
+  [`with_time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
+  : Time zone information
 - [`available_time_zones()`](https://pedrobtz.github.io/zudate/reference/available_time_zones.md)
   : Available time zones
+
+## Durations
+
 - [`duration()`](https://pedrobtz.github.io/zudate/reference/duration.md)
   [`is_duration()`](https://pedrobtz.github.io/zudate/reference/duration.md)
   : Durations
@@ -47,42 +117,12 @@ head(available_time_zones())
   [`duration_compare()`](https://pedrobtz.github.io/zudate/reference/duration_total.md)
   [`duration_blank()`](https://pedrobtz.github.io/zudate/reference/duration_total.md)
   : Duration helpers
-- [`epoch_seconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
-  [`epoch_milliseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
-  [`epoch_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/epoch_seconds.md)
-  : Epoch time
-- [`instant()`](https://pedrobtz.github.io/zudate/reference/instant.md)
-  [`instant_from_epoch()`](https://pedrobtz.github.io/zudate/reference/instant.md)
-  [`is_instant()`](https://pedrobtz.github.io/zudate/reference/instant.md)
-  : Instants
-- [`now_instant()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
-  [`now_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
-  [`now_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
-  [`now_plain_date()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
-  [`now_plain_time()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
-  [`now_time_zone()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
-  : The current time
-- [`plain_date()`](https://pedrobtz.github.io/zudate/reference/plain_date.md)
-  [`is_plain_date()`](https://pedrobtz.github.io/zudate/reference/plain_date.md)
-  : Plain dates
-- [`plain_date_time()`](https://pedrobtz.github.io/zudate/reference/plain_date_time.md)
-  [`is_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/plain_date_time.md)
-  : Plain date-times
-- [`plain_time()`](https://pedrobtz.github.io/zudate/reference/plain_time.md)
-  [`is_plain_time()`](https://pedrobtz.github.io/zudate/reference/plain_time.md)
-  : Plain times
-- [`as_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)
-  [`as_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)
-  [`as_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)
-  [`as_instant()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)
-  [`as_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)
-  : Coerce to Temporal types
-- [`to_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md)
-  [`to_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md)
-  [`to_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md)
-  [`to_instant()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md)
-  [`to_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md)
-  : Convert between Temporal types
+- [`as_duration()`](https://pedrobtz.github.io/zudate/reference/as_duration.md)
+  [`as_difftime()`](https://pedrobtz.github.io/zudate/reference/as_duration.md)
+  : Coerce to and from durations
+
+## Fields and modification
+
 - [`year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md)
   [`month()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md)
   [`day()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md)
@@ -103,30 +143,77 @@ head(available_time_zones())
   [`in_leap_year()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md)
   [`temporal_fields()`](https://pedrobtz.github.io/zudate/reference/temporal-fields.md)
   : Date and time fields
-- [`temporal_add()`](https://pedrobtz.github.io/zudate/reference/temporal_add.md)
-  [`temporal_subtract()`](https://pedrobtz.github.io/zudate/reference/temporal_add.md)
-  : Add or subtract durations
-- [`temporal_compare()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md)
-  [`temporal_equals()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md)
-  : Compare Temporal objects
-- [`temporal_round()`](https://pedrobtz.github.io/zudate/reference/temporal_round.md)
-  : Round values and durations
-- [`temporal_until()`](https://pedrobtz.github.io/zudate/reference/temporal_until.md)
-  [`temporal_since()`](https://pedrobtz.github.io/zudate/reference/temporal_until.md)
-  : Difference between two values
 - [`temporal_with()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md)
   [`with_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md)
   [`with_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal_with.md)
   : Replace fields
-- [`time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
-  [`offset()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
-  [`offset_nanoseconds()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
-  [`hours_in_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
-  [`start_of_day()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
-  [`time_zone_transition()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
-  [`with_time_zone()`](https://pedrobtz.github.io/zudate/reference/time_zone.md)
-  : Time zone information
-- [`zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/zoned_date_time.md)
-  [`is_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/zoned_date_time.md)
-  : Zoned date-times
 
+## Arithmetic, rounding and comparison
+
+- [`temporal_add()`](https://pedrobtz.github.io/zudate/reference/temporal_add.md)
+  [`temporal_subtract()`](https://pedrobtz.github.io/zudate/reference/temporal_add.md)
+  : Add or subtract durations
+- [`temporal_until()`](https://pedrobtz.github.io/zudate/reference/temporal_until.md)
+  [`temporal_since()`](https://pedrobtz.github.io/zudate/reference/temporal_until.md)
+  : Difference between two values
+- [`temporal_round()`](https://pedrobtz.github.io/zudate/reference/temporal_round.md)
+  : Round values and durations
+- [`temporal_compare()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md)
+  [`temporal_equals()`](https://pedrobtz.github.io/zudate/reference/temporal_compare.md)
+  : Compare Temporal objects
+
+## Conversion, parsing and formatting
+
+- [`to_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md)
+  [`to_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md)
+  [`to_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md)
+  [`to_instant()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md)
+  [`to_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-conversions.md)
+  : Convert between Temporal types
+- [`as_plain_date()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)
+  [`as_plain_time()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)
+  [`as_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)
+  [`as_instant()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)
+  [`as_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md)
+  : Coerce to Temporal types
+- [`format(`*`<zudate_plain_date>`*`)`](https://pedrobtz.github.io/zudate/reference/temporal-format.md)
+  [`format(`*`<zudate_plain_time>`*`)`](https://pedrobtz.github.io/zudate/reference/temporal-format.md)
+  [`format(`*`<zudate_plain_date_time>`*`)`](https://pedrobtz.github.io/zudate/reference/temporal-format.md)
+  [`format(`*`<zudate_instant>`*`)`](https://pedrobtz.github.io/zudate/reference/temporal-format.md)
+  [`format(`*`<zudate_zoned_date_time>`*`)`](https://pedrobtz.github.io/zudate/reference/temporal-format.md)
+  : Format Temporal objects as strings
+- [`temporal_strftime()`](https://pedrobtz.github.io/zudate/reference/temporal_strftime.md)
+  [`temporal_strptime()`](https://pedrobtz.github.io/zudate/reference/temporal_strftime.md)
+  : strftime-style formatting and parsing
+- [`summary(`*`<zudate_plain_date>`*`)`](https://pedrobtz.github.io/zudate/reference/temporal-summary.md)
+  [`summary(`*`<zudate_plain_time>`*`)`](https://pedrobtz.github.io/zudate/reference/temporal-summary.md)
+  [`summary(`*`<zudate_plain_date_time>`*`)`](https://pedrobtz.github.io/zudate/reference/temporal-summary.md)
+  [`summary(`*`<zudate_instant>`*`)`](https://pedrobtz.github.io/zudate/reference/temporal-summary.md)
+  [`summary(`*`<zudate_zoned_date_time>`*`)`](https://pedrobtz.github.io/zudate/reference/temporal-summary.md)
+  [`summary(`*`<zudate_duration>`*`)`](https://pedrobtz.github.io/zudate/reference/temporal-summary.md)
+  : Summaries of Temporal vectors
+
+## Current time
+
+- [`now_instant()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
+  [`now_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
+  [`now_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
+  [`now_plain_date()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
+  [`now_plain_time()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
+  [`now_time_zone()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
+  : The current time
+
+## Package
+
+- [`zudate`](https://pedrobtz.github.io/zudate/reference/zudate-package.md)
+  [`zudate-package`](https://pedrobtz.github.io/zudate/reference/zudate-package.md)
+  : zudate: 'Temporal' Date and Time Types Backed by 'jiff'
+
+# Articles
+
+### Articles
+
+- [Introduction to
+  zudate](https://pedrobtz.github.io/zudate/articles/zudate.md):
+- [Time
+  zones](https://pedrobtz.github.io/zudate/articles/time-zones.md):

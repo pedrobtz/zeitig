@@ -31,7 +31,14 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/zudate.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/time-zones.html">Time zones</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -51,22 +58,51 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>zudate brings the <a href="https://tc39.es/proposal-temporal/docs/" class="external-link">TC39 Temporal</a> date/time model (<code>Instant</code>, <code>PlainDate</code>, <code>PlainTime</code>, <code>PlainDateTime</code>, <code>ZonedDateTime</code>, <code>Duration</code>) to R as vectorised classes, with all date/time logic delegated to the Rust crate <a href="https://docs.rs/jiff" class="external-link">jiff</a>. The package is under active development towards 0.1.0; see <code>roadmap.md</code> for progress.</p>
-<p>Building from source needs a Rust toolchain (<code>cargo</code> and <code>rustc</code> &gt;= 1.81, see <a href="https://www.rust-lang.org/tools/install" class="external-link uri">https://www.rust-lang.org/tools/install</a>). All Rust dependencies are bundled, so no network access is needed during installation.</p>
+<p>zudate brings the <a href="https://tc39.es/proposal-temporal/docs/" class="external-link">TC39 Temporal</a> date/time model to R: <code>PlainDate</code>, <code>PlainTime</code>, <code>PlainDateTime</code>, <code>Instant</code>, <code>ZonedDateTime</code> and <code>Duration</code> as vectorised R classes with nanosecond precision, RFC 9557 strings, DST-aware arithmetic and Temporal’s rounding and disambiguation rules. All date/time logic is delegated to the Rust crate <a href="https://docs.rs/jiff" class="external-link">jiff</a>, which is bundled with the package.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of zudate from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>You can install the development version of zudate from <a href="https://github.com/pedrobtz/zudate" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"pedrobtz/zudate"</span><span class="op">)</span></span></code></pre></div>
+<p>Building from source needs a Rust toolchain (<code>cargo</code> and <code>rustc</code> &gt;= 1.81, see <a href="https://www.rust-lang.org/tools/install" class="external-link uri">https://www.rust-lang.org/tools/install</a>). All Rust dependencies are bundled, so no network access is needed during installation.</p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pedrobtz.github.io/zudate/">zudate</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/available_time_zones.html">available_time_zones</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span></span>
+<span><span class="co"># Calendar arithmetic clamps to the end of the month, as in Temporal</span></span>
+<span><span class="fu"><a href="reference/plain_date.html">plain_date</a></span><span class="op">(</span><span class="fl">2021</span>, <span class="fl">1</span>, <span class="fl">31</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="reference/duration.html">duration</a></span><span class="op">(</span>months <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;plain_date[1]&gt;</span></span>
+<span><span class="co">#&gt; [1] 2021-02-28</span></span>
+<span></span>
+<span><span class="co"># Differences, balanced and rounded</span></span>
+<span><span class="fu"><a href="reference/temporal_until.html">temporal_until</a></span><span class="op">(</span><span class="fu"><a href="reference/plain_date.html">plain_date</a></span><span class="op">(</span><span class="fl">2006</span>, <span class="fl">8</span>, <span class="fl">24</span><span class="op">)</span>, <span class="fu"><a href="reference/plain_date.html">plain_date</a></span><span class="op">(</span><span class="fl">2019</span>, <span class="fl">1</span>, <span class="fl">31</span><span class="op">)</span>, largest_unit <span class="op">=</span> <span class="st">"year"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;duration[1]&gt;</span></span>
+<span><span class="co">#&gt; [1] P12Y5M7D</span></span>
+<span></span>
+<span><span class="co"># Time zones: one calendar day later is still noon, but only 23 hours elapsed</span></span>
+<span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/zoned_date_time.html">zoned_date_time</a></span><span class="op">(</span><span class="st">"2020-03-07T12:00-05:00[America/New_York]"</span><span class="op">)</span></span>
+<span><span class="va">z</span> <span class="op">+</span> <span class="fu"><a href="reference/duration.html">duration</a></span><span class="op">(</span>days <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;zoned_date_time[1]&gt;</span></span>
+<span><span class="co">#&gt; [1] 2020-03-08T12:00:00-04:00[America/New_York]</span></span>
+<span><span class="op">(</span><span class="va">z</span> <span class="op">+</span> <span class="fu"><a href="reference/duration.html">duration</a></span><span class="op">(</span>days <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span> <span class="va">z</span></span>
+<span><span class="co">#&gt; &lt;duration[1]&gt;</span></span>
+<span><span class="co">#&gt; [1] PT23H</span></span>
+<span></span>
+<span><span class="co"># Local times in a DST gap are resolved explicitly</span></span>
+<span><span class="fu"><a href="reference/zoned_date_time.html">zoned_date_time</a></span><span class="op">(</span><span class="fl">2019</span>, <span class="fl">3</span>, <span class="fl">10</span>, <span class="fl">2</span>, <span class="fl">30</span>, time_zone <span class="op">=</span> <span class="st">"America/New_York"</span>, disambiguation <span class="op">=</span> <span class="st">"earlier"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;zoned_date_time[1]&gt;</span></span>
+<span><span class="co">#&gt; [1] 2019-03-10T01:30:00-05:00[America/New_York]</span></span>
+<span></span>
+<span><span class="co"># Nanosecond precision, exactly</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/instant.html">instant</a></span><span class="op">(</span><span class="st">"2019-03-30T00:45:00.123456789Z"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/epoch_seconds.html">epoch_nanoseconds</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "1553906700123456789"</span></span></code></pre></div>
+<p>See <code><a href="articles/zudate.html">vignette("zudate")</a></code> for an overview and <code><a href="articles/time-zones.html">vignette("time-zones")</a></code> for time zone handling.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

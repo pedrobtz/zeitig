@@ -15,7 +15,12 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/zudate.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/time-zones.html">Time zones</a></li>
+  </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -41,6 +46,10 @@
 <li>New <code><a href="../reference/instant.html">instant()</a></code> (Temporal <code>Instant</code>) and <code><a href="../reference/zoned_date_time.html">zoned_date_time()</a></code> (Temporal <code>ZonedDateTime</code>) classes: RFC 9557 parsing with <code>disambiguation</code> and <code>offset</code> options, per-element time zones, <code>epoch_*()</code> accessors, <code><a href="../reference/time_zone.html">time_zone()</a></code>, <code><a href="../reference/time_zone.html">offset()</a></code>, <code><a href="../reference/time_zone.html">offset_nanoseconds()</a></code>, <code><a href="../reference/time_zone.html">hours_in_day()</a></code>, <code><a href="../reference/time_zone.html">start_of_day()</a></code>, <code><a href="../reference/time_zone.html">time_zone_transition()</a></code>, <code><a href="../reference/time_zone.html">with_time_zone()</a></code>, <code><a href="../reference/temporal-conversions.html">to_instant()</a></code>, <code><a href="../reference/temporal-conversions.html">to_zoned_date_time()</a></code>, DST-aware arithmetic, rounding and differences, and <code>POSIXct</code>/<code>POSIXlt</code> conversions.</li>
 <li>
 <code><a href="../reference/now_instant.html">now_instant()</a></code>, <code><a href="../reference/now_instant.html">now_zoned_date_time()</a></code>, <code><a href="../reference/now_instant.html">now_plain_date()</a></code>, <code><a href="../reference/now_instant.html">now_plain_time()</a></code>, <code><a href="../reference/now_instant.html">now_plain_date_time()</a></code> and <code><a href="../reference/now_instant.html">now_time_zone()</a></code>.</li>
+<li>
+<code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> supports Temporal’s <code><a href="https://rdrr.io/r/base/toString.html" class="external-link">toString()</a></code> options (<code>fractional_second_digits</code>, <code>smallest_unit</code>, <code>rounding_mode</code>, <code>offset</code>, <code>time_zone_name</code>, <code>calendar_name</code>, <code>time_zone</code>), and <code><a href="../reference/temporal_strftime.html">temporal_strftime()</a></code>/<code><a href="../reference/temporal_strftime.html">temporal_strptime()</a></code> expose jiff’s strftime.</li>
+<li>
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods; vignettes <code><a href="../articles/zudate.html">vignette("zudate")</a></code> and <code><a href="../articles/time-zones.html">vignette("time-zones")</a></code>.</li>
 <li>New <code><a href="../reference/available_time_zones.html">available_time_zones()</a></code> lists the IANA time zone identifiers known to the time zone database.</li>
 </ul></div>
   </main></div>

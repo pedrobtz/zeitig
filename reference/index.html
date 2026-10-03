@@ -15,7 +15,12 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/zudate.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/time-zones.html">Time zones</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -32,7 +37,81 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="plain-dates-and-times">Plain dates and times<a class="anchor" aria-label="anchor" href="#plain-dates-and-times"></a></h2>
+
+      <div class="section-desc"><p>Calendar dates and wall-clock times without a time zone.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="plain_date.html">plain_date()</a></code> <code><a href="plain_date.html">is_plain_date()</a></code>
+
+        </dt>
+        <dd>Plain dates</dd>
+
+        <dt>
+
+          <code><a href="plain_time.html">plain_time()</a></code> <code><a href="plain_time.html">is_plain_time()</a></code>
+
+        </dt>
+        <dd>Plain times</dd>
+
+        <dt>
+
+          <code><a href="plain_date_time.html">plain_date_time()</a></code> <code><a href="plain_date_time.html">is_plain_date_time()</a></code>
+
+        </dt>
+        <dd>Plain date-times</dd>
+      </dl></div><div class="section level2">
+      <h2 id="exact-time">Exact time<a class="anchor" aria-label="anchor" href="#exact-time"></a></h2>
+
+      <div class="section-desc"><p>Instants and zoned date-times.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="instant.html">instant()</a></code> <code><a href="instant.html">instant_from_epoch()</a></code> <code><a href="instant.html">is_instant()</a></code>
+
+        </dt>
+        <dd>Instants</dd>
+
+        <dt>
+
+          <code><a href="epoch_seconds.html">epoch_seconds()</a></code> <code><a href="epoch_seconds.html">epoch_milliseconds()</a></code> <code><a href="epoch_seconds.html">epoch_nanoseconds()</a></code>
+
+        </dt>
+        <dd>Epoch time</dd>
+
+        <dt>
+
+          <code><a href="zoned_date_time.html">zoned_date_time()</a></code> <code><a href="zoned_date_time.html">is_zoned_date_time()</a></code>
+
+        </dt>
+        <dd>Zoned date-times</dd>
+
+        <dt>
+
+          <code><a href="time_zone.html">time_zone()</a></code> <code><a href="time_zone.html">offset()</a></code> <code><a href="time_zone.html">offset_nanoseconds()</a></code> <code><a href="time_zone.html">hours_in_day()</a></code> <code><a href="time_zone.html">start_of_day()</a></code> <code><a href="time_zone.html">time_zone_transition()</a></code> <code><a href="time_zone.html">with_time_zone()</a></code>
+
+        </dt>
+        <dd>Time zone information</dd>
+
+        <dt>
+
+          <code><a href="available_time_zones.html">available_time_zones()</a></code>
+
+        </dt>
+        <dd>Available time zones</dd>
+      </dl></div><div class="section level2">
+      <h2 id="durations">Durations<a class="anchor" aria-label="anchor" href="#durations"></a></h2>
 
 
 
@@ -42,20 +121,6 @@
 
 
       <dl><dt>
-
-          <code><a href="as_duration.html">as_duration()</a></code> <code><a href="as_duration.html">as_difftime()</a></code>
-
-        </dt>
-        <dd>Coerce to and from durations</dd>
-
-        <dt>
-
-          <code><a href="available_time_zones.html">available_time_zones()</a></code>
-
-        </dt>
-        <dd>Available time zones</dd>
-
-        <dt>
 
           <code><a href="duration.html">duration()</a></code> <code><a href="duration.html">is_duration()</a></code>
 
@@ -71,61 +136,21 @@
 
         <dt>
 
-          <code><a href="epoch_seconds.html">epoch_seconds()</a></code> <code><a href="epoch_seconds.html">epoch_milliseconds()</a></code> <code><a href="epoch_seconds.html">epoch_nanoseconds()</a></code>
+          <code><a href="as_duration.html">as_duration()</a></code> <code><a href="as_duration.html">as_difftime()</a></code>
 
         </dt>
-        <dd>Epoch time</dd>
+        <dd>Coerce to and from durations</dd>
+      </dl></div><div class="section level2">
+      <h2 id="fields-and-modification">Fields and modification<a class="anchor" aria-label="anchor" href="#fields-and-modification"></a></h2>
 
-        <dt>
 
-          <code><a href="instant.html">instant()</a></code> <code><a href="instant.html">instant_from_epoch()</a></code> <code><a href="instant.html">is_instant()</a></code>
 
-        </dt>
-        <dd>Instants</dd>
+      <dl></dl></div><div class="section level2">
 
-        <dt>
 
-          <code><a href="now_instant.html">now_instant()</a></code> <code><a href="now_instant.html">now_zoned_date_time()</a></code> <code><a href="now_instant.html">now_plain_date_time()</a></code> <code><a href="now_instant.html">now_plain_date()</a></code> <code><a href="now_instant.html">now_plain_time()</a></code> <code><a href="now_instant.html">now_time_zone()</a></code>
 
-        </dt>
-        <dd>The current time</dd>
 
-        <dt>
-
-          <code><a href="plain_date.html">plain_date()</a></code> <code><a href="plain_date.html">is_plain_date()</a></code>
-
-        </dt>
-        <dd>Plain dates</dd>
-
-        <dt>
-
-          <code><a href="plain_date_time.html">plain_date_time()</a></code> <code><a href="plain_date_time.html">is_plain_date_time()</a></code>
-
-        </dt>
-        <dd>Plain date-times</dd>
-
-        <dt>
-
-          <code><a href="plain_time.html">plain_time()</a></code> <code><a href="plain_time.html">is_plain_time()</a></code>
-
-        </dt>
-        <dd>Plain times</dd>
-
-        <dt>
-
-          <code><a href="temporal-coercion.html">as_plain_date()</a></code> <code><a href="temporal-coercion.html">as_plain_time()</a></code> <code><a href="temporal-coercion.html">as_plain_date_time()</a></code> <code><a href="temporal-coercion.html">as_instant()</a></code> <code><a href="temporal-coercion.html">as_zoned_date_time()</a></code>
-
-        </dt>
-        <dd>Coerce to Temporal types</dd>
-
-        <dt>
-
-          <code><a href="temporal-conversions.html">to_plain_date()</a></code> <code><a href="temporal-conversions.html">to_plain_time()</a></code> <code><a href="temporal-conversions.html">to_plain_date_time()</a></code> <code><a href="temporal-conversions.html">to_instant()</a></code> <code><a href="temporal-conversions.html">to_zoned_date_time()</a></code>
-
-        </dt>
-        <dd>Convert between Temporal types</dd>
-
-        <dt>
+      <dl><dt>
 
           <code><a href="temporal-fields.html">year()</a></code> <code><a href="temporal-fields.html">month()</a></code> <code><a href="temporal-fields.html">day()</a></code> <code><a href="temporal-fields.html">hour()</a></code> <code><a href="temporal-fields.html">minute()</a></code> <code><a href="temporal-fields.html">second()</a></code> <code><a href="temporal-fields.html">millisecond()</a></code> <code><a href="temporal-fields.html">microsecond()</a></code> <code><a href="temporal-fields.html">nanosecond()</a></code> <code><a href="temporal-fields.html">day_of_week()</a></code> <code><a href="temporal-fields.html">day_of_year()</a></code> <code><a href="temporal-fields.html">week_of_year()</a></code> <code><a href="temporal-fields.html">year_of_week()</a></code> <code><a href="temporal-fields.html">days_in_week()</a></code> <code><a href="temporal-fields.html">days_in_month()</a></code> <code><a href="temporal-fields.html">days_in_year()</a></code> <code><a href="temporal-fields.html">months_in_year()</a></code> <code><a href="temporal-fields.html">in_leap_year()</a></code> <code><a href="temporal-fields.html">temporal_fields()</a></code>
 
@@ -134,24 +159,26 @@
 
         <dt>
 
+          <code><a href="temporal_with.html">temporal_with()</a></code> <code><a href="temporal_with.html">with_plain_time()</a></code> <code><a href="temporal_with.html">with_plain_date()</a></code>
+
+        </dt>
+        <dd>Replace fields</dd>
+      </dl></div><div class="section level2">
+      <h2 id="arithmetic-rounding-and-comparison">Arithmetic, rounding and comparison<a class="anchor" aria-label="anchor" href="#arithmetic-rounding-and-comparison"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
           <code><a href="temporal_add.html">temporal_add()</a></code> <code><a href="temporal_add.html">temporal_subtract()</a></code>
 
         </dt>
         <dd>Add or subtract durations</dd>
-
-        <dt>
-
-          <code><a href="temporal_compare.html">temporal_compare()</a></code> <code><a href="temporal_compare.html">temporal_equals()</a></code>
-
-        </dt>
-        <dd>Compare Temporal objects</dd>
-
-        <dt>
-
-          <code><a href="temporal_round.html">temporal_round()</a></code>
-
-        </dt>
-        <dd>Round values and durations</dd>
 
         <dt>
 
@@ -162,26 +189,96 @@
 
         <dt>
 
-          <code><a href="temporal_with.html">temporal_with()</a></code> <code><a href="temporal_with.html">with_plain_time()</a></code> <code><a href="temporal_with.html">with_plain_date()</a></code>
+          <code><a href="temporal_round.html">temporal_round()</a></code>
 
         </dt>
-        <dd>Replace fields</dd>
+        <dd>Round values and durations</dd>
 
         <dt>
 
-          <code><a href="time_zone.html">time_zone()</a></code> <code><a href="time_zone.html">offset()</a></code> <code><a href="time_zone.html">offset_nanoseconds()</a></code> <code><a href="time_zone.html">hours_in_day()</a></code> <code><a href="time_zone.html">start_of_day()</a></code> <code><a href="time_zone.html">time_zone_transition()</a></code> <code><a href="time_zone.html">with_time_zone()</a></code>
+          <code><a href="temporal_compare.html">temporal_compare()</a></code> <code><a href="temporal_compare.html">temporal_equals()</a></code>
 
         </dt>
-        <dd>Time zone information</dd>
+        <dd>Compare Temporal objects</dd>
+      </dl></div><div class="section level2">
+      <h2 id="conversion-parsing-and-formatting">Conversion, parsing and formatting<a class="anchor" aria-label="anchor" href="#conversion-parsing-and-formatting"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="temporal-conversions.html">to_plain_date()</a></code> <code><a href="temporal-conversions.html">to_plain_time()</a></code> <code><a href="temporal-conversions.html">to_plain_date_time()</a></code> <code><a href="temporal-conversions.html">to_instant()</a></code> <code><a href="temporal-conversions.html">to_zoned_date_time()</a></code>
+
+        </dt>
+        <dd>Convert between Temporal types</dd>
 
         <dt>
 
-          <code><a href="zoned_date_time.html">zoned_date_time()</a></code> <code><a href="zoned_date_time.html">is_zoned_date_time()</a></code>
+          <code><a href="temporal-coercion.html">as_plain_date()</a></code> <code><a href="temporal-coercion.html">as_plain_time()</a></code> <code><a href="temporal-coercion.html">as_plain_date_time()</a></code> <code><a href="temporal-coercion.html">as_instant()</a></code> <code><a href="temporal-coercion.html">as_zoned_date_time()</a></code>
 
         </dt>
-        <dd>Zoned date-times</dd>
+        <dd>Coerce to Temporal types</dd>
+
+        <dt>
+
+          <code><a href="temporal-format.html">format(<i>&lt;zudate_plain_date&gt;</i>)</a></code> <code><a href="temporal-format.html">format(<i>&lt;zudate_plain_time&gt;</i>)</a></code> <code><a href="temporal-format.html">format(<i>&lt;zudate_plain_date_time&gt;</i>)</a></code> <code><a href="temporal-format.html">format(<i>&lt;zudate_instant&gt;</i>)</a></code> <code><a href="temporal-format.html">format(<i>&lt;zudate_zoned_date_time&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Format Temporal objects as strings</dd>
+
+        <dt>
+
+          <code><a href="temporal_strftime.html">temporal_strftime()</a></code> <code><a href="temporal_strftime.html">temporal_strptime()</a></code>
+
+        </dt>
+        <dd>strftime-style formatting and parsing</dd>
+
+        <dt>
+
+          <code><a href="temporal-summary.html">summary(<i>&lt;zudate_plain_date&gt;</i>)</a></code> <code><a href="temporal-summary.html">summary(<i>&lt;zudate_plain_time&gt;</i>)</a></code> <code><a href="temporal-summary.html">summary(<i>&lt;zudate_plain_date_time&gt;</i>)</a></code> <code><a href="temporal-summary.html">summary(<i>&lt;zudate_instant&gt;</i>)</a></code> <code><a href="temporal-summary.html">summary(<i>&lt;zudate_zoned_date_time&gt;</i>)</a></code> <code><a href="temporal-summary.html">summary(<i>&lt;zudate_duration&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summaries of Temporal vectors</dd>
+      </dl></div><div class="section level2">
+      <h2 id="current-time">Current time<a class="anchor" aria-label="anchor" href="#current-time"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="now_instant.html">now_instant()</a></code> <code><a href="now_instant.html">now_zoned_date_time()</a></code> <code><a href="now_instant.html">now_plain_date_time()</a></code> <code><a href="now_instant.html">now_plain_date()</a></code> <code><a href="now_instant.html">now_plain_time()</a></code> <code><a href="now_instant.html">now_time_zone()</a></code>
+
+        </dt>
+        <dd>The current time</dd>
+      </dl></div><div class="section level2">
+      <h2 id="package">Package<a class="anchor" aria-label="anchor" href="#package"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="zudate-package.html">zudate</a></code> <code><a href="zudate-package.html">zudate-package</a></code>
+
+        </dt>
+        <dd>zudate: 'Temporal' Date and Time Types Backed by 'jiff'</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

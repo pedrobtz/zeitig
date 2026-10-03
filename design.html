@@ -15,7 +15,12 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="articles/zudate.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/time-zones.html">Time zones</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json"></form></li>
@@ -451,7 +456,10 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <code>Date - Date</code> is a <code>Span</code> in days</td>
 <td>
 <code>x - y</code> is <code>temporal_since(x, y)</code> with default options</td>
-</tr></tbody></table><p>Anything discovered later goes in this table before the behaviour is shipped.</p>
+</tr></tbody></table><div class="line-block">
+<code><a href="https://rdrr.io/r/base/toString.html" class="external-link">toString()</a></code> offset of zoned values | rounded to whole minutes | printed with seconds when non-zero (<code>+00:19:32</code>) | jiff’s form, so strings round-trip exactly; only visible for pre-1900 LMT offsets |<br><code>toString({ smallestUnit: "minute" })</code> | <code>HH:MM</code> | no direct printer option | implemented in zudate’s own formatter (<code>src/rust/src/format.rs</code>), which reproduces jiff’s <code>Display</code> for default options (unit-tested) |<br><code>strftime</code>/<code>strptime</code> | not part of Temporal | <code>jiff::fmt::strtime</code> | exposed as <code><a href="reference/temporal_strftime.html">temporal_strftime()</a></code>/<code><a href="reference/temporal_strftime.html">temporal_strptime()</a></code> with jiff’s directive set |</div>
+<p>Reviewed against the behaviour at the end of milestone 5; every row above is covered by a test.</p>
+<p>Anything discovered later goes in this table before the behaviour is shipped.</p>
 </div>
 <div class="section level2">
 <h2 id="id_10-performance-notes">10. Performance notes<a class="anchor" aria-label="anchor" href="#id_10-performance-notes"></a></h2>
@@ -468,8 +476,10 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <li>
 <del>Whether <code>==</code> on <code>ZonedDateTime</code> should be <code>compare</code>-based</del> Decided (0.1.0): <code>==</code>, <code>&lt;</code>, <code><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort()</a></code> and <code><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique()</a></code> use the exact time only (<code>vec_proxy_equal</code>/<code>vec_proxy_compare</code> drop <code>tz</code>); <code><a href="reference/temporal_compare.html">temporal_equals()</a></code> also compares the zone.</li>
 <li>Whether to export <code>SignedDuration</code> (jiff-only, absolute time). Leaning no: not part of Temporal.</li>
-<li>Whether to ship <code>pillar</code>/<code>tibble</code> methods in 0.1.0 (Suggests) or defer.</li>
-<li>Final function prefix: <code>temporal_*</code> (chosen) versus a shorter <code>tp_*</code>.</li>
+<li>
+<del>Whether to ship <code>pillar</code>/<code>tibble</code> methods</del> Decided (0.1.0): not needed; vctrs’ <code>vctrs_vctr</code> methods already give tibble columns via <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> and <code>vec_ptype_abbr()</code>.</li>
+<li>
+<del>Final function prefix</del> Decided (0.1.0): <code>temporal_*</code> for Temporal methods, <code>duration_*</code> for Duration-only helpers, constructors named after the type.</li>
 </ol></div>
 </div>
 

@@ -68,6 +68,16 @@
   [`now_plain_date_time()`](https://pedrobtz.github.io/zudate/reference/now_instant.md)
   and
   [`now_time_zone()`](https://pedrobtz.github.io/zudate/reference/now_instant.md).
+- [`format()`](https://rdrr.io/r/base/format.html) supports Temporal’s
+  [`toString()`](https://rdrr.io/r/base/toString.html) options
+  (`fractional_second_digits`, `smallest_unit`, `rounding_mode`,
+  `offset`, `time_zone_name`, `calendar_name`, `time_zone`), and
+  [`temporal_strftime()`](https://pedrobtz.github.io/zudate/reference/temporal_strftime.md)/[`temporal_strptime()`](https://pedrobtz.github.io/zudate/reference/temporal_strftime.md)
+  expose jiff’s strftime.
+- [`summary()`](https://rdrr.io/r/base/summary.html) methods; vignettes
+  [`vignette("zudate")`](https://pedrobtz.github.io/zudate/articles/zudate.md)
+  and
+  [`vignette("time-zones")`](https://pedrobtz.github.io/zudate/articles/time-zones.md).
 - New
   [`available_time_zones()`](https://pedrobtz.github.io/zudate/reference/available_time_zones.md)
   lists the IANA time zone identifiers known to the time zone database.

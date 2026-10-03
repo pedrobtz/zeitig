@@ -176,20 +176,30 @@ Tests covering DST gaps and overlaps in at least three zones, fixed
 offsets, `Etc/UTC`, and the `TZ`/`TZDIR` environment handling on all CI
 platforms.
 
-## Milestone 5 - Formatting, parsing, polish
+## Milestone 5 - Formatting, parsing, polish (done)
 
 [`format()`](https://rdrr.io/r/base/format.html) options:
 `fractional_second_digits`, `smallest_unit`, `rounding_mode`, `offset`,
 `time_zone_name`, `calendar_name`.
 
-`temporal_strftime()` / `temporal_strptime()`.
+[`temporal_strftime()`](https://pedrobtz.github.io/zudate/reference/temporal_strftime.md)
+/
+[`temporal_strptime()`](https://pedrobtz.github.io/zudate/reference/temporal_strftime.md).
 
 `pillar` methods (tibble columns),
 [`str()`](https://rdrr.io/r/utils/str.html) output,
-[`summary()`](https://rdrr.io/r/base/summary.html).
+[`summary()`](https://rdrr.io/r/base/summary.html). (tibble columns and
+[`str()`](https://rdrr.io/r/utils/str.html) come from vctrs’
+`vctrs_vctr` methods using
+[`format()`](https://rdrr.io/r/base/format.html)/`vec_ptype_abbr()`; no
+direct pillar dependency needed.)
 
 `as_*()` S3 generics complete for character, base classes and all zudate
-classes.
+classes (`as_plain_date/time/date_time()`,
+[`as_instant()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md),
+[`as_zoned_date_time()`](https://pedrobtz.github.io/zudate/reference/temporal-coercion.md),
+[`as_duration()`](https://pedrobtz.github.io/zudate/reference/as_duration.md),
+[`as_difftime()`](https://pedrobtz.github.io/zudate/reference/as_duration.md)).
 
 `README.md` with install instructions and a worked example;
 `vignettes/zudate.Rmd` (overview and Temporal mapping) and

@@ -15,7 +15,12 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="articles/zudate.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/time-zones.html">Time zones</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json"></form></li>
@@ -89,14 +94,14 @@
 <li><label><input type="checkbox" checked>Tests covering DST gaps and overlaps in at least three zones, fixed offsets, <code>Etc/UTC</code>, and the <code>TZ</code>/<code>TZDIR</code> environment handling on all CI platforms.</label></li>
 </ul></div>
 <div class="section level2">
-<h2 id="milestone-5---formatting-parsing-polish">Milestone 5 - Formatting, parsing, polish<a class="anchor" aria-label="anchor" href="#milestone-5---formatting-parsing-polish"></a></h2>
-<ul class="task-list"><li><label><input type="checkbox"><code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> options: <code>fractional_second_digits</code>, <code>smallest_unit</code>, <code>rounding_mode</code>, <code>offset</code>, <code>time_zone_name</code>, <code>calendar_name</code>.</label></li>
-<li><label><input type="checkbox"><code>temporal_strftime()</code> / <code>temporal_strptime()</code>.</label></li>
-<li><label><input type="checkbox"><code>pillar</code> methods (tibble columns), <code><a href="https://rdrr.io/r/utils/str.html" class="external-link">str()</a></code> output, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>.</label></li>
-<li><label><input type="checkbox"><code>as_*()</code> S3 generics complete for character, base classes and all zudate classes.</label></li>
-<li><label><input type="checkbox"><code>README.md</code> with install instructions and a worked example; <code>vignettes/zudate.Rmd</code> (overview and Temporal mapping) and <code>vignettes/time-zones.Rmd</code>.</label></li>
-<li><label><input type="checkbox">pkgdown reference grouped by Temporal type.</label></li>
-<li><label><input type="checkbox">Deviation table in <code>design.md</code> section 9 reviewed against the final behaviour.</label></li>
+<h2 id="milestone-5---formatting-parsing-polish-done">Milestone 5 - Formatting, parsing, polish (done)<a class="anchor" aria-label="anchor" href="#milestone-5---formatting-parsing-polish-done"></a></h2>
+<ul class="task-list"><li><label><input type="checkbox" checked><code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> options: <code>fractional_second_digits</code>, <code>smallest_unit</code>, <code>rounding_mode</code>, <code>offset</code>, <code>time_zone_name</code>, <code>calendar_name</code>.</label></li>
+<li><label><input type="checkbox" checked><code><a href="reference/temporal_strftime.html">temporal_strftime()</a></code> / <code><a href="reference/temporal_strftime.html">temporal_strptime()</a></code>.</label></li>
+<li><label><input type="checkbox" checked><code>pillar</code> methods (tibble columns), <code><a href="https://rdrr.io/r/utils/str.html" class="external-link">str()</a></code> output, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>. (tibble columns and <code><a href="https://rdrr.io/r/utils/str.html" class="external-link">str()</a></code> come from vctrs’ <code>vctrs_vctr</code> methods using <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code>/<code>vec_ptype_abbr()</code>; no direct pillar dependency needed.)</label></li>
+<li><label><input type="checkbox" checked><code>as_*()</code> S3 generics complete for character, base classes and all zudate classes (<code>as_plain_date/time/date_time()</code>, <code><a href="reference/temporal-coercion.html">as_instant()</a></code>, <code><a href="reference/temporal-coercion.html">as_zoned_date_time()</a></code>, <code><a href="reference/as_duration.html">as_duration()</a></code>, <code><a href="reference/as_duration.html">as_difftime()</a></code>).</label></li>
+<li><label><input type="checkbox" checked><code>README.md</code> with install instructions and a worked example; <code>vignettes/zudate.Rmd</code> (overview and Temporal mapping) and <code>vignettes/time-zones.Rmd</code>.</label></li>
+<li><label><input type="checkbox" checked>pkgdown reference grouped by Temporal type.</label></li>
+<li><label><input type="checkbox" checked>Deviation table in <code>design.md</code> section 9 reviewed against the final behaviour.</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="milestone-6---cran-release-010">Milestone 6 - CRAN release 0.1.0<a class="anchor" aria-label="anchor" href="#milestone-6---cran-release-010"></a></h2>
