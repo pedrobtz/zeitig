@@ -2,4 +2,6 @@
 //! whole R vectors, builds `jiff` values element by element and returns whole
 //! R vectors (see design.md, "Architecture").
 
+mod civil;
+mod cols;
 mod tz;

@@ -1,1 +1,12 @@
 SEXP savvy_rs_available_time_zones__ffi(void);
+SEXP savvy_rs_plain_date_field__ffi(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day, SEXP c_arg__field);
+SEXP savvy_rs_plain_date_format__ffi(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day);
+SEXP savvy_rs_plain_date_from_epoch_days__ffi(SEXP c_arg__days);
+SEXP savvy_rs_plain_date_from_parts__ffi(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day, SEXP c_arg__reject);
+SEXP savvy_rs_plain_date_parse__ffi(SEXP c_arg__x);
+SEXP savvy_rs_plain_date_time_format__ffi(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day, SEXP c_arg__second_of_day, SEXP c_arg__nanos);
+SEXP savvy_rs_plain_date_time_parse__ffi(SEXP c_arg__x);
+SEXP savvy_rs_plain_date_to_epoch_days__ffi(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day);
+SEXP savvy_rs_plain_time_format__ffi(SEXP c_arg__second_of_day, SEXP c_arg__nanos);
+SEXP savvy_rs_plain_time_from_parts__ffi(SEXP c_arg__hour, SEXP c_arg__minute, SEXP c_arg__second, SEXP c_arg__millisecond, SEXP c_arg__microsecond, SEXP c_arg__nanosecond, SEXP c_arg__reject);
+SEXP savvy_rs_plain_time_parse__ffi(SEXP c_arg__x);

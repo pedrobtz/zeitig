@@ -44,9 +44,75 @@ SEXP savvy_rs_available_time_zones__impl(void) {
     return handle_result(res);
 }
 
+SEXP savvy_rs_plain_date_field__impl(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day, SEXP c_arg__field) {
+    SEXP res = savvy_rs_plain_date_field__ffi(c_arg__year, c_arg__month, c_arg__day, c_arg__field);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_plain_date_format__impl(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day) {
+    SEXP res = savvy_rs_plain_date_format__ffi(c_arg__year, c_arg__month, c_arg__day);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_plain_date_from_epoch_days__impl(SEXP c_arg__days) {
+    SEXP res = savvy_rs_plain_date_from_epoch_days__ffi(c_arg__days);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_plain_date_from_parts__impl(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day, SEXP c_arg__reject) {
+    SEXP res = savvy_rs_plain_date_from_parts__ffi(c_arg__year, c_arg__month, c_arg__day, c_arg__reject);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_plain_date_parse__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_plain_date_parse__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_plain_date_time_format__impl(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day, SEXP c_arg__second_of_day, SEXP c_arg__nanos) {
+    SEXP res = savvy_rs_plain_date_time_format__ffi(c_arg__year, c_arg__month, c_arg__day, c_arg__second_of_day, c_arg__nanos);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_plain_date_time_parse__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_plain_date_time_parse__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_plain_date_to_epoch_days__impl(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day) {
+    SEXP res = savvy_rs_plain_date_to_epoch_days__ffi(c_arg__year, c_arg__month, c_arg__day);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_plain_time_format__impl(SEXP c_arg__second_of_day, SEXP c_arg__nanos) {
+    SEXP res = savvy_rs_plain_time_format__ffi(c_arg__second_of_day, c_arg__nanos);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_plain_time_from_parts__impl(SEXP c_arg__hour, SEXP c_arg__minute, SEXP c_arg__second, SEXP c_arg__millisecond, SEXP c_arg__microsecond, SEXP c_arg__nanosecond, SEXP c_arg__reject) {
+    SEXP res = savvy_rs_plain_time_from_parts__ffi(c_arg__hour, c_arg__minute, c_arg__second, c_arg__millisecond, c_arg__microsecond, c_arg__nanosecond, c_arg__reject);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_plain_time_parse__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_plain_time_parse__ffi(c_arg__x);
+    return handle_result(res);
+}
+
 
 static const R_CallMethodDef CallEntries[] = {
     {"savvy_rs_available_time_zones__impl", (DL_FUNC) &savvy_rs_available_time_zones__impl, 0},
+    {"savvy_rs_plain_date_field__impl", (DL_FUNC) &savvy_rs_plain_date_field__impl, 4},
+    {"savvy_rs_plain_date_format__impl", (DL_FUNC) &savvy_rs_plain_date_format__impl, 3},
+    {"savvy_rs_plain_date_from_epoch_days__impl", (DL_FUNC) &savvy_rs_plain_date_from_epoch_days__impl, 1},
+    {"savvy_rs_plain_date_from_parts__impl", (DL_FUNC) &savvy_rs_plain_date_from_parts__impl, 4},
+    {"savvy_rs_plain_date_parse__impl", (DL_FUNC) &savvy_rs_plain_date_parse__impl, 1},
+    {"savvy_rs_plain_date_time_format__impl", (DL_FUNC) &savvy_rs_plain_date_time_format__impl, 5},
+    {"savvy_rs_plain_date_time_parse__impl", (DL_FUNC) &savvy_rs_plain_date_time_parse__impl, 1},
+    {"savvy_rs_plain_date_to_epoch_days__impl", (DL_FUNC) &savvy_rs_plain_date_to_epoch_days__impl, 3},
+    {"savvy_rs_plain_time_format__impl", (DL_FUNC) &savvy_rs_plain_time_format__impl, 2},
+    {"savvy_rs_plain_time_from_parts__impl", (DL_FUNC) &savvy_rs_plain_time_from_parts__impl, 7},
+    {"savvy_rs_plain_time_parse__impl", (DL_FUNC) &savvy_rs_plain_time_parse__impl, 1},
     {NULL, NULL, 0}
 };
 

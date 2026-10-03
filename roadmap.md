@@ -27,18 +27,19 @@ constraints.
 - [x] CI job: build the tarball, install it with networking disabled (`CARGO_NET_OFFLINE=true`, no `~/.cargo/registry`), run tests.
 - [x] Measure tarball size; must stay under 5 MB. (1.5 MB; enforced by the offline-install job.)
 
-## Milestone 2 - Core civil types
+## Milestone 2 - Core civil types (done)
 
 `PlainDate`, `PlainTime`, `PlainDateTime` end to end; this establishes the patterns (record layout,
 Rust column loops, option handling, error mapping) that the remaining types copy.
 
-- [ ] vctrs record classes + `format`/`print`/`vec_ptype2`/`vec_cast`/`vec_proxy_compare` for the three types.
-- [ ] Constructors from components and from RFC 9557 strings (Rust parser); `overflow = "constrain" | "reject"`.
-- [ ] Field accessors (`year()` ... `nanosecond()`, `day_of_week()`, `day_of_year()`, `week_of_year()`, `year_of_week()`, `days_in_month()`, `days_in_year()`, `in_leap_year()`).
-- [ ] `temporal_with()`, `with_plain_time()`, `with_plain_date()`.
-- [ ] Conversions among the three (`to_plain_date()`, `to_plain_time()`, `to_plain_date_time()`), and from/to `Date`, `POSIXlt`.
-- [ ] Rust error -> `zudate_error` condition with element index.
-- [ ] Tests from Temporal docs examples for each method; `NA` and zero-length inputs in every test file.
+- [x] vctrs record classes + `format`/`print`/`vec_ptype2`/`vec_cast`/`vec_proxy_compare` for the three types (default record proxy; field order gives Temporal ordering).
+- [x] Constructors from components and from RFC 9557 strings (Rust parser); `overflow = "constrain" | "reject"`.
+- [x] Field accessors (`year()` ... `nanosecond()`, `day_of_week()`, `day_of_year()`, `week_of_year()`, `year_of_week()`, `days_in_month()`, `days_in_year()`, `in_leap_year()`), plus `days_in_week()`, `months_in_year()`, `temporal_fields()`.
+- [x] `temporal_with()`, `with_plain_time()`, `with_plain_date()`.
+- [x] Conversions among the three (`to_plain_date()`, `to_plain_time()`, `to_plain_date_time()`), and from/to `Date`, `POSIXlt`, `POSIXct` (`as_plain_*()` generics, `as.Date()`, `as.POSIXct()`/`as.POSIXlt()`).
+- [x] Rust error -> `zudate_error` condition with element index (`zudate_range_error`; argument types -> `zudate_type_error`).
+- [x] `temporal_compare()` / `temporal_equals()` for the civil types.
+- [x] Tests from Temporal docs examples for each method; `NA` and zero-length inputs in every test file.
 
 ## Milestone 3 - Duration and arithmetic
 

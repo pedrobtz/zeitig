@@ -135,6 +135,18 @@ with methods for character, base R classes and the other zudate classes.
 `offset_nanoseconds()`, `time_zone()`, `hours_in_day()`, `total()`/`abs()`/`sign()`/`blank()` for
 durations. These are implemented in R from the record fields when trivial, in Rust otherwise.
 
+Accessors are plain functions, not S3 generics: each calls an internal helper
+(`civil_date_fields()`, `civil_time_fields()` in `R/accessors.R`) that knows which classes carry
+a date or a time and errors with `zudate_type_error` otherwise. Adding a type (e.g.
+`ZonedDateTime`) means adding a branch there, not a method per accessor. Conversions from other
+classes use the `as_plain_date()`/`as_plain_time()`/`as_plain_date_time()` S3 generics, while
+`to_*()` follow Temporal's `toPlainDate()`-style methods and accept only Temporal objects.
+
+Numeric component arguments follow Temporal's `ToIntegerWithTruncation`: doubles are truncated
+towards zero, non-finite values are a `zudate_range_error`, non-numbers a `zudate_type_error`.
+With `overflow = "constrain"` a month or day below 1 is still an error (Temporal requires positive
+integers there), while time fields are clamped in both directions (Temporal's `ConstrainTime`).
+
 ### Arithmetic and comparison
 
 | Temporal method              | R                                                                        |
@@ -179,6 +191,8 @@ ZonedDateTime` needs a time zone; `Plain* -> Zoned*` goes through disambiguation
 |-------------------|-------------------------------------|--------------------------------------------------------------|
 | `Date`            | `PlainDate`                         | exact                                                        |
 | `POSIXct`         | `Instant`, `ZonedDateTime`          | uses `tzone` attribute or `Sys.timezone()`; sub-nanosecond doubles are rounded |
+| `POSIXct`         | `PlainDate`/`PlainTime`/`PlainDateTime` | wall clock in its own zone, rounded to microseconds (a double cannot hold ns of a current instant) |
+| `PlainDateTime`   | `POSIXct`/`POSIXlt`                 | wall clock interpreted in `tz` (default UTC); DST gaps resolved by the OS |
 | `POSIXlt`         | `PlainDateTime` / `ZonedDateTime`   | field-wise                                                   |
 | `difftime`        | `Duration`                          | units mapped to days/hours/minutes/seconds                   |
 | `PlainDate`       | `Date`                              | exact                                                        |

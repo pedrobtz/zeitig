@@ -1,6 +1,7 @@
 linters: linters_with_defaults(
     line_length_linter(100),
-    object_usage_linter = NULL
+    object_usage_linter = NULL,
+    object_length_linter = NULL
   )
 exclusions: list("R/000-wrappers.R")
 encoding: "UTF-8"
