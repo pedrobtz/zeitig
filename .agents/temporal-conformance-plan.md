@@ -140,7 +140,8 @@ license to `LICENSE.note`. Keep the ported set small; the comparison harness is 
 
 ## Decisions (formerly open questions)
 
-- JSON with `jsonlite` in `Suggests`, because the cases have nested arguments and options.
+- JSON, read with `zujson` (the author's own CRAN package) in `Suggests`, because the cases have
+  nested arguments and options.
 - No scheduled regeneration job yet. Fixtures change only when someone runs `generate.mjs`.
   The zoned cases avoid tzdata drift by using 2000-2024 dates and no link names.
 - Both figures are reported. The API share counts static and prototype members of the

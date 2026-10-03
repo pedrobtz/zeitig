@@ -3,7 +3,7 @@
 # tools/temporal-oracle/). Every documented difference is recorded in the
 # fixtures as a `divergence`; any other mismatch fails.
 
-skip_if_not_installed("jsonlite")
+skip_if_not_installed("zujson")
 
 for (type in conformance_types) {
   test_that(paste("zeitig matches Temporal:", type), {

@@ -13,7 +13,7 @@ conformance_types <- c(
 
 conformance_load <- function(type) {
   path <- test_path("fixtures", "temporal", paste0(type, ".json"))
-  jsonlite::fromJSON(path, simplifyVector = FALSE)$cases
+  zujson::json_parse_file(path, simplify = FALSE)$cases
 }
 
 conformance_parsers <- list(
