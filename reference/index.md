@@ -108,7 +108,8 @@ Instants and zoned date-times.
   [`as_instant()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md)
   [`as_zoned_date_time()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md)
   : Coerce to Temporal types
-- [`format(`*`<zeitig_plain_date>`*`)`](https://pedrobtz.github.io/zeitig/reference/temporal-format.md)
+- [`format(`*`<zeitig_duration>`*`)`](https://pedrobtz.github.io/zeitig/reference/temporal-format.md)
+  [`format(`*`<zeitig_plain_date>`*`)`](https://pedrobtz.github.io/zeitig/reference/temporal-format.md)
   [`format(`*`<zeitig_plain_time>`*`)`](https://pedrobtz.github.io/zeitig/reference/temporal-format.md)
   [`format(`*`<zeitig_plain_date_time>`*`)`](https://pedrobtz.github.io/zeitig/reference/temporal-format.md)
   [`format(`*`<zeitig_instant>`*`)`](https://pedrobtz.github.io/zeitig/reference/temporal-format.md)

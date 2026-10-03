@@ -10,6 +10,15 @@ defaults print the shortest exact representation.
 ## Usage
 
 ``` r
+# S3 method for class 'zeitig_duration'
+format(
+  x,
+  ...,
+  fractional_second_digits = "auto",
+  smallest_unit = NULL,
+  rounding_mode = "trunc"
+)
+
 # S3 method for class 'zeitig_plain_date'
 format(x, ..., calendar_name = "auto")
 
@@ -86,7 +95,8 @@ A character vector, `NA` for missing elements.
 
 - `smallest_unit`: `"minute"`, `"second"`, `"millisecond"`,
   `"microsecond"` or `"nanosecond"`; overrides
-  `fractional_second_digits`. `"minute"` omits the seconds.
+  `fractional_second_digits`. `"minute"` omits the seconds (not for
+  durations).
 
 - `rounding_mode`: how to round to the requested precision (default
   `"trunc"`).
@@ -102,6 +112,10 @@ A character vector, `NA` for missing elements.
 
 - `time_zone` (instants): print the wall-clock time and offset in this
   zone instead of UTC.
+
+For durations, a fixed precision rounds the hours and smaller units and
+always prints the seconds (`"PT1H0.000S"`), as Temporal's
+`Duration.prototype.toString()` does.
 
 ## Examples
 
@@ -119,4 +133,6 @@ format(instant("2020-01-01T00:00Z"), time_zone = "Asia/Tokyo")
 #> [1] "2020-01-01T09:00:00+09:00"
 format(plain_time("12:00:00.5"), fractional_second_digits = 3)
 #> [1] "12:00:00.500"
+format(duration("PT1M30.25S"), fractional_second_digits = 1)
+#> [1] "PT1M30.2S"
 ```

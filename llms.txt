@@ -10,7 +10,14 @@ disambiguation rules. All date/time logic is delegated to the Rust crate
 
 ## Installation
 
-You can install the development version of zeitig from
+You can install zeitig from CRAN with:
+
+``` r
+
+install.packages("zeitig")
+```
+
+or the development version from
 [GitHub](https://github.com/pedrobtz/zeitig) with:
 
 ``` r
@@ -20,9 +27,8 @@ pak::pak("pedrobtz/zeitig")
 ```
 
 Building from source needs a Rust toolchain (`cargo` and `rustc` \>=
-1.81, see <https://www.rust-lang.org/tools/install>). All Rust
-dependencies are bundled, so no network access is needed during
-installation.
+1.81, see <https://rust-lang.org/tools/install/>). All Rust dependencies
+are bundled, so no network access is needed during installation.
 
 ## Example
 
@@ -62,9 +68,11 @@ epoch_nanoseconds(x)
 
 See
 [`vignette("zeitig")`](https://pedrobtz.github.io/zeitig/articles/zeitig.md)
-for an overview and
+for an overview,
 [`vignette("time-zones")`](https://pedrobtz.github.io/zeitig/articles/time-zones.md)
-for time zone handling.
+for time zone handling and
+[`vignette("temporal-differences")`](https://pedrobtz.github.io/zeitig/articles/temporal-differences.md)
+for where zeitig differs from Temporal.
 
 # Package index
 
@@ -176,7 +184,8 @@ Instants and zoned date-times.
   [`as_instant()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md)
   [`as_zoned_date_time()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md)
   : Coerce to Temporal types
-- [`format(`*`<zeitig_plain_date>`*`)`](https://pedrobtz.github.io/zeitig/reference/temporal-format.md)
+- [`format(`*`<zeitig_duration>`*`)`](https://pedrobtz.github.io/zeitig/reference/temporal-format.md)
+  [`format(`*`<zeitig_plain_date>`*`)`](https://pedrobtz.github.io/zeitig/reference/temporal-format.md)
   [`format(`*`<zeitig_plain_time>`*`)`](https://pedrobtz.github.io/zeitig/reference/temporal-format.md)
   [`format(`*`<zeitig_plain_date_time>`*`)`](https://pedrobtz.github.io/zeitig/reference/temporal-format.md)
   [`format(`*`<zeitig_instant>`*`)`](https://pedrobtz.github.io/zeitig/reference/temporal-format.md)
@@ -217,5 +226,7 @@ Instants and zoned date-times.
   zeitig](https://pedrobtz.github.io/zeitig/articles/zeitig.md):
 - [Time
   zones](https://pedrobtz.github.io/zeitig/articles/time-zones.md):
+- [Differences from
+  Temporal](https://pedrobtz.github.io/zeitig/articles/temporal-differences.md):
 - [Cookbook: everyday tasks with Temporal
   types](https://pedrobtz.github.io/zeitig/articles/cookbook.md):

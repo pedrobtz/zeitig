@@ -20,6 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/time-zones.html">Time zones</a></li>
+    <li><a class="dropdown-item" href="../articles/temporal-differences.html">Differences from Temporal</a></li>
     <li><a class="dropdown-item" href="../articles/cookbook.html">Cookbook: everyday tasks with Temporal types</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -51,14 +52,27 @@
 <li>
 <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> supports Temporal’s <code><a href="https://rdrr.io/r/base/toString.html" class="external-link">toString()</a></code> options (<code>fractional_second_digits</code>, <code>smallest_unit</code>, <code>rounding_mode</code>, <code>offset</code>, <code>time_zone_name</code>, <code>calendar_name</code>, <code>time_zone</code>), and <code><a href="../reference/temporal_strftime.html">temporal_strftime()</a></code>/<code><a href="../reference/temporal_strftime.html">temporal_strptime()</a></code> expose jiff’s strftime.</li>
 <li>
-<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods; vignettes <code><a href="../articles/zeitig.html">vignette("zeitig")</a></code> and <code><a href="../articles/time-zones.html">vignette("time-zones")</a></code>.</li>
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods; vignettes <code><a href="../articles/zeitig.html">vignette("zeitig")</a></code>, <code><a href="../articles/time-zones.html">vignette("time-zones")</a></code> and <code><a href="../articles/temporal-differences.html">vignette("temporal-differences")</a></code>.</li>
 <li>New <code><a href="../reference/available_time_zones.html">available_time_zones()</a></code> lists the IANA time zone identifiers known to the time zone database.</li>
+<li>A conformance test compares about 6,300 operations with the reference Temporal implementation, including a selection of test262 cases. Every remaining difference is listed in <code><a href="../articles/temporal-differences.html">vignette("temporal-differences")</a></code>. Fixed while bringing zeitig in line:
+<ul><li>
+<code>[!u-ca=iso8601]</code> annotations are accepted. Other calendar annotations are an error instead of being ignored.</li>
+<li>UTC offsets of 24 hours or more are an error. So are offsets with fractional seconds for instants and zoned date-times, which were silently truncated.</li>
+<li>
+<code><a href="../reference/temporal_until.html">temporal_since()</a></code> with calendar units and the <code>halfEven</code> rounding mode in several cases give Temporal’s results. So do day rounding increments with <code>largest_unit = "week"</code>, and the rounding of instants before 1970.</li>
+<li>A <code>+00:00</code> time zone is no longer turned into <code>UTC</code>. <code><a href="../reference/temporal_compare.html">temporal_equals()</a></code> treats <code>UTC</code>, <code>Etc/UTC</code>, <code>Etc/GMT</code> and <code>GMT</code> as the same zone.</li>
+<li>
+<code><a href="../reference/instant.html">instant_from_epoch()</a></code> gives an error for out-of-range nanoseconds instead of crashing the R session.</li>
+<li>
+<code><a href="../reference/temporal_add.html">temporal_add()</a></code> and <code><a href="../reference/temporal_add.html">temporal_subtract()</a></code> accept durations, and <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> on durations supports <code>fractional_second_digits</code>, <code>smallest_unit</code> and <code>rounding_mode</code>.</li>
+<li>Invalid option values raise <code>zeitig_range_error</code>, as Temporal raises a <code>RangeError</code>.</li>
+</ul></li>
 </ul></div>
   </main></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Pedro Z.</p>
+  <p>Developed by Pedro Baltazar.</p>
 </div>
 
 <div class="pkgdown-footer-right">

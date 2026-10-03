@@ -20,6 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/time-zones.html">Time zones</a></li>
+    <li><a class="dropdown-item" href="articles/temporal-differences.html">Differences from Temporal</a></li>
     <li><a class="dropdown-item" href="articles/cookbook.html">Cookbook: everyday tasks with Temporal types</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -44,7 +45,7 @@
 <div class="section level2">
 <h2 id="what-this-package-is">What this package is<a class="anchor" aria-label="anchor" href="#what-this-package-is"></a></h2>
 <p><code>zeitig</code> is an R package that implements the <a href="https://tc39.es/proposal-temporal/docs/" class="external-link">TC39 Temporal</a> date/time model (Instant, PlainDate, PlainTime, PlainDateTime, ZonedDateTime, Duration, …) on top of the Rust crate <a href="https://docs.rs/jiff" class="external-link"><code>jiff</code></a>, which is vendored into the package so it builds offline on CRAN. The R &lt;-&gt; Rust bridge is <a href="https://yutannihilation.github.io/savvy/guide/" class="external-link">savvy</a>.</p>
-<p>Read <code>design.md</code> (architecture, data model, API mapping, CRAN constraints) and <code>roadmap.md</code> (milestones for 0.1.0) before adding features. Keep both files current when a design decision changes.</p>
+<p>Read <code>design.md</code> (architecture, data model, API mapping, CRAN constraints) and <code>.agents/roadmap.md</code> (milestones for 0.1.0) before adding features. Keep both files current when a design decision changes.</p>
 </div>
 <div class="section level2">
 <h2 id="commands">Commands<a class="anchor" aria-label="anchor" href="#commands"></a></h2>
@@ -145,7 +146,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Pedro Z.</p>
+  <p>Developed by Pedro Baltazar.</p>
 </div>
 
 <div class="pkgdown-footer-right">

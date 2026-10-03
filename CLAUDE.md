@@ -13,8 +13,8 @@ vendored into the package so it builds offline on CRAN. The R \<-\> Rust
 bridge is [savvy](https://yutannihilation.github.io/savvy/guide/).
 
 Read `design.md` (architecture, data model, API mapping, CRAN
-constraints) and `roadmap.md` (milestones for 0.1.0) before adding
-features. Keep both files current when a design decision changes.
+constraints) and `.agents/roadmap.md` (milestones for 0.1.0) before
+adding features. Keep both files current when a design decision changes.
 
 ## Commands
 

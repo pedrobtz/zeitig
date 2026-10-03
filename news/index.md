@@ -77,9 +77,39 @@ Initial CRAN release.
   [`temporal_strftime()`](https://pedrobtz.github.io/zeitig/reference/temporal_strftime.md)/[`temporal_strptime()`](https://pedrobtz.github.io/zeitig/reference/temporal_strftime.md)
   expose jiff’s strftime.
 - [`summary()`](https://rdrr.io/r/base/summary.html) methods; vignettes
-  [`vignette("zeitig")`](https://pedrobtz.github.io/zeitig/articles/zeitig.md)
+  [`vignette("zeitig")`](https://pedrobtz.github.io/zeitig/articles/zeitig.md),
+  [`vignette("time-zones")`](https://pedrobtz.github.io/zeitig/articles/time-zones.md)
   and
-  [`vignette("time-zones")`](https://pedrobtz.github.io/zeitig/articles/time-zones.md).
+  [`vignette("temporal-differences")`](https://pedrobtz.github.io/zeitig/articles/temporal-differences.md).
 - New
   [`available_time_zones()`](https://pedrobtz.github.io/zeitig/reference/available_time_zones.md)
   lists the IANA time zone identifiers known to the time zone database.
+- A conformance test compares about 6,300 operations with the reference
+  Temporal implementation, including a selection of test262 cases. Every
+  remaining difference is listed in
+  [`vignette("temporal-differences")`](https://pedrobtz.github.io/zeitig/articles/temporal-differences.md).
+  Fixed while bringing zeitig in line:
+  - `[!u-ca=iso8601]` annotations are accepted. Other calendar
+    annotations are an error instead of being ignored.
+  - UTC offsets of 24 hours or more are an error. So are offsets with
+    fractional seconds for instants and zoned date-times, which were
+    silently truncated.
+  - [`temporal_since()`](https://pedrobtz.github.io/zeitig/reference/temporal_until.md)
+    with calendar units and the `halfEven` rounding mode in several
+    cases give Temporal’s results. So do day rounding increments with
+    `largest_unit = "week"`, and the rounding of instants before 1970.
+  - A `+00:00` time zone is no longer turned into `UTC`.
+    [`temporal_equals()`](https://pedrobtz.github.io/zeitig/reference/temporal_compare.md)
+    treats `UTC`, `Etc/UTC`, `Etc/GMT` and `GMT` as the same zone.
+  - [`instant_from_epoch()`](https://pedrobtz.github.io/zeitig/reference/instant.md)
+    gives an error for out-of-range nanoseconds instead of crashing the
+    R session.
+  - [`temporal_add()`](https://pedrobtz.github.io/zeitig/reference/temporal_add.md)
+    and
+    [`temporal_subtract()`](https://pedrobtz.github.io/zeitig/reference/temporal_add.md)
+    accept durations, and
+    [`format()`](https://rdrr.io/r/base/format.html) on durations
+    supports `fractional_second_digits`, `smallest_unit` and
+    `rounding_mode`.
+  - Invalid option values raise `zeitig_range_error`, as Temporal raises
+    a `RangeError`.

@@ -10,7 +10,14 @@ disambiguation rules. All date/time logic is delegated to the Rust crate
 
 ## Installation
 
-You can install the development version of zeitig from
+You can install zeitig from CRAN with:
+
+``` r
+
+install.packages("zeitig")
+```
+
+or the development version from
 [GitHub](https://github.com/pedrobtz/zeitig) with:
 
 ``` r
@@ -20,9 +27,8 @@ pak::pak("pedrobtz/zeitig")
 ```
 
 Building from source needs a Rust toolchain (`cargo` and `rustc` \>=
-1.81, see <https://www.rust-lang.org/tools/install>). All Rust
-dependencies are bundled, so no network access is needed during
-installation.
+1.81, see <https://rust-lang.org/tools/install/>). All Rust dependencies
+are bundled, so no network access is needed during installation.
 
 ## Example
 
@@ -62,6 +68,8 @@ epoch_nanoseconds(x)
 
 See
 [`vignette("zeitig")`](https://pedrobtz.github.io/zeitig/articles/zeitig.md)
-for an overview and
+for an overview,
 [`vignette("time-zones")`](https://pedrobtz.github.io/zeitig/articles/time-zones.md)
-for time zone handling.
+for time zone handling and
+[`vignette("temporal-differences")`](https://pedrobtz.github.io/zeitig/articles/temporal-differences.md)
+for where zeitig differs from Temporal.

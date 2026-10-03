@@ -209,8 +209,9 @@ when you need nanoseconds.
 ## Differences from Temporal
 
 zeitig supports only the ISO 8601 calendar, and a few behaviors follow
-jiff or R conventions; they are listed in the package’s design notes.
-The most visible ones:
+jiff or R conventions;
+[`vignette("temporal-differences")`](https://pedrobtz.github.io/zeitig/articles/temporal-differences.md)
+lists the ones you are most likely to notice. In short:
 
 - `x - y` for two values of the same type is `temporal_since(x, y)`.
 - `==` and `<` on zoned date-times compare the exact time only;

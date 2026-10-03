@@ -35,6 +35,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/time-zones.html">Time zones</a></li>
+    <li><a class="dropdown-item" href="../articles/temporal-differences.html">Differences from Temporal</a></li>
     <li><a class="dropdown-item" href="../articles/cookbook.html">Cookbook: everyday tasks with Temporal types</a></li>
   </ul>
 </li>
@@ -279,8 +280,9 @@ from it are rounded to the microsecond. Use the Temporal types (or
 <h2 id="differences-from-temporal">Differences from Temporal<a class="anchor" aria-label="anchor" href="#differences-from-temporal"></a>
 </h2>
 <p>zeitig supports only the ISO 8601 calendar, and a few behaviors
-follow jiff or R conventions; they are listed in the package’s design
-notes. The most visible ones:</p>
+follow jiff or R conventions;
+<code><a href="../articles/temporal-differences.html">vignette("temporal-differences")</a></code> lists the ones you are
+most likely to notice. In short:</p>
 <ul>
 <li>
 <code>x - y</code> for two values of the same type is
@@ -302,7 +304,7 @@ not <code>==</code> to <code>PT60M</code>); use
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Pedro Z.</p>
+  <p>Developed by Pedro Baltazar.</p>
 </div>
 
 <div class="pkgdown-footer-right">
