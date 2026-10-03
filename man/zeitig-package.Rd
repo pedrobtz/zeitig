@@ -6,7 +6,7 @@
 \alias{zeitig-package}
 \title{zeitig: 'Temporal' Date and Time Types Backed by 'jiff'}
 \description{
-Implements the 'TC39 Temporal' date and time model \url{https://tc39.es/proposal-temporal/docs/} (instants, plain dates, plain times, plain date-times, zoned date-times and durations) as vectorised R classes. All calendar and time zone arithmetic, parsing and formatting is delegated to the 'Rust' crate 'jiff' \url{https://docs.rs/jiff}, which is bundled with the package, giving nanosecond precision, 'RFC 9557' string support and time-zone-aware arithmetic with 'Temporal' semantics.
+Implements the 'Temporal' date and time model of Ecma Technical Committee 39 (TC39) \url{https://tc39.es/proposal-temporal/docs/} (instants, plain dates, plain times, plain date-times, zoned date-times and durations) as vectorised R classes. All calendar and time zone arithmetic, parsing and formatting is delegated to the 'Rust' crate 'jiff' \url{https://docs.rs/jiff}, which is bundled with the package, giving nanosecond precision, Internet Extended Date/Time Format (IXDTF, RFC 9557) string support and time-zone-aware arithmetic with 'Temporal' semantics.
 }
 \seealso{
 Useful links:
@@ -18,15 +18,17 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Pedro Z \email{pedrobtz@gmail.com}
+\strong{Maintainer}: Pedro Baltazar \email{pedrobtz@gmail.com} [copyright holder]
 
 Authors:
 \itemize{
-  \item Pedro Z \email{pedrobtz@gmail.com}
+  \item Pedro Baltazar \email{pedrobtz@gmail.com} [copyright holder]
 }
 
 Other contributors:
 \itemize{
+  \item Andrew Gallant (Author of the bundled 'jiff' Rust crates) [contributor, copyright holder]
+  \item Hiroaki Yutani (Author of the bundled 'savvy' Rust crates) [contributor, copyright holder]
   \item The authors of the dependency Rust crates (see inst/AUTHORS for details) [copyright holder]
 }
 

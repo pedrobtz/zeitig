@@ -1,9 +1,11 @@
 CMD
-IANA
-Temporal's
 designator
+Ecma
 getters
+IANA
+IXDTF
 strftime
+Temporal's
 toolchain
 vendored
 zoneinfo

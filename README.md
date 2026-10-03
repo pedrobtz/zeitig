@@ -13,8 +13,13 @@ Temporal's rounding and disambiguation rules. All date/time logic is delegated t
 
 ## Installation
 
-You can install the development version of zeitig from [GitHub](https://github.com/pedrobtz/zeitig)
-with:
+You can install zeitig from CRAN with:
+
+``` r
+install.packages("zeitig")
+```
+
+or the development version from [GitHub](https://github.com/pedrobtz/zeitig) with:
 
 ``` r
 # install.packages("pak")
@@ -22,7 +27,7 @@ pak::pak("pedrobtz/zeitig")
 ```
 
 Building from source needs a Rust toolchain (`cargo` and `rustc` >= 1.81, see
-<https://www.rust-lang.org/tools/install>). All Rust dependencies are bundled, so no network access
+<https://rust-lang.org/tools/install/>). All Rust dependencies are bundled, so no network access
 is needed during installation.
 
 ## Example
