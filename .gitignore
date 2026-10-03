@@ -9,3 +9,4 @@ src/rust/cargo-home
 *.dll
 /doc/
 /Meta/
+node_modules/

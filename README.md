@@ -65,4 +65,5 @@ epoch_nanoseconds(x)
 #> [1] "1553906700123456789"
 ```
 
-See `vignette("zeitig")` for an overview and `vignette("time-zones")` for time zone handling.
+See `vignette("zeitig")` for an overview, `vignette("time-zones")` for time zone handling and
+`vignette("temporal-differences")` for where zeitig differs from Temporal.

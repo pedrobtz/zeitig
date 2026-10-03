@@ -8,7 +8,7 @@
 #'   or a number from 0 to 9. The value is rounded with `rounding_mode` first.
 #' * `smallest_unit`: `"minute"`, `"second"`, `"millisecond"`,
 #'   `"microsecond"` or `"nanosecond"`; overrides `fractional_second_digits`.
-#'   `"minute"` omits the seconds.
+#'   `"minute"` omits the seconds (not for durations).
 #' * `rounding_mode`: how to round to the requested precision (default
 #'   `"trunc"`).
 #' * `offset` (zoned): `"auto"` prints the UTC offset, `"never"` omits it.
@@ -19,6 +19,10 @@
 #'   `"critical"` `[!u-ca=iso8601]`.
 #' * `time_zone` (instants): print the wall-clock time and offset in this
 #'   zone instead of UTC.
+#'
+#' For durations, a fixed precision rounds the hours and smaller units and
+#' always prints the seconds (`"PT1H0.000S"`), as Temporal's
+#' `Duration.prototype.toString()` does.
 #'
 #' @param x A Temporal object.
 #' @param ... Not used; for compatibility with the generic.
@@ -35,6 +39,7 @@
 #' format(x, offset = "never", time_zone_name = "critical", calendar_name = "always")
 #' format(instant("2020-01-01T00:00Z"), time_zone = "Asia/Tokyo")
 #' format(plain_time("12:00:00.5"), fractional_second_digits = 3)
+#' format(duration("PT1M30.25S"), fractional_second_digits = 1)
 NULL
 
 format_options <- function(x, kind, fractional_second_digits = "auto", smallest_unit = NULL,
@@ -42,21 +47,50 @@ format_options <- function(x, kind, fractional_second_digits = "auto", smallest_
                            calendar_name = "auto", time_zone = NULL,
                            call = rlang::caller_env()) {
   rounding_mode <- arg_rounding_mode(rounding_mode, call = call)
-  offset <- arg_match(offset, c("auto", "never"), error_call = call)
-  time_zone_name <- arg_match(time_zone_name, c("auto", "never", "critical"), error_call = call)
-  calendar_name <- arg_match(
+  offset <- arg_option(offset, c("auto", "never"), error_call = call)
+  time_zone_name <- arg_option(time_zone_name, c("auto", "never", "critical"), error_call = call)
+  calendar_name <- arg_option(
     calendar_name, c("auto", "always", "never", "critical"),
     error_call = call
   )
+  p <- format_precision(fractional_second_digits, smallest_unit, call = call)
+  digits <- p$digits
+  minute <- p$minute
+  round <- p$round
+  if (!is.null(round) && kind != "plain_date") {
+    x <- temporal_round(
+      x, round$unit,
+      rounding_increment = round$increment, rounding_mode = rounding_mode
+    )
+  }
+  if (is.null(time_zone)) {
+    time_zone <- NA_character_
+  } else {
+    check_time_zone(time_zone, call = call)
+    time_zone <- vec_recycle(time_zone, vec_size(x), call = call)
+  }
+  fields <- unclass(vec_data(x))
+  zeitig_call(
+    rs_format(
+      fields, kind, digits, minute, offset, time_zone_name, calendar_name, time_zone
+    ),
+    call = call
+  )
+}
+
+# toString()'s precision options: the number of fractional digits (-1 for
+# "auto"), whether to stop at minutes, and the rounding to apply first.
+format_precision <- function(fractional_second_digits, smallest_unit,
+                             units = c(
+                               "minute", "second", "millisecond", "microsecond", "nanosecond"
+                             ),
+                             call = rlang::caller_env()) {
   digits <- -1L
   minute <- FALSE
   round <- NULL
   if (!is.null(smallest_unit)) {
     smallest_unit <- sub("s$", "", smallest_unit)
-    smallest_unit <- arg_match(
-      smallest_unit, c("minute", "second", "millisecond", "microsecond", "nanosecond"),
-      error_call = call
-    )
+    smallest_unit <- arg_option(smallest_unit, units, error_call = call)
     digits <- switch(smallest_unit,
       minute = -1L,
       second = 0L,
@@ -86,25 +120,7 @@ format_options <- function(x, kind, fractional_second_digits = "auto", smallest_
       list(unit = "nanosecond", increment = 10^(9L - digits))
     }
   }
-  if (!is.null(round) && kind != "plain_date") {
-    x <- temporal_round(
-      x, round$unit,
-      rounding_increment = round$increment, rounding_mode = rounding_mode
-    )
-  }
-  if (is.null(time_zone)) {
-    time_zone <- NA_character_
-  } else {
-    check_time_zone(time_zone, call = call)
-    time_zone <- vec_recycle(time_zone, vec_size(x), call = call)
-  }
-  fields <- unclass(vec_data(x))
-  zeitig_call(
-    rs_format(
-      fields, kind, digits, minute, offset, time_zone_name, calendar_name, time_zone
-    ),
-    call = call
-  )
+  list(digits = digits, minute = minute, round = round)
 }
 
 #' @rdname temporal-format

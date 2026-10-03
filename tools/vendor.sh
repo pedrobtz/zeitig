@@ -73,6 +73,14 @@ note <- c(
 for (lic in sort(names(by_license))) {
   note <- c(note, paste0(lic, ":"), paste0("  - ", by_license[[lic]]), "")
 }
+note <- c(
+  note,
+  "The test fixtures in tests/testthat/fixtures/temporal/ include inputs taken",
+  "from the Test262 test suite (https://github.com/tc39/test262), marked with",
+  "\"source\": \"test262/...\". Test262 is Copyright (c) 2012 Ecma International",
+  "and is licensed under the BSD 3-Clause licence:",
+  "https://github.com/tc39/test262/blob/main/LICENSE"
+)
 writeLines(note, file.path(root, "LICENSE.note"))
 REOF
 

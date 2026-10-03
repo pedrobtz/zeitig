@@ -49,6 +49,10 @@ temporal_subtract <- function(x, duration, ..., overflow = c("constrain", "rejec
 }
 
 temporal_add_impl <- function(x, d, reject, call = rlang::caller_env()) {
+  if (is_duration(x)) {
+    # Duration.prototype.add(): only days (as 24 hours) and time units.
+    return(vec_arith("+", x, d))
+  }
   args <- vec_recycle_common(x = x, d = d, .call = call)
   x <- args$x
   d <- duration_data(args$d)
@@ -213,8 +217,12 @@ temporal_round <- function(x, smallest_unit = NULL, ..., rounding_increment = 1,
     if (is.null(smallest_unit) && is.null(largest_unit)) {
       zeitig_type_error("At least one of `smallest_unit` and `largest_unit` must be given.")
     }
-    smallest_unit <- arg_unit(smallest_unit %||% "nanosecond")
-    largest_unit <- arg_unit(largest_unit %||% "auto", auto = TRUE)
+    # Defaults are filled in first: deparsing `x %||% y` for the error
+    # argument name is slow.
+    smallest_unit <- smallest_unit %||% "nanosecond"
+    largest_unit <- largest_unit %||% "auto"
+    smallest_unit <- arg_unit(smallest_unit)
+    largest_unit <- arg_unit(largest_unit, auto = TRUE)
     args <- with_relative(x, relative_to)
     return(new_duration_fields(zeitig_call(rs_duration_round(
       duration_data(args$x), largest_unit, smallest_unit, rounding_increment, rounding_mode,

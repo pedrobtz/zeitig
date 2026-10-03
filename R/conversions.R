@@ -76,7 +76,7 @@ to_instant <- function(x) {
 #' @export
 to_zoned_date_time <- function(x, time_zone, time = NULL,
                                disambiguation = c("compatible", "earlier", "later", "reject")) {
-  disambiguation <- arg_match(disambiguation)
+  disambiguation <- arg_option(disambiguation, disambiguation_values)
   if (is_instant(x)) {
     return(instant_to_zoned(instant_data(x), time_zone))
   }

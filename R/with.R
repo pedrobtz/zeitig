@@ -38,8 +38,8 @@ temporal_with <- function(x, ..., overflow = c("constrain", "reject"),
                           disambiguation = c("compatible", "earlier", "later", "reject"),
                           offset = c("prefer", "use", "ignore", "reject")) {
   if (is_zoned_date_time(x)) {
-    disambiguation <- arg_match(disambiguation)
-    offset <- arg_match(offset)
+    disambiguation <- arg_option(disambiguation, disambiguation_values)
+    offset <- arg_option(offset, c("prefer", "use", "ignore", "reject"))
     pdt <- temporal_with(to_plain_date_time(x), ..., overflow = overflow)
     n <- vec_size(pdt)
     x <- vec_recycle(x, n)

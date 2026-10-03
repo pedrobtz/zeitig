@@ -7,6 +7,7 @@ mod civil;
 mod cols;
 mod duration;
 mod format;
+mod ixdtf;
 mod opts;
 mod tz;
 mod zoned;

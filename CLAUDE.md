@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 [`jiff`](https://docs.rs/jiff), which is vendored into the package so it builds offline on CRAN.
 The R <-> Rust bridge is [savvy](https://yutannihilation.github.io/savvy/guide/).
 
-Read `design.md` (architecture, data model, API mapping, CRAN constraints) and `roadmap.md`
+Read `design.md` (architecture, data model, API mapping, CRAN constraints) and `.agents/roadmap.md`
 (milestones for 0.1.0) before adding features. Keep both files current when a design decision changes.
 
 ## Commands

@@ -55,8 +55,23 @@ obj_type_friendly <- function(x) {
   paste0("a <", class(x)[[1]], "> object")
 }
 
+# `rlang::arg_match()` for Temporal options: an invalid option value is a
+# RangeError in Temporal, so the error also has class `zeitig_range_error`.
+arg_option <- function(x, values, error_arg = rlang::caller_arg(x),
+                       error_call = rlang::caller_env()) {
+  withCallingHandlers(
+    arg_match(x, values, error_arg = error_arg, error_call = error_call),
+    error = function(e) {
+      class(e) <- c("zeitig_range_error", "zeitig_error", class(e))
+      stop(e)
+    }
+  )
+}
+
+disambiguation_values <- c("compatible", "earlier", "later", "reject")
+
 arg_overflow <- function(overflow, call = rlang::caller_env()) {
-  overflow <- arg_match(overflow, c("constrain", "reject"), error_call = call)
+  overflow <- arg_option(overflow, c("constrain", "reject"), error_call = call)
   identical(overflow, "reject")
 }
 

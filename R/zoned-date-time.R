@@ -43,9 +43,9 @@ zoned_date_time <- function(year, month, day, hour = 0L, minute = 0L, second = 0
                             offset = c("reject", "use", "prefer", "ignore"),
                             overflow = c("constrain", "reject")) {
   rlang::check_dots_empty0(...)
-  disambiguation <- arg_match(disambiguation)
+  disambiguation <- arg_option(disambiguation, disambiguation_values)
   if (is.character(year) && missing(month) && missing(day)) {
-    offset <- arg_match(offset)
+    offset <- arg_option(offset, c("reject", "use", "prefer", "ignore"))
     return(zoned_date_time_parse(year, disambiguation, offset))
   }
   if (missing(time_zone)) {
@@ -201,7 +201,7 @@ start_of_day <- function(x) {
 #' @export
 time_zone_transition <- function(x, direction = c("next", "previous")) {
   check_class(x, "zeitig_zoned_date_time", "a zoned date-time")
-  direction <- arg_match(direction)
+  direction <- arg_option(direction, c("next", "previous"))
   new_zoned_fields(zeitig_call(rs_zoned_transition(zoned_data(x), direction == "next")))
 }
 
