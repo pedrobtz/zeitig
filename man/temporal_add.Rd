@@ -10,7 +10,8 @@ temporal_add(x, duration, ..., overflow = c("constrain", "reject"))
 temporal_subtract(x, duration, ..., overflow = c("constrain", "reject"))
 }
 \arguments{
-\item{x}{A plain date, plain time or plain date-time.}
+\item{x}{A plain date, plain time, plain date-time, instant or zoned
+date-time.}
 
 \item{duration}{A duration (or ISO 8601 duration string), recycled against
 \code{x}.}
@@ -37,6 +38,10 @@ remainder is ignored.
 \item Plain times: only hours and smaller units count and the result wraps
 around midnight.
 \item Plain date-times: calendar units as for dates, then the time.
+\item Instants: only hours and smaller units are allowed (exact time).
+\item Zoned date-times: calendar units (years to days) follow the wall clock
+and are DST-aware (adding one day keeps the local time even when the day
+has 23 or 25 hours); time units are exact elapsed time.
 }
 
 Subtracting two values of the same type (\code{x - y}) is \code{temporal_since(x, y)}

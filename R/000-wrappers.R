@@ -83,6 +83,56 @@ NULL
 }
 
 
+`rs_instant_add` <- function(`x`, `duration`) {
+  .Call(savvy_rs_instant_add__impl, `x`, `duration`)
+}
+
+
+`rs_instant_diff` <- function(`x`, `y`, `largest`, `smallest`, `increment`, `mode`, `since`) {
+  .Call(savvy_rs_instant_diff__impl, `x`, `y`, `largest`, `smallest`, `increment`, `mode`, `since`)
+}
+
+
+`rs_instant_epoch_nanoseconds` <- function(`x`) {
+  .Call(savvy_rs_instant_epoch_nanoseconds__impl, `x`)
+}
+
+
+`rs_instant_format` <- function(`x`) {
+  .Call(savvy_rs_instant_format__impl, `x`)
+}
+
+
+`rs_instant_from_epoch_nanoseconds` <- function(`x`) {
+  .Call(savvy_rs_instant_from_epoch_nanoseconds__impl, `x`)
+}
+
+
+`rs_instant_parse` <- function(`x`) {
+  .Call(savvy_rs_instant_parse__impl, `x`)
+}
+
+
+`rs_instant_round` <- function(`x`, `smallest`, `increment`, `mode`) {
+  .Call(savvy_rs_instant_round__impl, `x`, `smallest`, `increment`, `mode`)
+}
+
+
+`rs_instant_to_zoned` <- function(`x`, `time_zone`) {
+  .Call(savvy_rs_instant_to_zoned__impl, `x`, `time_zone`)
+}
+
+
+`rs_instant_validate` <- function(`x`) {
+  .Call(savvy_rs_instant_validate__impl, `x`)
+}
+
+
+`rs_now` <- function() {
+  .Call(savvy_rs_now__impl)
+}
+
+
 `rs_plain_date_add` <- function(`year`, `month`, `day`, `duration`, `reject`) {
   .Call(savvy_rs_plain_date_add__impl, `year`, `month`, `day`, `duration`, `reject`)
 }
@@ -175,6 +225,66 @@ NULL
 
 `rs_plain_time_round` <- function(`second_of_day`, `nanos`, `smallest`, `increment`, `mode`) {
   .Call(savvy_rs_plain_time_round__impl, `second_of_day`, `nanos`, `smallest`, `increment`, `mode`)
+}
+
+
+`rs_time_zone_canonical` <- function(`x`) {
+  .Call(savvy_rs_time_zone_canonical__impl, `x`)
+}
+
+
+`rs_zoned_add` <- function(`x`, `duration`, `reject`) {
+  .Call(savvy_rs_zoned_add__impl, `x`, `duration`, `reject`)
+}
+
+
+`rs_zoned_civil` <- function(`x`) {
+  .Call(savvy_rs_zoned_civil__impl, `x`)
+}
+
+
+`rs_zoned_diff` <- function(`x`, `y`, `largest`, `smallest`, `increment`, `mode`, `since`) {
+  .Call(savvy_rs_zoned_diff__impl, `x`, `y`, `largest`, `smallest`, `increment`, `mode`, `since`)
+}
+
+
+`rs_zoned_format` <- function(`x`) {
+  .Call(savvy_rs_zoned_format__impl, `x`)
+}
+
+
+`rs_zoned_from_civil` <- function(`x`, `time_zone`, `disambiguation`, `offset`, `offset_mode`) {
+  .Call(savvy_rs_zoned_from_civil__impl, `x`, `time_zone`, `disambiguation`, `offset`, `offset_mode`)
+}
+
+
+`rs_zoned_hours_in_day` <- function(`x`) {
+  .Call(savvy_rs_zoned_hours_in_day__impl, `x`)
+}
+
+
+`rs_zoned_offset` <- function(`x`) {
+  .Call(savvy_rs_zoned_offset__impl, `x`)
+}
+
+
+`rs_zoned_parse` <- function(`x`, `disambiguation`, `offset_mode`) {
+  .Call(savvy_rs_zoned_parse__impl, `x`, `disambiguation`, `offset_mode`)
+}
+
+
+`rs_zoned_round` <- function(`x`, `smallest`, `increment`, `mode`) {
+  .Call(savvy_rs_zoned_round__impl, `x`, `smallest`, `increment`, `mode`)
+}
+
+
+`rs_zoned_start_of_day` <- function(`x`) {
+  .Call(savvy_rs_zoned_start_of_day__impl, `x`)
+}
+
+
+`rs_zoned_transition` <- function(`x`, `next`) {
+  .Call(savvy_rs_zoned_transition__impl, `x`, `next`)
 }
 
 

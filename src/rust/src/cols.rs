@@ -6,10 +6,13 @@
 //! output field.
 
 use jiff::civil::{Date, DateTime, Time};
-use jiff::Span;
+use jiff::{Span, Timestamp, Zoned};
 use savvy::{
-    IntegerSexp, ListSexp, OwnedIntegerSexp, OwnedListSexp, OwnedRealSexp, Sexp, TypedSexp,
+    IntegerSexp, ListSexp, OwnedIntegerSexp, OwnedListSexp, OwnedRealSexp, OwnedStringSexp, Sexp,
+    TypedSexp,
 };
+
+use crate::tz::{time_zone_id, TzCache};
 
 /// R's `NA_integer_`. Compared directly instead of through savvy's
 /// `NotAvailableValue`, which reads the `R_NaInt` symbol and so cannot be
@@ -461,4 +464,199 @@ impl DurationOut {
 /// because `f64::from_bits` is only `const` from Rust 1.83 (MSRV is 1.81).
 pub(crate) fn na_real() -> f64 {
     f64::from_bits(0x7FF0_0000_0000_07A2)
+}
+
+// ---------------------------------------------------------------------------
+// Generic access to record fields passed as a list.
+
+pub(crate) fn list_real(x: &ListSexp, k: usize) -> savvy::Result<Vec<f64>> {
+    match x.get_by_index(k).map(|s| s.into_typed()) {
+        Some(TypedSexp::Real(v)) => Ok(v.to_vec()),
+        _ => Err(savvy::Error::new(format!(
+            "internal error: record field {} must be a double vector",
+            k + 1
+        ))),
+    }
+}
+
+pub(crate) fn list_int(x: &ListSexp, k: usize) -> savvy::Result<Vec<i32>> {
+    match x.get_by_index(k).map(|s| s.into_typed()) {
+        Some(TypedSexp::Integer(v)) => Ok(v.to_vec()),
+        _ => Err(savvy::Error::new(format!(
+            "internal error: record field {} must be an integer vector",
+            k + 1
+        ))),
+    }
+}
+
+pub(crate) fn list_str(x: &ListSexp, k: usize) -> savvy::Result<Vec<Option<String>>> {
+    match x.get_by_index(k).map(|s| s.into_typed()) {
+        Some(TypedSexp::String(v)) => Ok(v
+            .iter()
+            .map(|s| {
+                if is_na_str(s) {
+                    None
+                } else {
+                    Some(s.to_string())
+                }
+            })
+            .collect()),
+        _ => Err(savvy::Error::new(format!(
+            "internal error: record field {} must be a character vector",
+            k + 1
+        ))),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Instant: seconds (double), nanos (integer)
+
+pub(crate) struct InstantIn {
+    secs: Vec<f64>,
+    nanos: Vec<i32>,
+}
+
+impl InstantIn {
+    pub(crate) fn new(x: &ListSexp) -> savvy::Result<Self> {
+        let secs = list_real(x, 0)?;
+        let nanos = list_int(x, 1)?;
+        common_len(&[secs.len(), nanos.len()])?;
+        Ok(Self { secs, nanos })
+    }
+
+    pub(crate) fn len(&self) -> usize {
+        self.secs.len()
+    }
+
+    pub(crate) fn get(&self, i: usize) -> savvy::Result<Option<Timestamp>> {
+        let (s, ns) = (self.secs[i], self.nanos[i]);
+        if s.is_nan() || is_na_int(ns) {
+            return Ok(None);
+        }
+        timestamp_from_parts(i, s, ns).map(Some)
+    }
+}
+
+pub(crate) fn timestamp_from_parts(i: usize, secs: f64, nanos: i32) -> savvy::Result<Timestamp> {
+    if !secs.is_finite() || secs.fract() != 0.0 || secs.abs() > 1e15 {
+        return Err(elt_error(
+            i,
+            "epoch seconds must be a finite integer in range",
+        ));
+    }
+    Timestamp::new(secs as i64, nanos).map_err(|e| elt_error(i, e))
+}
+
+pub(crate) struct InstantOut {
+    secs: Vec<f64>,
+    nanos: Vec<i32>,
+}
+
+/// Splits a timestamp into whole seconds (floored) and nanoseconds in
+/// `0..1e9`, so that record order matches time order.
+pub(crate) fn timestamp_parts(t: Timestamp) -> (f64, i32) {
+    let mut s = t.as_second();
+    let mut ns = t.subsec_nanosecond();
+    if ns < 0 {
+        s -= 1;
+        ns += 1_000_000_000;
+    }
+    (s as f64, ns)
+}
+
+impl InstantOut {
+    pub(crate) fn with_capacity(n: usize) -> Self {
+        Self {
+            secs: Vec::with_capacity(n),
+            nanos: Vec::with_capacity(n),
+        }
+    }
+
+    pub(crate) fn push(&mut self, x: Option<Timestamp>) {
+        match x {
+            Some(t) => {
+                let (s, ns) = timestamp_parts(t);
+                self.secs.push(s);
+                self.nanos.push(ns);
+            }
+            None => {
+                self.secs.push(na_real());
+                self.nanos.push(NA_INT);
+            }
+        }
+    }
+
+    pub(crate) fn into_sexp(self) -> savvy::Result<Sexp> {
+        let mut out = OwnedListSexp::new(2, true)?;
+        out.set_name_and_value(0, "seconds", OwnedRealSexp::try_from_slice(self.secs)?)?;
+        out.set_name_and_value(1, "nanos", OwnedIntegerSexp::try_from_slice(self.nanos)?)?;
+        Ok(out.into())
+    }
+}
+
+// ---------------------------------------------------------------------------
+// ZonedDateTime: seconds, nanos, tz
+
+pub(crate) struct ZonedIn {
+    inst: InstantIn,
+    tz: Vec<Option<String>>,
+}
+
+impl ZonedIn {
+    pub(crate) fn new(x: &ListSexp) -> savvy::Result<Self> {
+        let inst = InstantIn::new(x)?;
+        let tz = list_str(x, 2)?;
+        common_len(&[inst.len(), tz.len()])?;
+        Ok(Self { inst, tz })
+    }
+
+    pub(crate) fn len(&self) -> usize {
+        self.inst.len()
+    }
+
+    pub(crate) fn get(&self, i: usize, cache: &mut TzCache) -> savvy::Result<Option<Zoned>> {
+        let (Some(t), Some(id)) = (self.inst.get(i)?, self.tz[i].as_deref()) else {
+            return Ok(None);
+        };
+        let tz = cache.get(i, id)?.0.clone();
+        Ok(Some(t.to_zoned(tz)))
+    }
+}
+
+pub(crate) struct ZonedOut {
+    inst: InstantOut,
+    tz: Vec<Option<String>>,
+}
+
+impl ZonedOut {
+    pub(crate) fn with_capacity(n: usize) -> Self {
+        Self {
+            inst: InstantOut::with_capacity(n),
+            tz: Vec::with_capacity(n),
+        }
+    }
+
+    pub(crate) fn push(&mut self, x: Option<&Zoned>) {
+        self.inst.push(x.map(|z| z.timestamp()));
+        self.tz.push(x.map(|z| time_zone_id(z.time_zone())));
+    }
+
+    pub(crate) fn into_sexp(self) -> savvy::Result<Sexp> {
+        let mut out = OwnedListSexp::new(3, true)?;
+        out.set_name_and_value(0, "seconds", OwnedRealSexp::try_from_slice(self.inst.secs)?)?;
+        out.set_name_and_value(
+            1,
+            "nanos",
+            OwnedIntegerSexp::try_from_slice(self.inst.nanos)?,
+        )?;
+        let mut tz = OwnedStringSexp::new(self.tz.len())?;
+        for (i, v) in self.tz.iter().enumerate() {
+            match v {
+                Some(s) => tz.set_elt(i, s)?,
+                None => tz.set_na(i)?,
+            }
+        }
+        out.set_name_and_value(2, "tz", tz)?;
+        Ok(out.into())
+    }
 }

@@ -5,6 +5,8 @@
 \alias{to_plain_date}
 \alias{to_plain_time}
 \alias{to_plain_date_time}
+\alias{to_instant}
+\alias{to_zoned_date_time}
 \title{Convert between Temporal types}
 \usage{
 to_plain_date(x)
@@ -12,26 +14,48 @@ to_plain_date(x)
 to_plain_time(x)
 
 to_plain_date_time(x, time = NULL)
+
+to_instant(x)
+
+to_zoned_date_time(
+  x,
+  time_zone,
+  time = NULL,
+  disambiguation = c("compatible", "earlier", "later", "reject")
+)
 }
 \arguments{
 \item{x}{A Temporal object.}
 
 \item{time}{A plain time (or string) recycled against \code{x}, or \code{NULL} for
 midnight.}
+
+\item{time_zone}{Time zone identifiers, recycled against \code{x}.}
+
+\item{disambiguation}{How to resolve local times in DST gaps and overlaps,
+see \code{\link[=zoned_date_time]{zoned_date_time()}}.}
 }
 \value{
 A plain date, plain time or plain date-time vector.
 }
 \description{
 Conversions that drop or add information, mirroring Temporal's
-\code{.toPlainDate()}, \code{.toPlainTime()} and \code{.toPlainDateTime()}:
+\code{.toPlainDate()}, \code{.toPlainTime()}, \code{.toPlainDateTime()}, \code{.toInstant()}
+and \code{.toZonedDateTime()}:
 }
 \details{
 \itemize{
 \item \code{to_plain_date()} and \code{to_plain_time()} take the date or time part of a
-plain date-time.
+plain date-time or (wall clock of a) zoned date-time.
 \item \code{to_plain_date_time()} combines a plain date with a plain time
-(midnight when \code{time} is \code{NULL}).
+(midnight when \code{time} is \code{NULL}), or takes the wall clock of a zoned
+date-time.
+\item \code{to_instant()} drops the time zone of a zoned date-time.
+\item \code{to_zoned_date_time()} places an instant, plain date-time or plain date
+in \code{time_zone}. For plain types the local time is resolved with
+\code{disambiguation}; a plain date without \code{time} becomes the start of that
+day. A zoned date-time is converted to \code{time_zone} keeping the exact
+time.
 }
 }
 \examples{
@@ -39,4 +63,9 @@ dt <- plain_date_time("1995-12-07T03:24:30")
 to_plain_date(dt)
 to_plain_time(dt)
 to_plain_date_time(plain_date(2006, 8, 24), plain_time(15, 30))
+z <- to_zoned_date_time(dt, "Europe/Paris")
+z
+to_instant(z)
+to_zoned_date_time(instant("2020-01-01T00:00Z"), "Asia/Tokyo")
+to_zoned_date_time(plain_date(2020, 3, 29), "Asia/Beirut") # day starts at 01:00
 }

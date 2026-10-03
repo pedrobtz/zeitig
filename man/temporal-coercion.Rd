@@ -5,6 +5,8 @@
 \alias{as_plain_date}
 \alias{as_plain_time}
 \alias{as_plain_date_time}
+\alias{as_instant}
+\alias{as_zoned_date_time}
 \title{Coerce to Temporal types}
 \usage{
 as_plain_date(x, ...)
@@ -12,6 +14,10 @@ as_plain_date(x, ...)
 as_plain_time(x, ...)
 
 as_plain_date_time(x, ...)
+
+as_instant(x, ...)
+
+as_zoned_date_time(x, ...)
 }
 \arguments{
 \item{x}{An object to convert.}
@@ -35,12 +41,19 @@ own time zone (the \code{tzone} attribute, or the session time zone). \code{POSI
 values are rounded to the microsecond, because a double cannot hold
 nanoseconds of a present-day instant; \code{POSIXlt} seconds are rounded to the
 nanosecond.
+\item \code{POSIXct} converts to an instant, or to a zoned date-time in its
+\code{tzone} (the session time zone, see \code{\link[=now_time_zone]{now_time_zone()}}, when unset);
+\code{as_zoned_date_time(x, time_zone = )} picks another zone.
 }
 
-The reverse conversions use base generics: \code{\link[=as.Date]{as.Date()}} for plain dates and
-plain date-times, and \code{\link[=as.POSIXct]{as.POSIXct()}} / \code{\link[=as.POSIXlt]{as.POSIXlt()}} for plain date-times,
-which interpret the wall-clock time in \code{tz} (UTC by default). Local times
-that do not exist in \code{tz} (DST gaps) are resolved by the operating system.
+The reverse conversions use base generics: \code{\link[=as.Date]{as.Date()}} for plain dates,
+plain date-times and zoned date-times (wall-clock date), and
+\code{\link[=as.POSIXct]{as.POSIXct()}} / \code{\link[=as.POSIXlt]{as.POSIXlt()}}. For plain date-times these interpret the
+wall-clock time in \code{tz} (UTC by default; local times in DST gaps are
+resolved by the operating system). Instants and zoned date-times convert
+exactly up to the microsecond; zoned date-times keep their time zone when
+all elements share one IANA zone and \code{tz} is not given, otherwise \code{tz}
+(default UTC) is used.
 }
 \examples{
 as_plain_date(as.Date("2020-02-29"))
@@ -48,4 +61,7 @@ as_plain_date_time(as.POSIXct("2020-02-29 12:30:00", tz = "UTC"))
 as_plain_time("12:30")
 as.Date(plain_date(2020, 2, 29))
 as.POSIXct(plain_date_time("2020-02-29T12:30"), tz = "America/New_York")
+as_instant(as.POSIXct("2020-01-01 12:00:00", tz = "UTC"))
+as_zoned_date_time(as.POSIXct("2020-07-01 12:00:00", tz = "Europe/Paris"))
+as.POSIXct(zoned_date_time("2020-07-01T12:00+02:00[Europe/Paris]"))
 }

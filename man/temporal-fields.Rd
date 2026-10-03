@@ -62,8 +62,9 @@ in_leap_year(x)
 temporal_fields(x)
 }
 \arguments{
-\item{x}{A Temporal object: date fields need a plain date or plain
-date-time, time fields a plain time or plain date-time;
+\item{x}{A Temporal object: date fields need a plain date, plain
+date-time or zoned date-time (whose fields are the wall clock in its time
+zone), time fields a plain time, plain date-time or zoned date-time;
 \code{temporal_fields()} also accepts durations.}
 }
 \value{

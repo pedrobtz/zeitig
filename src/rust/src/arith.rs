@@ -15,7 +15,7 @@ use crate::opts::{increment_i64, parse_round_mode, parse_unit, DiffOpts};
 
 /// Temporal `overflow: "reject"` for date arithmetic: adding the years and
 /// months of `span` must not move the day of month (jiff always constrains).
-fn check_reject(i: usize, date: Date, span: Span) -> savvy::Result<()> {
+pub(crate) fn check_reject(i: usize, date: Date, span: Span) -> savvy::Result<()> {
     if span.get_years() == 0 && span.get_months() == 0 {
         return Ok(());
     }

@@ -200,8 +200,10 @@ ZonedDateTime` needs a time zone; `Plain* -> Zoned*` goes through disambiguation
 | `Instant`, `ZonedDateTime` | `POSIXct`                  | lossy below microseconds; documented                         |
 | `Duration`        | `difftime`                          | only when the duration has no calendar units                 |
 
-Default time zone: Temporal's `Now` uses the system zone. We use R's `Sys.timezone()` (which honours
-`TZ`) rather than `jiff`'s own system detection so results match base R inside the same session.
+Default time zone: Temporal's `Now` uses the system zone. We use the `TZ` environment variable when
+it names a valid zone, then R's `Sys.timezone()`, then `"UTC"`, rather than `jiff`'s own system
+detection, so results match base R inside the same session. (`Sys.timezone()` alone is not enough:
+it caches its first answer and misses a later `Sys.setenv(TZ = )`.)
 
 ## 5. Options and enumerations
 
@@ -318,6 +320,9 @@ constraint on the build. The scheme:
 | `Duration` string with fractional units | allowed on the smallest unit | allowed | same |
 | `ZonedDateTime` equality | `equals` includes time zone id | `Zoned == Zoned` compares instant and zone | `==` follows `compare` (instant only); `temporal_equals()` also compares the zone id |
 | `until`/`since` default units on `ZonedDateTime` | `hour` largest unit | `Zoned::until` defaults to hours as well | same |
+| `Instant` epoch accessors | `epochMilliseconds`, `epochNanoseconds` (BigInt) | `as_millisecond()`, `as_nanosecond()` (i128) | `epoch_seconds()`/`epoch_milliseconds()` floor to doubles; `epoch_nanoseconds()` is a decimal string; `instant_from_epoch(nanoseconds =)` accepts strings |
+| Time zone identifiers | IANA names and `±HH:MM` | also POSIX TZ strings | POSIX TZ strings and sub-minute offsets are rejected; names are canonicalised to the database's spelling |
+| `ZonedDateTime` `until` across zones | RangeError for calendar units when zones differ | computes anyway | R checks and errors (`zudate_range_error`) when `largest_unit` is `day` or larger and the zones differ |
 | `toString()` fractional digits | `auto` trims trailing zeros | `Display` prints `auto` precision | same |
 | Leap seconds | not represented | not represented | same |
 | Weeks without `relativeTo` | `Duration.compare`/`total`/`round` need `relativeTo` for weeks | weeks are 7 days with `days_are_24_hours()` | jiff behaviour: weeks count as 7 x 24 hours when no `relative_to` is given |
@@ -339,7 +344,9 @@ Anything discovered later goes in this table before the behaviour is shipped.
 
 1. ~~Whether `Duration` fields should be stored as doubles~~ Decided (0.1.0): doubles, validated as
    integers in R (`ToIntegerIfIntegral`) and range-checked by `jiff::Span` in Rust.
-2. Whether `==` on `ZonedDateTime` should be `compare`-based (chosen) or `equals`-based.
+2. ~~Whether `==` on `ZonedDateTime` should be `compare`-based~~ Decided (0.1.0): `==`, `<`,
+   `sort()` and `unique()` use the exact time only (`vec_proxy_equal`/`vec_proxy_compare` drop
+   `tz`); `temporal_equals()` also compares the zone.
 3. Whether to export `SignedDuration` (jiff-only, absolute time). Leaning no: not part of Temporal.
 4. Whether to ship `pillar`/`tibble` methods in 0.1.0 (Suggests) or defer.
 5. Final function prefix: `temporal_*` (chosen) versus a shorter `tp_*`.

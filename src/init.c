@@ -84,6 +84,56 @@ SEXP savvy_rs_duration_validate__impl(SEXP c_arg__x) {
     return handle_result(res);
 }
 
+SEXP savvy_rs_instant_add__impl(SEXP c_arg__x, SEXP c_arg__duration) {
+    SEXP res = savvy_rs_instant_add__ffi(c_arg__x, c_arg__duration);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_instant_diff__impl(SEXP c_arg__x, SEXP c_arg__y, SEXP c_arg__largest, SEXP c_arg__smallest, SEXP c_arg__increment, SEXP c_arg__mode, SEXP c_arg__since) {
+    SEXP res = savvy_rs_instant_diff__ffi(c_arg__x, c_arg__y, c_arg__largest, c_arg__smallest, c_arg__increment, c_arg__mode, c_arg__since);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_instant_epoch_nanoseconds__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_instant_epoch_nanoseconds__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_instant_format__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_instant_format__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_instant_from_epoch_nanoseconds__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_instant_from_epoch_nanoseconds__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_instant_parse__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_instant_parse__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_instant_round__impl(SEXP c_arg__x, SEXP c_arg__smallest, SEXP c_arg__increment, SEXP c_arg__mode) {
+    SEXP res = savvy_rs_instant_round__ffi(c_arg__x, c_arg__smallest, c_arg__increment, c_arg__mode);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_instant_to_zoned__impl(SEXP c_arg__x, SEXP c_arg__time_zone) {
+    SEXP res = savvy_rs_instant_to_zoned__ffi(c_arg__x, c_arg__time_zone);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_instant_validate__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_instant_validate__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_now__impl(void) {
+    SEXP res = savvy_rs_now__ffi();
+    return handle_result(res);
+}
+
 SEXP savvy_rs_plain_date_add__impl(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day, SEXP c_arg__duration, SEXP c_arg__reject) {
     SEXP res = savvy_rs_plain_date_add__ffi(c_arg__year, c_arg__month, c_arg__day, c_arg__duration, c_arg__reject);
     return handle_result(res);
@@ -179,6 +229,66 @@ SEXP savvy_rs_plain_time_round__impl(SEXP c_arg__second_of_day, SEXP c_arg__nano
     return handle_result(res);
 }
 
+SEXP savvy_rs_time_zone_canonical__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_time_zone_canonical__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_zoned_add__impl(SEXP c_arg__x, SEXP c_arg__duration, SEXP c_arg__reject) {
+    SEXP res = savvy_rs_zoned_add__ffi(c_arg__x, c_arg__duration, c_arg__reject);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_zoned_civil__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_zoned_civil__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_zoned_diff__impl(SEXP c_arg__x, SEXP c_arg__y, SEXP c_arg__largest, SEXP c_arg__smallest, SEXP c_arg__increment, SEXP c_arg__mode, SEXP c_arg__since) {
+    SEXP res = savvy_rs_zoned_diff__ffi(c_arg__x, c_arg__y, c_arg__largest, c_arg__smallest, c_arg__increment, c_arg__mode, c_arg__since);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_zoned_format__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_zoned_format__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_zoned_from_civil__impl(SEXP c_arg__x, SEXP c_arg__time_zone, SEXP c_arg__disambiguation, SEXP c_arg__offset, SEXP c_arg__offset_mode) {
+    SEXP res = savvy_rs_zoned_from_civil__ffi(c_arg__x, c_arg__time_zone, c_arg__disambiguation, c_arg__offset, c_arg__offset_mode);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_zoned_hours_in_day__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_zoned_hours_in_day__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_zoned_offset__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_zoned_offset__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_zoned_parse__impl(SEXP c_arg__x, SEXP c_arg__disambiguation, SEXP c_arg__offset_mode) {
+    SEXP res = savvy_rs_zoned_parse__ffi(c_arg__x, c_arg__disambiguation, c_arg__offset_mode);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_zoned_round__impl(SEXP c_arg__x, SEXP c_arg__smallest, SEXP c_arg__increment, SEXP c_arg__mode) {
+    SEXP res = savvy_rs_zoned_round__ffi(c_arg__x, c_arg__smallest, c_arg__increment, c_arg__mode);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_zoned_start_of_day__impl(SEXP c_arg__x) {
+    SEXP res = savvy_rs_zoned_start_of_day__ffi(c_arg__x);
+    return handle_result(res);
+}
+
+SEXP savvy_rs_zoned_transition__impl(SEXP c_arg__x, SEXP c_arg__next) {
+    SEXP res = savvy_rs_zoned_transition__ffi(c_arg__x, c_arg__next);
+    return handle_result(res);
+}
+
 
 static const R_CallMethodDef CallEntries[] = {
     {"savvy_rs_available_time_zones__impl", (DL_FUNC) &savvy_rs_available_time_zones__impl, 0},
@@ -190,6 +300,16 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_rs_duration_sort_key__impl", (DL_FUNC) &savvy_rs_duration_sort_key__impl, 1},
     {"savvy_rs_duration_total__impl", (DL_FUNC) &savvy_rs_duration_total__impl, 3},
     {"savvy_rs_duration_validate__impl", (DL_FUNC) &savvy_rs_duration_validate__impl, 1},
+    {"savvy_rs_instant_add__impl", (DL_FUNC) &savvy_rs_instant_add__impl, 2},
+    {"savvy_rs_instant_diff__impl", (DL_FUNC) &savvy_rs_instant_diff__impl, 7},
+    {"savvy_rs_instant_epoch_nanoseconds__impl", (DL_FUNC) &savvy_rs_instant_epoch_nanoseconds__impl, 1},
+    {"savvy_rs_instant_format__impl", (DL_FUNC) &savvy_rs_instant_format__impl, 1},
+    {"savvy_rs_instant_from_epoch_nanoseconds__impl", (DL_FUNC) &savvy_rs_instant_from_epoch_nanoseconds__impl, 1},
+    {"savvy_rs_instant_parse__impl", (DL_FUNC) &savvy_rs_instant_parse__impl, 1},
+    {"savvy_rs_instant_round__impl", (DL_FUNC) &savvy_rs_instant_round__impl, 4},
+    {"savvy_rs_instant_to_zoned__impl", (DL_FUNC) &savvy_rs_instant_to_zoned__impl, 2},
+    {"savvy_rs_instant_validate__impl", (DL_FUNC) &savvy_rs_instant_validate__impl, 1},
+    {"savvy_rs_now__impl", (DL_FUNC) &savvy_rs_now__impl, 0},
     {"savvy_rs_plain_date_add__impl", (DL_FUNC) &savvy_rs_plain_date_add__impl, 5},
     {"savvy_rs_plain_date_diff__impl", (DL_FUNC) &savvy_rs_plain_date_diff__impl, 7},
     {"savvy_rs_plain_date_field__impl", (DL_FUNC) &savvy_rs_plain_date_field__impl, 4},
@@ -209,6 +329,18 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_rs_plain_time_from_parts__impl", (DL_FUNC) &savvy_rs_plain_time_from_parts__impl, 7},
     {"savvy_rs_plain_time_parse__impl", (DL_FUNC) &savvy_rs_plain_time_parse__impl, 1},
     {"savvy_rs_plain_time_round__impl", (DL_FUNC) &savvy_rs_plain_time_round__impl, 5},
+    {"savvy_rs_time_zone_canonical__impl", (DL_FUNC) &savvy_rs_time_zone_canonical__impl, 1},
+    {"savvy_rs_zoned_add__impl", (DL_FUNC) &savvy_rs_zoned_add__impl, 3},
+    {"savvy_rs_zoned_civil__impl", (DL_FUNC) &savvy_rs_zoned_civil__impl, 1},
+    {"savvy_rs_zoned_diff__impl", (DL_FUNC) &savvy_rs_zoned_diff__impl, 7},
+    {"savvy_rs_zoned_format__impl", (DL_FUNC) &savvy_rs_zoned_format__impl, 1},
+    {"savvy_rs_zoned_from_civil__impl", (DL_FUNC) &savvy_rs_zoned_from_civil__impl, 5},
+    {"savvy_rs_zoned_hours_in_day__impl", (DL_FUNC) &savvy_rs_zoned_hours_in_day__impl, 1},
+    {"savvy_rs_zoned_offset__impl", (DL_FUNC) &savvy_rs_zoned_offset__impl, 1},
+    {"savvy_rs_zoned_parse__impl", (DL_FUNC) &savvy_rs_zoned_parse__impl, 3},
+    {"savvy_rs_zoned_round__impl", (DL_FUNC) &savvy_rs_zoned_round__impl, 4},
+    {"savvy_rs_zoned_start_of_day__impl", (DL_FUNC) &savvy_rs_zoned_start_of_day__impl, 1},
+    {"savvy_rs_zoned_transition__impl", (DL_FUNC) &savvy_rs_zoned_transition__impl, 2},
     {NULL, NULL, 0}
 };
 

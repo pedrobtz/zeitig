@@ -162,15 +162,16 @@ duration_sign <- function(x) {
 #' * `duration_blank()` is `TRUE` for zero durations (`.blank`).
 #'
 #' Without `relative_to`, days are 24 hours long and durations with years,
-#' months or weeks are an error. With `relative_to` (a plain date or plain
-#' date-time, or a string), calendar units are resolved from that starting
-#' point.
+#' months are an error. With `relative_to` (a plain date, plain date-time or
+#' zoned date-time, or a string), calendar units are resolved from that
+#' starting point; with a zoned date-time, days follow the time zone's DST
+#' rules.
 #'
 #' @param x,y Durations (or ISO 8601 strings), recycled to a common length.
 #' @param unit The unit to express the duration in, e.g. `"hour"`. Plural
 #'   spellings (`"hours"`) are accepted.
-#' @param relative_to `NULL`, or a plain date / plain date-time (or string)
-#'   recycled against `x`.
+#' @param relative_to `NULL`, or a plain date, plain date-time or zoned
+#'   date-time (or string) recycled against `x`.
 #' @returns `duration_total()`: a double vector. `duration_compare()`: an
 #'   integer vector. `duration_blank()`: a logical vector.
 #' @family duration
@@ -205,6 +206,16 @@ duration_blank <- function(x) {
   s == 0L
 }
 
+# Temporal parses a relativeTo string as a ZonedDateTime when it carries a
+# time zone annotation and as a PlainDate(Time) otherwise.
+parse_relative_to <- function(x, call = rlang::caller_env()) {
+  if (all(is.na(x) | grepl("[", x, fixed = TRUE))) {
+    zoned_date_time_parse(x, call = call)
+  } else {
+    plain_date_time_parse(x, call = call)
+  }
+}
+
 # Recycle a duration with its `relative_to` and turn the latter into the list
 # of plain date-time fields Rust expects (or NULL).
 with_relative <- function(x, relative_to, call = rlang::caller_env()) {
@@ -212,13 +223,18 @@ with_relative <- function(x, relative_to, call = rlang::caller_env()) {
     return(list(x = x, relative = NULL))
   }
   if (is.character(relative_to)) {
-    relative_to <- plain_date_time_parse(relative_to, call = call)
-  } else if (is_plain_date(relative_to)) {
+    relative_to <- parse_relative_to(relative_to, call = call)
+  }
+  if (is_zoned_date_time(relative_to)) {
+    args <- vec_recycle_common(x = x, relative = relative_to, .call = call)
+    return(list(x = args$x, relative = zoned_data(args$relative)))
+  }
+  if (is_plain_date(relative_to)) {
     relative_to <- to_plain_date_time(relative_to)
   } else if (!is_plain_date_time(relative_to)) {
     zudate_type_error(
       sprintf(
-        "`relative_to` must be a plain date or plain date-time, not %s.",
+        "`relative_to` must be a plain date, plain date-time or zoned date-time, not %s.",
         obj_type_friendly(relative_to)
       ),
       call = call

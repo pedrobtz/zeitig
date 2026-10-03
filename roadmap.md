@@ -52,15 +52,15 @@ Rust column loops, option handling, error mapping) that the remaining types copy
 - [x] CI job building with the MSRV (rustc 1.81) from the vendored crates.
 - [x] Property tests in Rust: `a + (b - a) == b` for every type pair, round trip of strings (deterministic LCG, no extra crate).
 
-## Milestone 4 - Instant, ZonedDateTime, Now
+## Milestone 4 - Instant, ZonedDateTime, Now (done)
 
-- [ ] `zudate_instant`: constructor from strings and epoch units, `epoch_seconds()`, `epoch_milliseconds()`, `epoch_nanoseconds()` (string), arithmetic with time-unit durations, `temporal_round()`, `until`/`since`.
-- [ ] `zudate_zoned_date_time`: per-element time zone, constructor with `disambiguation` and `offset` options, parsing of `[Zone]` and `[!Zone]` annotations, `offset()`, `offset_nanoseconds()`, `time_zone()`, `hours_in_day()`, `start_of_day()`, `time_zone_transition()`, `with_time_zone()`, calendar-aware `add`/`until`/`round`.
-- [ ] Per-call time zone cache in Rust; invalid identifiers produce `zudate_range_error`.
-- [ ] `now_*()` functions; default zone from `Sys.timezone()`.
-- [ ] `POSIXct` conversions both ways with documented precision loss.
-- [ ] `temporal_equals()` vs `==` semantics as decided in `design.md` section 11.
-- [ ] Tests covering DST gaps and overlaps in at least three zones, fixed offsets, `Etc/UTC`, and the `TZ`/`TZDIR` environment handling on all CI platforms.
+- [x] `zudate_instant`: constructor from strings and epoch units, `epoch_seconds()`, `epoch_milliseconds()`, `epoch_nanoseconds()` (string), arithmetic with time-unit durations, `temporal_round()`, `until`/`since`.
+- [x] `zudate_zoned_date_time`: per-element time zone, constructor with `disambiguation` and `offset` options, parsing of `[Zone]` and `[!Zone]` annotations, `offset()`, `offset_nanoseconds()`, `time_zone()`, `hours_in_day()`, `start_of_day()`, `time_zone_transition()`, `with_time_zone()`, calendar-aware `add`/`until`/`round`.
+- [x] Per-call time zone cache in Rust; invalid identifiers produce `zudate_range_error`; `ZUDATE_TZDIR` overrides the database (read once per session).
+- [x] `now_*()` functions; default zone from `TZ`, then `Sys.timezone()` (which caches and misses later `TZ` changes), then UTC.
+- [x] `POSIXct` conversions both ways with documented precision loss.
+- [x] `temporal_equals()` vs `==` semantics as decided in `design.md` section 11.
+- [x] Tests covering DST gaps and overlaps in at least three zones, fixed offsets, `Etc/UTC`, and the `TZ`/`TZDIR` environment handling on all CI platforms.
 
 ## Milestone 5 - Formatting, parsing, polish
 
