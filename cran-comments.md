@@ -34,7 +34,6 @@ TC39 'Temporal' specification, which is linked in the Description field
 * GitHub Actions: Ubuntu (R release, oldrel-1), macOS (arm64, R release),
   Windows (R release, Rtools); r-devel containers with clang 23 and GCC 16.
 * Offline installation from the source tarball on Linux, macOS and Windows.
-* TODO before submission: win-builder (release, devel) and R-hub Rust images.
 
 ## R CMD check results
 

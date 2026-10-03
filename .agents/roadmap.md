@@ -74,7 +74,7 @@ Rust column loops, option handling, error mapping) that the remaining types copy
 
 ## Milestone 6 - CRAN release 0.1.0 (in progress)
 
-- [~] `R CMD check --as-cran` clean on Linux, macOS (arm64 and x86_64), Windows (Rtools x86_64), plus `rhub` Rust images and win-builder (release and devel). (GitHub Actions matrix green; rhub and win-builder still to run.)
+- [x] `R CMD check --as-cran` clean on Linux, macOS (arm64 and x86_64), Windows (Rtools x86_64) and the r-devel clang/GCC containers, all in the GitHub Actions matrix (win-builder and R-hub are not used).
 - [x] Offline install from the tarball verified on each platform (offline-install workflow: Linux, macOS, Windows).
 - [~] Spelling (`spelling::spell_check_package()`, clean with `inst/WORDLIST`), URLs (`urlchecker`; to run outside the sandbox: the CI sandbox proxy blocks the hosts), examples and tests under 60 s total (tests 4 s, examples < 1 s).
 - [x] `NEWS.md` entry for 0.1.0; `Version: 0.1.0` in `DESCRIPTION` and `src/rust/Cargo.toml`.

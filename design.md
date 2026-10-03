@@ -317,8 +317,9 @@ constraint on the build. The scheme:
 - **Platform matrix** via the existing CI (`pedrobtz/r-actions` with `rust: true`): Linux, macOS,
   Windows; the `full-ci` label or a push to `main` runs the full set. Add a job that installs from
   the built tarball with network disabled to prove the vendored build works.
-- **CRAN rehearsal**: `rhub::rhub_check()` on the Rust-enabled images and `devtools::check_win_devel()`
-  before submission.
+- **CRAN rehearsal**: the GitHub Actions `R CMD check --as-cran` matrix above (release, oldrel and
+  r-devel with clang and GCC, on Linux, macOS and Windows) is the pre-submission check; win-builder
+  and R-hub are not used.
 
 ## 9. Known deviations from Temporal (and how they are handled)
 
