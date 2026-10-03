@@ -15,7 +15,10 @@ packages (https://cran.r-project.org/web/packages/using_rust.html):
 * Cargo runs with `-j 2` and a `CARGO_HOME` inside the build directory, so
   nothing is written outside it; `cleanup` removes the extracted sources.
 * The authors of the vendored crates are listed in `inst/AUTHORS` and
-  credited in `Authors@R` as a `cph` entry; their licences (MIT, Apache-2.0,
+  credited in `Authors@R`: the authors of the two crates the package is
+  built on, 'jiff' (Andrew Gallant) and 'savvy' (Hiroaki Yutani), by name
+  as `ctb`/`cph`, and the remaining crate authors as a collective `cph`
+  entry; their licences (MIT, Apache-2.0,
   Unlicense, Unicode-3.0, all permissive) are summarised in `LICENSE.note`.
 * `SystemRequirements` states the minimum Rust version (1.81), which is
   checked in CI.
