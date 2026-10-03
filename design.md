@@ -132,8 +132,9 @@ with methods for character, base R classes and the other zudate classes.
 `day()`, `hour()`, `minute()`, `second()`, `millisecond()`, `microsecond()`, `nanosecond()`,
 `day_of_week()`, `day_of_year()`, `week_of_year()`, `year_of_week()`, `days_in_month()`,
 `days_in_year()`, `in_leap_year()`, `epoch_seconds()`, `epoch_milliseconds()`, `offset()`,
-`offset_nanoseconds()`, `time_zone()`, `hours_in_day()`, `total()`/`abs()`/`sign()`/`blank()` for
-durations. These are implemented in R from the record fields when trivial, in Rust otherwise.
+`offset_nanoseconds()`, `time_zone()`, `hours_in_day()`, `duration_total()`/`abs()`/`sign()`/`duration_blank()` for
+durations (no per-unit duration accessors, which would mask `base::months()` and clash with
+lubridate; use `temporal_fields()`). These are implemented in R from the record fields when trivial, in Rust otherwise.
 
 Accessors are plain functions, not S3 generics: each calls an internal helper
 (`civil_date_fields()`, `civil_time_fields()` in `R/accessors.R`) that knows which classes carry
@@ -319,6 +320,9 @@ constraint on the build. The scheme:
 | `until`/`since` default units on `ZonedDateTime` | `hour` largest unit | `Zoned::until` defaults to hours as well | same |
 | `toString()` fractional digits | `auto` trims trailing zeros | `Display` prints `auto` precision | same |
 | Leap seconds | not represented | not represented | same |
+| Weeks without `relativeTo` | `Duration.compare`/`total`/`round` need `relativeTo` for weeks | weeks are 7 days with `days_are_24_hours()` | jiff behaviour: weeks count as 7 x 24 hours when no `relative_to` is given |
+| `Duration` operators | no `<`/`==` (`valueOf` throws) | `Span` has no `Ord`; `fieldwise()` equality | `<`, `sort()` order by length with 24-hour days (error for years/months); `==` compares fields (`PT1H != PT60M`); `duration_compare()` compares lengths |
+| `PlainDate - PlainDate` | n/a (no operators) | `Date - Date` is a `Span` in days | `x - y` is `temporal_since(x, y)` with default options |
 
 Anything discovered later goes in this table before the behaviour is shipped.
 
@@ -333,8 +337,8 @@ Anything discovered later goes in this table before the behaviour is shipped.
 
 ## 11. Open questions (decide before 0.1.0 feature freeze)
 
-1. Whether `Duration` fields should be stored as doubles (chosen above, for range) or as integers
-   with a separate overflow check; doubles are simpler and exact up to 2^53.
+1. ~~Whether `Duration` fields should be stored as doubles~~ Decided (0.1.0): doubles, validated as
+   integers in R (`ToIntegerIfIntegral`) and range-checked by `jiff::Span` in Rust.
 2. Whether `==` on `ZonedDateTime` should be `compare`-based (chosen) or `equals`-based.
 3. Whether to export `SignedDuration` (jiff-only, absolute time). Leaning no: not part of Temporal.
 4. Whether to ship `pillar`/`tibble` methods in 0.1.0 (Suggests) or defer.

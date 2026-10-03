@@ -84,3 +84,24 @@ jobs:
           .libPaths(c("lib", .libPaths()))
           library(zudate)
           testthat::test_dir("tests/testthat", package = "zudate", load_package = "installed", stop_on_failure = TRUE)
+
+  # The minimum supported Rust version (DESCRIPTION SystemRequirements,
+  # rust-version in Cargo.toml) must keep building from the vendored crates:
+  # older CRAN flavours ship older toolchains.
+  msrv:
+    runs-on: ubuntu-latest
+    name: msrv (rust 1.81)
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@1.81
+
+      - name: Build the crate offline from the vendored sources
+        working-directory: src/rust
+        run: |
+          set -eu
+          tar -xf vendor.tar.xz
+          mkdir -p cargo-home
+          printf '[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "vendor"\n' > cargo-home/config.toml
+          CARGO_HOME="$PWD/cargo-home" cargo build --offline --locked --lib --release

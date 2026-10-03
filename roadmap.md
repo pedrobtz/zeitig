@@ -41,15 +41,16 @@ Rust column loops, option handling, error mapping) that the remaining types copy
 - [x] `temporal_compare()` / `temporal_equals()` for the civil types.
 - [x] Tests from Temporal docs examples for each method; `NA` and zero-length inputs in every test file.
 
-## Milestone 3 - Duration and arithmetic
+## Milestone 3 - Duration and arithmetic (done)
 
-- [ ] `zudate_duration` record class, constructor from components and ISO 8601 strings, uniform-sign and range validation.
-- [ ] `temporal_add()`/`temporal_subtract()` and `+`/`-` via `vec_arith` for Plain* types.
-- [ ] `temporal_until()`/`temporal_since()` with `largest_unit`, `smallest_unit`, `rounding_increment`, `rounding_mode`.
-- [ ] `temporal_round()` for Plain* types and durations (`relative_to` for calendar units).
-- [ ] `duration_total()`, `duration_compare()`, `abs()`, unary `-`, `sign()`, `blank()`.
-- [ ] `difftime` conversions.
-- [ ] Property tests in Rust: `a + (b - a) == b` for every type pair, round trip of strings.
+- [x] `zudate_duration` record class, constructor from components and ISO 8601 strings, uniform-sign and range validation.
+- [x] `temporal_add()`/`temporal_subtract()` and `+`/`-` via `vec_arith` for Plain* types.
+- [x] `temporal_until()`/`temporal_since()` with `largest_unit`, `smallest_unit`, `rounding_increment`, `rounding_mode`.
+- [x] `temporal_round()` for Plain* types and durations (`relative_to` for calendar units).
+- [x] `duration_total()`, `duration_compare()`, `abs()`, unary `-`, `sign()`, `duration_blank()`.
+- [x] `difftime` conversions (`as_duration()`, `as_difftime()`).
+- [x] CI job building with the MSRV (rustc 1.81) from the vendored crates.
+- [x] Property tests in Rust: `a + (b - a) == b` for every type pair, round trip of strings (deterministic LCG, no extra crate).
 
 ## Milestone 4 - Instant, ZonedDateTime, Now
 

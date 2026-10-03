@@ -3,6 +3,6 @@
 
 ## usethis namespace: start
 #' @import vctrs
-#' @importFrom rlang abort arg_match
+#' @importFrom rlang abort arg_match %||%
 ## usethis namespace: end
 NULL

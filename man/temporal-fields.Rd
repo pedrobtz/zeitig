@@ -63,7 +63,8 @@ temporal_fields(x)
 }
 \arguments{
 \item{x}{A Temporal object: date fields need a plain date or plain
-date-time, time fields a plain time or plain date-time.}
+date-time, time fields a plain time or plain date-time;
+\code{temporal_fields()} also accepts durations.}
 }
 \value{
 An integer vector (\code{in_leap_year()}: logical; \code{temporal_fields()}:
@@ -89,7 +90,8 @@ year that week belongs to (which differs from \code{year()} around New Year).
 \code{months_in_year()}, \code{in_leap_year()}.
 }
 
-\code{temporal_fields()} returns all the component fields as a data frame.
+\code{temporal_fields()} returns all the component fields as a data frame; for
+durations these are the ten fields from \code{years} to \code{nanoseconds}.
 }
 \examples{
 x <- plain_date_time("2021-01-03T15:23:30.123456789")

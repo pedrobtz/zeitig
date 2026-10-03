@@ -59,10 +59,12 @@ time_field <- function(x, field, call = rlang::caller_env()) {
 #' * `days_in_week()`, `days_in_month()`, `days_in_year()`,
 #'   `months_in_year()`, `in_leap_year()`.
 #'
-#' `temporal_fields()` returns all the component fields as a data frame.
+#' `temporal_fields()` returns all the component fields as a data frame; for
+#' durations these are the ten fields from `years` to `nanoseconds`.
 #'
 #' @param x A Temporal object: date fields need a plain date or plain
-#'   date-time, time fields a plain time or plain date-time.
+#'   date-time, time fields a plain time or plain date-time;
+#'   `temporal_fields()` also accepts durations.
 #' @returns An integer vector (`in_leap_year()`: logical; `temporal_fields()`:
 #'   a data frame).
 #' @name temporal-fields
@@ -157,6 +159,9 @@ in_leap_year <- function(x) as.logical(date_field(x, "in_leap_year"))
 #' @rdname temporal-fields
 #' @export
 temporal_fields <- function(x) {
+  if (is_duration(x)) {
+    return(new_data_frame(duration_data(x), n = vec_size(x)))
+  }
   out <- list()
   if (is_plain_date(x) || is_plain_date_time(x)) {
     out <- c(out, civil_date_fields(x))

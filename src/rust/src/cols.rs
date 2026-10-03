@@ -6,7 +6,10 @@
 //! output field.
 
 use jiff::civil::{Date, DateTime, Time};
-use savvy::{IntegerSexp, OwnedIntegerSexp, OwnedListSexp, Sexp};
+use jiff::Span;
+use savvy::{
+    IntegerSexp, ListSexp, OwnedIntegerSexp, OwnedListSexp, OwnedRealSexp, Sexp, TypedSexp,
+};
 
 /// R's `NA_integer_`. Compared directly instead of through savvy's
 /// `NotAvailableValue`, which reads the `R_NaInt` symbol and so cannot be
@@ -15,6 +18,12 @@ pub(crate) const NA_INT: i32 = i32::MIN;
 
 pub(crate) fn is_na_int(x: i32) -> bool {
     x == NA_INT
+}
+
+/// `NA_character_` check for strings from a `StringSexp`.
+pub(crate) fn is_na_str(x: &str) -> bool {
+    use savvy::NotAvailableValue;
+    x.is_na()
 }
 
 /// Error for element `i` (0-based), with the 1-based index R users see.
@@ -273,4 +282,183 @@ impl DateTimeOut {
             ],
         )
     }
+}
+
+// ---------------------------------------------------------------------------
+// Duration: years, months, weeks, days, hours, minutes, seconds,
+// milliseconds, microseconds, nanoseconds (all doubles holding integers)
+
+pub(crate) const DURATION_FIELDS: [&str; 10] = [
+    "years",
+    "months",
+    "weeks",
+    "days",
+    "hours",
+    "minutes",
+    "seconds",
+    "milliseconds",
+    "microseconds",
+    "nanoseconds",
+];
+
+/// Builds a `Span` from Temporal duration fields. `None` when any field is
+/// `NA`; an error for non-integers, mixed signs or values outside jiff's
+/// per-unit limits.
+pub(crate) fn span_from_fields(i: usize, v: [f64; 10]) -> savvy::Result<Option<Span>> {
+    if v.iter().any(|x| x.is_nan()) {
+        return Ok(None);
+    }
+    let mut sign = 0.0;
+    for (k, &x) in v.iter().enumerate() {
+        if !x.is_finite() || x.fract() != 0.0 {
+            return Err(elt_error(
+                i,
+                format!(
+                    "duration field '{}' must be a finite integer",
+                    DURATION_FIELDS[k]
+                ),
+            ));
+        }
+        if x != 0.0 {
+            if sign != 0.0 && x.signum() != sign {
+                return Err(elt_error(
+                    i,
+                    "mixed-sign values not allowed as duration fields",
+                ));
+            }
+            sign = x.signum();
+        }
+    }
+    let a: Vec<i64> = v
+        .iter()
+        .enumerate()
+        .map(|(k, x)| {
+            let x = x.abs();
+            if x >= 9.223_372_036_854_775e18 {
+                Err(elt_error(
+                    i,
+                    format!("duration field '{}' is out of range", DURATION_FIELDS[k]),
+                ))
+            } else {
+                Ok(x as i64)
+            }
+        })
+        .collect::<savvy::Result<_>>()?;
+    let e = |e| elt_error(i, e);
+    let span = Span::new()
+        .try_years(a[0])
+        .map_err(e)?
+        .try_months(a[1])
+        .map_err(e)?
+        .try_weeks(a[2])
+        .map_err(e)?
+        .try_days(a[3])
+        .map_err(e)?
+        .try_hours(a[4])
+        .map_err(e)?
+        .try_minutes(a[5])
+        .map_err(e)?
+        .try_seconds(a[6])
+        .map_err(e)?
+        .try_milliseconds(a[7])
+        .map_err(e)?
+        .try_microseconds(a[8])
+        .map_err(e)?
+        .try_nanoseconds(a[9])
+        .map_err(e)?;
+    Ok(Some(if sign < 0.0 { span.negate() } else { span }))
+}
+
+pub(crate) fn span_to_fields(s: Span) -> [f64; 10] {
+    [
+        f64::from(s.get_years()),
+        f64::from(s.get_months()),
+        f64::from(s.get_weeks()),
+        f64::from(s.get_days()),
+        f64::from(s.get_hours()),
+        s.get_minutes() as f64,
+        s.get_seconds() as f64,
+        s.get_milliseconds() as f64,
+        s.get_microseconds() as f64,
+        s.get_nanoseconds() as f64,
+    ]
+}
+
+pub(crate) struct DurationIn {
+    cols: Vec<Vec<f64>>,
+}
+
+impl DurationIn {
+    /// `x` is the list of the ten record fields, in `DURATION_FIELDS` order.
+    pub(crate) fn new(x: &ListSexp) -> savvy::Result<Self> {
+        let mut cols = Vec::with_capacity(10);
+        for (k, name) in DURATION_FIELDS.iter().enumerate() {
+            let col = match x.get_by_index(k).map(|s| s.into_typed()) {
+                Some(TypedSexp::Real(r)) => r,
+                _ => {
+                    return Err(savvy::Error::new(format!(
+                        "internal error: duration field '{name}' must be a double vector"
+                    )))
+                }
+            };
+            cols.push(col.to_vec());
+        }
+        let lens: Vec<usize> = cols.iter().map(|c| c.len()).collect();
+        common_len(&lens)?;
+        Ok(Self { cols })
+    }
+
+    pub(crate) fn len(&self) -> usize {
+        self.cols.first().map_or(0, |c| c.len())
+    }
+
+    pub(crate) fn get(&self, i: usize) -> savvy::Result<Option<Span>> {
+        let mut v = [0.0; 10];
+        for (k, c) in self.cols.iter().enumerate() {
+            v[k] = c[i];
+        }
+        span_from_fields(i, v)
+    }
+}
+
+pub(crate) struct DurationOut {
+    cols: [Vec<f64>; 10],
+}
+
+impl DurationOut {
+    pub(crate) fn with_capacity(n: usize) -> Self {
+        Self {
+            cols: std::array::from_fn(|_| Vec::with_capacity(n)),
+        }
+    }
+
+    pub(crate) fn push(&mut self, x: Option<Span>) {
+        match x {
+            Some(s) => {
+                for (c, v) in self.cols.iter_mut().zip(span_to_fields(s)) {
+                    // Normalise -0 to 0.
+                    c.push(v + 0.0);
+                }
+            }
+            None => {
+                for c in self.cols.iter_mut() {
+                    c.push(na_real());
+                }
+            }
+        }
+    }
+
+    pub(crate) fn into_sexp(self) -> savvy::Result<Sexp> {
+        let mut out = OwnedListSexp::new(10, true)?;
+        for (k, col) in self.cols.into_iter().enumerate() {
+            out.set_name_and_value(k, DURATION_FIELDS[k], OwnedRealSexp::try_from_slice(col)?)?;
+        }
+        Ok(out.into())
+    }
+}
+
+/// R's `NA_real_`: a NaN with payload 1954. A function rather than a const
+/// because `f64::from_bits` is only `const` from Rust 1.83 (MSRV is 1.81).
+pub(crate) fn na_real() -> f64 {
+    f64::from_bits(0x7FF0_0000_0000_07A2)
 }
