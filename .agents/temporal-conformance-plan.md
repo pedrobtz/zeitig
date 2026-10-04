@@ -8,7 +8,7 @@ Status: implemented. The figures quoted below were measured with `@js-temporal/p
   `report.R` (match share).
 - `tests/testthat/helper-conformance.R` (dispatch table) and `test-temporal-conformance.R`.
 - Result: 6,262 cases; 98.8% match Temporal, 1.2% are documented differences, 0 mismatches.
-  160 of 216 Temporal members (74%) are implemented.
+  161 of 216 Temporal members (75%) are implemented.
 - Fixtures: about 1 MB of JSON on disk, about 75 KB compressed in the tarball. This is above the
   500 KB target below, which was chosen with the tarball in mind. The test takes about
   10 seconds. Most of that is per-call overhead: about 3,500 calls, because options are scalar

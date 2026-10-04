@@ -106,7 +106,9 @@ temporal_equals(utc, london)
 ```
 
 Like Temporal, `temporal_equals()` treats `UTC`, `Etc/UTC`, `Etc/GMT` and `GMT` as the same zone,
-but it does not resolve other alternative names, such as `Asia/Calcutta` for `Asia/Kolkata`.
+but it does not resolve other alternative names, such as `Asia/Calcutta` for `Asia/Kolkata`. The
+same rule decides whether `temporal_until()` and `temporal_since()` may use days or larger units
+between two zoned date-times: they need the same zone, and those four names count as one.
 
 ## Nanoseconds since the epoch
 
