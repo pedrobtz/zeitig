@@ -260,3 +260,33 @@ test_that("POSIXct interop", {
   expect_equal(as.POSIXlt(z)$hour, 12L)
   expect_equal(format(as_instant(z)), "2020-07-01T10:00:00Z")
 })
+
+test_that("temporal_fields() on zoned values matches the accessors", {
+  z <- zoned_date_time(c(
+    "2020-01-01T15:23:30.123456789+01:00[Europe/Paris]", NA,
+    "2019-11-03T01:30-05:00[America/New_York]"
+  ))
+  f <- temporal_fields(z)
+  expect_equal(names(f), c(
+    "year", "month", "day", "hour", "minute", "second", "millisecond", "microsecond",
+    "nanosecond"
+  ))
+  expect_equal(f$year, year(z))
+  expect_equal(f$hour, hour(z))
+  expect_equal(f$nanosecond, nanosecond(z))
+  expect_equal(f$minute, c(23L, NA, 30L))
+})
+
+test_that("temporal_with() keeps the offset of the original value", {
+  z <- zoned_date_time(c(
+    "2019-11-03T01:30-04:00[America/New_York]", "2019-11-03T01:30-05:00[America/New_York]"
+  ))
+  expect_equal(
+    format(temporal_with(z, minute = 45)),
+    c("2019-11-03T01:45:00-04:00[America/New_York]", "2019-11-03T01:45:00-05:00[America/New_York]")
+  )
+  expect_equal(
+    format(temporal_with(z[1], minute = c(10, 20))),
+    c("2019-11-03T01:10:00-04:00[America/New_York]", "2019-11-03T01:20:00-04:00[America/New_York]")
+  )
+})

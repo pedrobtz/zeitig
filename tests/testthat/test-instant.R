@@ -84,3 +84,16 @@ test_that("POSIXct interop", {
   expect_true(is.na(as_instant(as.POSIXct(NA))))
   expect_equal(vec_cast(ct, instant(character())), x)
 })
+
+test_that("numeric epoch nanoseconds beyond 2^53 are an error", {
+  expect_equal(epoch_nanoseconds(instant_from_epoch(nanoseconds = 2^53)), "9007199254740992")
+  expect_equal(epoch_nanoseconds(instant_from_epoch(nanoseconds = -2^53)), "-9007199254740992")
+  expect_error(
+    instant_from_epoch(nanoseconds = c(0, 1553906700000000001)),
+    "element 2", class = "zeitig_range_error"
+  )
+  expect_equal(
+    epoch_nanoseconds(instant_from_epoch(nanoseconds = "1553906700000000001")),
+    "1553906700000000001"
+  )
+})
