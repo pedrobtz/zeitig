@@ -188,7 +188,7 @@ temporal_strptime("15/07/2024", "%d/%m/%Y", "plain_date")
 
 as_plain_date(Sys.Date())
 #> <plain_date[1]>
-#> [1] 2026-10-03
+#> [1] 2026-10-04
 as.Date(plain_date(2020, 2, 29))
 #> [1] "2020-02-29"
 as_zoned_date_time(as.POSIXct("2020-07-01 12:00:00", tz = "Europe/Paris"))

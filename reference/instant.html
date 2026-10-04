@@ -74,7 +74,9 @@ no time zone or calendar, the equivalent of
 <dd><p>Exactly one of these: numbers of
 units since the epoch, or for <code>nanoseconds</code> also a character vector of
 integers. Fractional seconds are rounded to the microsecond; fractional
-milliseconds and nanoseconds are truncated.</p></dd>
+milliseconds and nanoseconds are truncated. Numeric <code>nanoseconds</code> beyond
+2^53 in absolute value are an error, because a double cannot hold them
+exactly; give them as strings.</p></dd>
 
 </dl></div>
     <div class="section level2">

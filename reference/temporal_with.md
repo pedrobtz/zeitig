@@ -1,7 +1,8 @@
 # Replace fields
 
 `temporal_with()` returns a copy of `x` with some fields replaced, the
-equivalent of Temporal's `.with()`. `with_plain_time()` and
+equivalent of Temporal's `.with()` (including
+`Duration.prototype.with()`). `with_plain_time()` and
 `with_plain_date()` replace the whole time or date part of a plain or
 zoned date-time (`.withPlainTime()`, `.withPlainDate()`).
 
@@ -32,12 +33,13 @@ with_plain_date(x, date)
   Named fields to replace, recycled with `x` to a common length. Plain
   dates take `year`, `month`, `day`; plain times take `hour`, `minute`,
   `second`, `millisecond`, `microsecond`, `nanosecond`; plain and zoned
-  date-times take both.
+  date-times take both; durations take `years` to `nanoseconds` (the
+  result must still have fields of one sign).
 
 - overflow:
 
   How to handle out-of-range values: `"constrain"` (the default) clamps,
-  `"reject"` raises an error.
+  `"reject"` raises an error. Not used for durations.
 
 - disambiguation, offset:
 
@@ -93,4 +95,7 @@ temporal_with(z, minute = 45) # stays at -04:00 in the DST overlap
 with_plain_time(z)
 #> <zoned_date_time[1]>
 #> [1] 2019-11-03T00:00:00-04:00[America/New_York]
+temporal_with(duration(hours = 1, minutes = 30), minutes = 0)
+#> <duration[1]>
+#> [1] PT1H
 ```

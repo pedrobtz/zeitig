@@ -163,7 +163,7 @@ in months or years have no fixed length, so they need a
 <span><span class="co">#&gt; [1] 336</span></span>
 <span><span class="fu"><a href="../reference/duration.html">duration</a></span><span class="op">(</span>months <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fu"><a href="../reference/duration.html">duration</a></span><span class="op">(</span>days <span class="op">=</span> <span class="fl">31</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `vec_proxy_compare()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> could not compute normalized relative span when all days are assumed to be 24 hours: using unit 'month' in span or configuration requires that a relative reference time be given (`jiff::SpanRelativeTo::days_are_24_hours()` was given but this only permits using days and weeks without a relative reference time) (element 1)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> could not compute normalized relative span when all days are assumed to be 24 hours: using unit 'month' in span or configuration requires `relative_to` (without it, only days of 24 hours and weeks of 7 days can be used) (element 1)</span></span>
 <span><span class="fu"><a href="../reference/duration_total.html">duration_compare</a></span><span class="op">(</span><span class="fu"><a href="../reference/duration.html">duration</a></span><span class="op">(</span>months <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="../reference/duration.html">duration</a></span><span class="op">(</span>days <span class="op">=</span> <span class="fl">31</span><span class="op">)</span>, relative_to <span class="op">=</span> <span class="fu"><a href="../reference/plain_date.html">plain_date</a></span><span class="op">(</span><span class="fl">2021</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] -1</span></span></code></pre></div>
 <p>In a time zone with daylight saving time, a day is not always 24
@@ -192,7 +192,10 @@ as Temporal’s <code>equals()</code> does, use
 <code>UTC</code>, <code>Etc/UTC</code>, <code>Etc/GMT</code> and
 <code>GMT</code> as the same zone, but it does not resolve other
 alternative names, such as <code>Asia/Calcutta</code> for
-<code>Asia/Kolkata</code>.</p>
+<code>Asia/Kolkata</code>. The same rule decides whether
+<code><a href="../reference/temporal_until.html">temporal_until()</a></code> and <code><a href="../reference/temporal_until.html">temporal_since()</a></code> may use
+days or larger units between two zoned date-times: they need the same
+zone, and those four names count as one.</p>
 </div>
 <div class="section level2">
 <h2 id="nanoseconds-since-the-epoch">Nanoseconds since the epoch<a class="anchor" aria-label="anchor" href="#nanoseconds-since-the-epoch"></a>

@@ -53,7 +53,11 @@
 <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> supports Temporal’s <code><a href="https://rdrr.io/r/base/toString.html" class="external-link">toString()</a></code> options (<code>fractional_second_digits</code>, <code>smallest_unit</code>, <code>rounding_mode</code>, <code>offset</code>, <code>time_zone_name</code>, <code>calendar_name</code>, <code>time_zone</code>), and <code><a href="../reference/temporal_strftime.html">temporal_strftime()</a></code>/<code><a href="../reference/temporal_strftime.html">temporal_strptime()</a></code> expose jiff’s strftime.</li>
 <li>
 <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods; vignettes <code><a href="../articles/zeitig.html">vignette("zeitig")</a></code>, <code><a href="../articles/time-zones.html">vignette("time-zones")</a></code> and <code><a href="../articles/temporal-differences.html">vignette("temporal-differences")</a></code>.</li>
-<li>New <code><a href="../reference/available_time_zones.html">available_time_zones()</a></code> lists the IANA time zone identifiers known to the time zone database.</li>
+<li>New <code><a href="../reference/available_time_zones.html">available_time_zones()</a></code> lists the IANA time zone identifiers known to the time zone database. A <code>ZEITIG_TZDIR</code> environment variable that does not point at a time zone database is an error rather than silently ignored.</li>
+<li>
+<code><a href="../reference/temporal_with.html">temporal_with()</a></code> also replaces the fields of durations (<code>Duration.prototype.with()</code>).</li>
+<li>Strings combine with and compare against every zeitig class by parsing, as they do with base R’s <code>Date</code>: <code>plain_date(2020, 1, 1) == "2020-01-01"</code>.</li>
+<li>Error messages never name jiff’s Rust types; for example a duration with months used without <code>relative_to</code> reports that it “requires <code>relative_to</code>”.</li>
 <li>A conformance test compares about 6,300 operations with the reference Temporal implementation, including a selection of test262 cases. Every remaining difference is listed in <code><a href="../articles/temporal-differences.html">vignette("temporal-differences")</a></code>. Behaviour it checks includes:
 <ul><li>
 <code>[!u-ca=iso8601]</code> annotations are accepted. Other calendar annotations are an error.</li>

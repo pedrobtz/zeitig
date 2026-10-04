@@ -67,10 +67,14 @@ Three rules keep this simple:
     columns (R vectors), loops over elements, builds `jiff` values on
     the fly, and returns whole columns. No `jiff` object outlives a
     call. There are no external pointers in the public API, so values
-    serialise, copy and subset like any R vector.
+    serialise, copy and subset like any R vector. Input columns are read
+    in place: the `*Cols` handles in `src/rust/src/cols.rs` hold the R
+    vectors and their `reader()`s borrow the data, so no column is
+    copied on the way in.
 2.  **R owns the vector semantics.** Length, recycling, `NA`, names,
     subsetting, concatenation, printing and data-frame integration are
-    implemented once via `vctrs` (`new_rcrd`), not in Rust.
+    implemented once via `vctrs` (`new_rcrd`), not in Rust. Rust only
+    checks that the columns it receives have one common length.
 3.  **Temporal defines the behaviour, `jiff` implements it.** When the
     two differ, `jiff` wins only if the difference is documented in this
     file (section 9). Otherwise R code adapts the call so the
@@ -80,9 +84,11 @@ Three rules keep this simple:
 
 - savvy generates the full `.Call` boilerplate and R wrappers, has a
   small dependency footprint (`savvy`, `savvy-ffi`, `savvy-macro`, `cc`,
-  proc-macro crates), and panics are converted into R errors rather than
-  crashing R. The small footprint matters because every transitive crate
-  is vendored into the CRAN tarball.
+  proc-macro crates), and turns a returned `savvy::Result::Err` into an
+  R error. (A panic is not converted: release builds abort, see section
+  6, so Rust code must never panic on user input.) The small footprint
+  matters because every transitive crate is vendored into the CRAN
+  tarball.
 - `jiff` is the only mature Rust library whose data model is Temporal’s;
   implementing Temporal over `chrono` or Howard Hinnant’s `date` would
   mean reimplementing disambiguation, span rounding and RFC 9557 parsing
@@ -112,8 +118,11 @@ Notes
   exactly-representable range. Rust validates integrality.
 - `ZonedDateTime` stores the time zone identifier per element, as
   Temporal does. `jiff` resolves the identifier on each call; Rust keeps
-  a per-call `HashMap<&str, TimeZone>` so a column with one distinct
-  zone pays one lookup.
+  a per-call `TzCache` (`src/rust/src/tz.rs`), so a column with one
+  distinct zone pays one lookup. A hit allocates nothing: the last
+  identifier is compared first and the map is probed by `&str`. Each
+  entry holds the zone and its canonical identifier as an `Rc<str>`,
+  which output columns share instead of formatting a string per element.
 - `Duration` field ranges are those of `jiff::Span` (years ±19998,
   months/weeks/days i32-ish, time units i64). Construction validates the
   uniform-sign rule and the ranges in Rust and errors with the Temporal
@@ -158,7 +167,10 @@ Every character constructor is a parser;
 [`as_instant()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md),
 [`as_plain_date()`](https://pedrobtz.github.io/zeitig/reference/temporal-coercion.md),
 etc. are S3 generics with methods for character, base R classes and the
-other zeitig classes.
+other zeitig classes. Strings also combine with and compare against
+every class (`vec_ptype2()` with character gives the zeitig class and
+the string is parsed), as they do with base R’s `Date`:
+`plain_date(2020, 1, 1) == "2020-01-01"`.
 
 ### Accessors (`.year`, `.epochMilliseconds`, …)
 
@@ -222,8 +234,8 @@ clamped in both directions (Temporal’s `ConstrainTime`).
 | `X.compare(a, b)` | `<`, `==`, [`sort()`](https://rdrr.io/r/base/sort.html), [`order()`](https://rdrr.io/r/base/order.html), via [`vctrs::vec_proxy_compare()`](https://vctrs.r-lib.org/reference/vec_proxy_compare.html); `temporal_compare(a, b)` returns -1/0/1 |
 | `x.equals(y)` | `temporal_equals(x, y)` (compares time zone id too, unlike `==` on `ZonedDateTime` which follows `compare`) |
 | `x.round(opts)` | `temporal_round(x, smallest_unit =, rounding_increment = 1, rounding_mode = "halfExpand")` |
-| `x.with({...}, {overflow})` | `temporal_with(x, year = , month = , ...)` |
-| `x.withPlainTime(t)` etc. | [`with_plain_time()`](https://pedrobtz.github.io/zeitig/reference/temporal_with.md), [`with_plain_date()`](https://pedrobtz.github.io/zeitig/reference/temporal_with.md), [`with_time_zone()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md), `with_calendar()` (iso8601 only) |
+| `x.with({...}, {overflow})` | `temporal_with(x, year = , month = , ...)`; also `Duration.with()` (`temporal_with(d, hours = )`) |
+| `x.withPlainTime(t)` etc. | [`with_plain_time()`](https://pedrobtz.github.io/zeitig/reference/temporal_with.md), [`with_plain_date()`](https://pedrobtz.github.io/zeitig/reference/temporal_with.md), [`with_time_zone()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md) (no `withCalendar()`: only ISO 8601) |
 | `zdt.startOfDay()` | [`start_of_day()`](https://pedrobtz.github.io/zeitig/reference/time_zone.md) |
 | `zdt.getTimeZoneTransition(dir)` | `time_zone_transition(x, direction = c("next", "previous"))` |
 | `Duration.compare(a, b, {relativeTo})` | `duration_compare(a, b, relative_to = NULL)` |
@@ -259,7 +271,12 @@ time zone; `Plain* -> Zoned*` goes through disambiguation.
 - `temporal_strftime(x, fmt)` and
   `temporal_strptime(string, fmt, class)` expose `jiff::fmt::strtime`.
 - [`print()`](https://rdrr.io/r/base/print.html) shows the Temporal
-  string form; `pillar` methods make tibble columns readable.
+  string form. Tibble columns use vctrs’ `vctrs_vctr` methods
+  ([`format()`](https://rdrr.io/r/base/format.html),
+  `vec_ptype_abbr()`); there are no `pillar` methods (section 11).
+- With a fixed precision,
+  [`format()`](https://rdrr.io/r/base/format.html) rounds and prints in
+  one pass in Rust (`rs_format`).
 
 ### Interop with base R
 
@@ -268,7 +285,7 @@ time zone; `Plain* -> Zoned*` goes through disambiguation.
 | `Date` | `PlainDate` | exact |
 | `POSIXct` | `Instant`, `ZonedDateTime` | uses `tzone` attribute or [`Sys.timezone()`](https://rdrr.io/r/base/timezones.html); sub-nanosecond doubles are rounded |
 | `POSIXct` | `PlainDate`/`PlainTime`/`PlainDateTime` | wall clock in its own zone, rounded to microseconds (a double cannot hold ns of a current instant) |
-| `PlainDateTime` | `POSIXct`/`POSIXlt` | wall clock interpreted in `tz` (default UTC); DST gaps resolved by the OS |
+| `PlainDateTime` | `POSIXct`/`POSIXlt` | wall clock interpreted in `tz` (default UTC, `""` the session zone); DST gaps and overlaps resolved with `disambiguation = "compatible"` |
 | `POSIXlt` | `PlainDateTime` / `ZonedDateTime` | field-wise |
 | `difftime` | `Duration` | units mapped to days/hours/minutes/seconds |
 | `PlainDate` | `Date` | exact |
@@ -307,12 +324,17 @@ docs.
   (e.g. `"parameter 'day' with value 31 is not in the required range of 1..=30"`);
   the R wrapper rethrows it as a condition of class `zeitig_error` with
   the element index appended (`"... (element 3)"`) when a vector
-  operation fails.
+  operation fails. The few jiff messages that name Rust items
+  (`jiff::Span`, `SpanRelativeTo::days_are_24_hours()`, …) are rewritten
+  in zeitig’s terms by `cols::temporal_message()` (e.g. “requires
+  `relative_to`”), unit-tested against jiff’s real messages.
 - Temporal distinguishes `RangeError` and `TypeError`. R conditions
   carry a subclass `zeitig_range_error` / `zeitig_type_error`;
   input-type problems are detected in R before calling Rust.
-- `NA` is never an error. Rust receives `NA` as R’s sentinel values via
-  savvy’s `is_na()` and emits `NA` fields in the output.
+- `NA` is never an error. Rust receives `NA` as R’s sentinel values
+  (`cols::is_na_int()`, NaN for doubles, savvy’s `is_na()` for strings)
+  and emits `NA` fields in the output. `tests/testthat/test-na.R` sends
+  `NA` through every public operation.
 - Panics must be impossible on user input. `panic = "abort"` stays on
   for release builds (CRAN requirement that the package does not leave R
   in a corrupted state after a Rust unwind), so any `unwrap()`/indexing
@@ -362,9 +384,12 @@ binding constraint on the build. The scheme:
 4.  **Time zone database.** On Linux/macOS `jiff` reads
     `/usr/share/zoneinfo` (or `TZDIR`). On Windows it uses the bundled
     `jiff-tzdb` because Windows has no zoneinfo. CRAN’s check machines
-    all satisfy one of these. `ZEITIG_TZDIR` is honoured as an override
-    for testing. Document in the package that the database version
-    therefore follows the OS on Unix and the vendored crate on Windows.
+    all satisfy one of these. `ZEITIG_TZDIR` (read once per session) is
+    honoured as an override for testing; a directory that is missing or
+    holds no TZif files is an error on every lookup, never a silent
+    fallback (tested in a subprocess in `test-time-zone.R`). Document in
+    the package that the database version therefore follows the OS on
+    Unix and the vendored crate on Windows.
 5.  **Authorship and licences.** `DESCRIPTION` adds
     `person("The authors of the dependency Rust crates", role = "cph")`,
     `inst/AUTHORS` lists every vendored crate with authors and licence,
@@ -426,8 +451,10 @@ binding constraint on the build. The scheme:
 - **Property tests in Rust** (`#[cfg(test)]`): parse/format round trips,
   `add` then `since` identity, ordering consistency across the record
   representation and `jiff` comparison.
-- **savvy integration tests** (`savvy-cli test`) for anything that needs
-  a live R session, e.g. `NA` handling at the FFI boundary.
+- **FFI boundary tests** run from R rather than through
+  `savvy-cli test`: `test-na.R` covers `NA` in every argument of every
+  entry point, and settings read once per session (`ZEITIG_TZDIR`) are
+  tested in a fresh R process (`helper-subprocess.R`).
 - **Platform matrix** via the existing CI (`pedrobtz/r-actions` with
   `rust: true`): Linux, macOS, Windows; the `full-ci` label or a push to
   `main` runs the full set. Add a job that installs from the built
@@ -441,7 +468,7 @@ binding constraint on the build. The scheme:
 
 | Key | Area | Temporal | jiff | 0.1.0 behaviour |
 |----|----|----|----|----|
-| `calendars` | Calendars | pluggable, `iso8601` default | ISO only | `calendar = "iso8601"` accepted, as are `[u-ca=iso8601]` and `[!u-ca=iso8601]` annotations; any other calendar (argument or annotation of a plain date, plain date-time or zoned string) errors with `zeitig_range_error` |
+| `calendars` | Calendars | pluggable, `iso8601` default | ISO only | no `calendar` arguments and no `withCalendar()`; `[u-ca=iso8601]` and `[!u-ca=iso8601]` annotations are accepted, any other calendar annotation of a plain date, plain date-time or zoned string errors with `zeitig_range_error` |
 |  | `overflow: "constrain"` in `from()`/[`with()`](https://rdrr.io/r/base/with.html) | clamps day to month length | `civil::Date::new` rejects | R/Rust clamps `day` to `days_in_month` before calling `jiff` when `overflow = "constrain"`; `reject` passes through |
 |  | Date arithmetic across month ends | constrain (Jan 31 + 1 month = Feb 28) | same | no adaptation needed |
 | `instant-range` | `Instant` range | ±1e8 days from epoch | -009999-01-02T01:59:59Z to 9999-12-30T22:00:00.999999999Z (`Timestamp::MIN/MAX`) | jiff’s range; documented; values outside error |
@@ -450,8 +477,8 @@ binding constraint on the build. The scheme:
 | `zoned-equality` | `ZonedDateTime` equality | `equals` includes time zone id | `Zoned == Zoned` compares instant and zone | `==` follows `compare` (instant only); [`temporal_equals()`](https://pedrobtz.github.io/zeitig/reference/temporal_compare.md) also compares the zone id |
 |  | `until`/`since` default units on `ZonedDateTime` | `hour` largest unit | `Zoned::until` defaults to hours as well | same |
 | `epoch-nanoseconds` | `Instant` epoch accessors | `epochMilliseconds`, `epochNanoseconds` (BigInt) | `as_millisecond()`, `as_nanosecond()` (i128) | [`epoch_seconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md)/[`epoch_milliseconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md) floor to doubles; [`epoch_nanoseconds()`](https://pedrobtz.github.io/zeitig/reference/epoch_seconds.md) is a decimal string; `instant_from_epoch(nanoseconds =)` accepts strings |
-| `time-zone-ids` | Time zone identifiers | IANA names and `±HH:MM` | also POSIX TZ strings | POSIX TZ strings and sub-minute offsets are rejected; names are canonicalised to the database’s spelling; `+00:00` stays distinct from `UTC`; [`temporal_equals()`](https://pedrobtz.github.io/zeitig/reference/temporal_compare.md) treats `UTC`, `Etc/UTC`, `Etc/GMT` and `GMT` as one zone but resolves no other links |
-|  | `ZonedDateTime` `until` across zones | RangeError for calendar units when zones differ | computes anyway | R checks and errors (`zeitig_range_error`) when `largest_unit` is `day` or larger and the zones differ |
+| `time-zone-ids` | Time zone identifiers | IANA names and `±HH:MM` | also POSIX TZ strings | POSIX TZ strings and sub-minute offsets are rejected; names are canonicalised to the database’s spelling; `+00:00` stays distinct from `UTC`; [`temporal_equals()`](https://pedrobtz.github.io/zeitig/reference/temporal_compare.md) and the `until`/`since` zone check treat `UTC`, `Etc/UTC`, `Etc/GMT` and `GMT` as one zone but resolve no other links |
+|  | `ZonedDateTime` `until` across zones | RangeError for calendar units when zones differ | errors unless the zone objects are equal | Rust errors (`zeitig_range_error`) when `largest_unit` is `day` or larger and the zones differ (Temporal’s `TimeZoneEquals`, so UTC aliases count as one zone) |
 |  | [`toString()`](https://rdrr.io/r/base/toString.html) fractional digits | `auto` trims trailing zeros | `Display` prints `auto` precision | same |
 |  | Leap seconds | not represented | not represented | same |
 | `weeks-without-relative-to` | Weeks without `relativeTo` | `Duration.compare`/`total`/`round` need `relativeTo` for weeks | weeks are 7 days with `days_are_24_hours()` | jiff behaviour: weeks count as 7 x 24 hours when no `relative_to` is given |
@@ -502,16 +529,48 @@ changes.
 
 ## 10. Performance notes
 
-- Per-call cost is one `.Call` plus an allocation per output column;
-  per-element cost is a `jiff` operation (tens of nanoseconds for civil
-  math, a few hundred for zoned math after the zone is cached). This is
-  competitive with `clock` and far faster than `lubridate` for vector
-  work.
+- Per-call cost is one `.Call` plus an allocation per output column.
+  Input columns are borrowed, not copied (section 2), and the
+  per-element loop allocates nothing except the strings it writes:
+  duration fields are read into a fixed array, zone identifiers are
+  shared `Rc<str>`s from the `TzCache`, and formatting reuses one
+  buffer.
+
+- Measured with `tools/bench/bench.R` (release build, n = 1e6, median of
+  5 runs, one Linux container), in nanoseconds per element:
+
+  | Operation | ns | Operation | ns |
+  |----|----|----|----|
+  | `instant + PT1H` | 50 | `temporal_until(zoned, zoned, largest_unit = "day")` | 230 |
+  | `plain_date + P1D` | 70 | `temporal_round(zoned, "hour")` | 350 |
+  | `plain_date_time + PT1H` | 100 | `year(zoned)` | 90 |
+  | `zoned + P1D` | 360 | `temporal_fields(zoned)` | 120 |
+  | `duration + duration` | 150 | `temporal_with(zoned, hour = 1)` | 530 |
+  | [`instant()`](https://pedrobtz.github.io/zeitig/reference/instant.md) parse | 90 | `format(plain_date)` | 150 |
+  | [`zoned_date_time()`](https://pedrobtz.github.io/zeitig/reference/zoned_date_time.md) parse | 620 | `format(zoned)` | 950 |
+  | `as.POSIXct(plain_date_time)` | 170 | `format(zoned, fractional_second_digits = 3)` | 1800 |
+
+  For scale on the same machine: `Date + 1` takes 2 ns (one vectorised
+  double addition), `format(Date)` 300 ns and `format(POSIXct)` 800 ns.
+  Arithmetic is jiff-bound and calendar-aware, so it costs more than
+  base R’s plain-number arithmetic. Formatting writes one R string per
+  element (`mkChar` through savvy’s unwind protection), which dominates
+  the [`format()`](https://rdrr.io/r/base/format.html) rows.
+
 - Parsing character vectors is done in Rust; R never splits strings.
+
 - `ZonedDateTime` columns with many distinct zones pay one
   `TimeZone::get` per distinct id per call.
+
+- The `halfEven` workaround (section 9) rounds a second time only when
+  the `halfExpand` result could be the odd neighbour of a tie
+  (`arith::half_even()`).
+
 - No parallelism in Rust (CRAN restricts to two threads and `jiff` work
   is already cheap).
+
+- `devtools::load_all()` builds the cargo dev profile, 4 to 10 times
+  slower; benchmark an installed package.
 
 ## 11. Open questions (decide before 0.1.0 feature freeze)
 

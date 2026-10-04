@@ -112,7 +112,7 @@ duration_total(duration(weeks = 2), "hour")
 #> [1] 336
 duration(months = 1) < duration(days = 31)
 #> Error in `vec_proxy_compare()`:
-#> ! could not compute normalized relative span when all days are assumed to be 24 hours: using unit 'month' in span or configuration requires that a relative reference time be given (`jiff::SpanRelativeTo::days_are_24_hours()` was given but this only permits using days and weeks without a relative reference time) (element 1)
+#> ! could not compute normalized relative span when all days are assumed to be 24 hours: using unit 'month' in span or configuration requires `relative_to` (without it, only days of 24 hours and weeks of 7 days can be used) (element 1)
 duration_compare(duration(months = 1), duration(days = 31), relative_to = plain_date(2021, 2, 1))
 #> [1] -1
 ```
@@ -150,7 +150,12 @@ Like Temporal,
 [`temporal_equals()`](https://pedrobtz.github.io/zeitig/reference/temporal_compare.md)
 treats `UTC`, `Etc/UTC`, `Etc/GMT` and `GMT` as the same zone, but it
 does not resolve other alternative names, such as `Asia/Calcutta` for
-`Asia/Kolkata`.
+`Asia/Kolkata`. The same rule decides whether
+[`temporal_until()`](https://pedrobtz.github.io/zeitig/reference/temporal_until.md)
+and
+[`temporal_since()`](https://pedrobtz.github.io/zeitig/reference/temporal_until.md)
+may use days or larger units between two zoned date-times: they need the
+same zone, and those four names count as one.
 
 ## Nanoseconds since the epoch
 

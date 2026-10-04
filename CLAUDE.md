@@ -41,8 +41,8 @@ Rscript -e 'testthat::test_file("tests/testthat/test-instant.R")'
 # Rust-only unit tests (no R session; #[cfg(test)] modules)
 cargo test --manifest-path src/rust/Cargo.toml
 
-# Rust tests that need a live R session (#[cfg(feature = "savvy-test")] modules)
-savvy-cli test src/rust
+# Benchmarks (install a release build first; load_all() compiles the slow dev profile)
+R CMD INSTALL . && Rscript tools/bench/bench.R
 
 # Full check as CRAN sees it (what CI runs)
 Rscript -e 'rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning")'
@@ -154,9 +154,10 @@ CRAN compliance”.
   together.
 - `src/rust/.cargo/config.toml` exists only so `cargo test` links on
   Windows MSVC; it is excluded from the tarball on purpose.
-- `cargo test` warns about an unexpected `savvy-test` cfg; that is
-  expected (the feature is injected by `savvy-cli test`), do not “fix”
-  it by removing the test module.
+- There are no `savvy-cli test` modules: anything that needs a live R
+  session is tested from R (`tests/testthat/test-na.R` for `NA` at the
+  boundary; `helper-subprocess.R` runs a fresh R process for per-session
+  settings such as `ZEITIG_TZDIR`).
 - CRAN installs with at most 2 CPUs: Makevars passes `-j 2` to cargo.
 - Makevars only builds `libzeitig.a` when it is missing (it is deleted
   after linking). A stray `src/rust/target/<profile>/libzeitig.a` left

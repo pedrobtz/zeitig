@@ -95,11 +95,12 @@ nanosecond.</p></li>
 </ul><p>The reverse conversions use base generics: <code><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date()</a></code> for plain dates,
 plain date-times and zoned date-times (wall-clock date), and
 <code><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct()</a></code> / <code><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXlt()</a></code>. For plain date-times these interpret the
-wall-clock time in <code>tz</code> (UTC by default; local times in DST gaps are
-resolved by the operating system). Instants and zoned date-times convert
-exactly up to the microsecond; zoned date-times keep their time zone when
-all elements share one IANA zone and <code>tz</code> is not given, otherwise <code>tz</code>
-(default UTC) is used.</p>
+wall-clock time in <code>tz</code> (UTC by default; <code>""</code> is the session time zone,
+see <code><a href="now_instant.html">now_time_zone()</a></code>); local times in a DST gap or overlap are resolved
+with <code>disambiguation = "compatible"</code>, as <code><a href="temporal-conversions.html">to_zoned_date_time()</a></code> does.
+Instants and zoned date-times convert exactly up to the microsecond; zoned
+date-times keep their time zone when all elements share one IANA zone and
+<code>tz</code> is not given, otherwise <code>tz</code> (default UTC) is used.</p>
     </div>
 
     <div class="section level2">

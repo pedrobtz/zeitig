@@ -75,14 +75,14 @@ src/rust/src/    hand-written Rust: #[savvy] fns, columnar in/out, per-element j
 vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, rounding</code></pre>
 <p>Three rules keep this simple:</p>
 <ol style="list-style-type: decimal"><li>
-<strong>Rust is stateless.</strong> Every <code>#[savvy]</code> function receives whole columns (R vectors), loops over elements, builds <code>jiff</code> values on the fly, and returns whole columns. No <code>jiff</code> object outlives a call. There are no external pointers in the public API, so values serialise, copy and subset like any R vector.</li>
+<strong>Rust is stateless.</strong> Every <code>#[savvy]</code> function receives whole columns (R vectors), loops over elements, builds <code>jiff</code> values on the fly, and returns whole columns. No <code>jiff</code> object outlives a call. There are no external pointers in the public API, so values serialise, copy and subset like any R vector. Input columns are read in place: the <code>*Cols</code> handles in <code>src/rust/src/cols.rs</code> hold the R vectors and their <code>reader()</code>s borrow the data, so no column is copied on the way in.</li>
 <li>
-<strong>R owns the vector semantics.</strong> Length, recycling, <code>NA</code>, names, subsetting, concatenation, printing and data-frame integration are implemented once via <code>vctrs</code> (<code>new_rcrd</code>), not in Rust.</li>
+<strong>R owns the vector semantics.</strong> Length, recycling, <code>NA</code>, names, subsetting, concatenation, printing and data-frame integration are implemented once via <code>vctrs</code> (<code>new_rcrd</code>), not in Rust. Rust only checks that the columns it receives have one common length.</li>
 <li>
 <strong>Temporal defines the behaviour, <code>jiff</code> implements it.</strong> When the two differ, <code>jiff</code> wins only if the difference is documented in this file (section 9). Otherwise R code adapts the call so the user-visible result matches the Temporal specification.</li>
 </ol><div class="section level3">
 <h3 id="why-savvy-not-extendr-or-cpp11--a-c-date-library">Why savvy (not extendr or cpp11 + a C++ date library)<a class="anchor" aria-label="anchor" href="#why-savvy-not-extendr-or-cpp11--a-c-date-library"></a></h3>
-<ul><li>savvy generates the full <code>.Call</code> boilerplate and R wrappers, has a small dependency footprint (<code>savvy</code>, <code>savvy-ffi</code>, <code>savvy-macro</code>, <code>cc</code>, proc-macro crates), and panics are converted into R errors rather than crashing R. The small footprint matters because every transitive crate is vendored into the CRAN tarball.</li>
+<ul><li>savvy generates the full <code>.Call</code> boilerplate and R wrappers, has a small dependency footprint (<code>savvy</code>, <code>savvy-ffi</code>, <code>savvy-macro</code>, <code>cc</code>, proc-macro crates), and turns a returned <code>savvy::Result::Err</code> into an R error. (A panic is not converted: release builds abort, see section 6, so Rust code must never panic on user input.) The small footprint matters because every transitive crate is vendored into the CRAN tarball.</li>
 <li>
 <code>jiff</code> is the only mature Rust library whose data model is Temporal’s; implementing Temporal over <code>chrono</code> or Howard Hinnant’s <code>date</code> would mean reimplementing disambiguation, span rounding and RFC 9557 parsing by hand.</li>
 </ul></div>
@@ -127,7 +127,7 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <ul><li>
 <code>seconds</code> is a double because <code>jiff::Timestamp</code> spans roughly years -9999..9999, i.e. about ±3e11 seconds, well inside the 2^53 exactly-representable range. Rust validates integrality.</li>
 <li>
-<code>ZonedDateTime</code> stores the time zone identifier per element, as Temporal does. <code>jiff</code> resolves the identifier on each call; Rust keeps a per-call <code>HashMap&lt;&amp;str, TimeZone&gt;</code> so a column with one distinct zone pays one lookup.</li>
+<code>ZonedDateTime</code> stores the time zone identifier per element, as Temporal does. <code>jiff</code> resolves the identifier on each call; Rust keeps a per-call <code>TzCache</code> (<code>src/rust/src/tz.rs</code>), so a column with one distinct zone pays one lookup. A hit allocates nothing: the last identifier is compared first and the map is probed by <code>&amp;str</code>. Each entry holds the zone and its canonical identifier as an <code>Rc&lt;str&gt;</code>, which output columns share instead of formatting a string per element.</li>
 <li>
 <code>Duration</code> field ranges are those of <code>jiff::Span</code> (years ±19998, months/weeks/days i32-ish, time units i64). Construction validates the uniform-sign rule and the ranges in Rust and errors with the Temporal error wording.</li>
 <li>Temporal’s <code>Instant</code> in JavaScript is a <code>BigInt</code> of epoch nanoseconds; we expose <code><a href="reference/epoch_seconds.html">epoch_nanoseconds()</a></code> as a character/<code>bit64</code>-free double pair only through helper accessors (<code><a href="reference/epoch_seconds.html">epoch_seconds()</a></code>, <code><a href="reference/epoch_seconds.html">epoch_milliseconds()</a></code>, and <code><a href="reference/epoch_seconds.html">epoch_nanoseconds()</a></code> returning a string) since R has no native 64-bit integer.</li>
@@ -164,7 +164,7 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <td>
 <code><a href="reference/now_instant.html">now_instant()</a></code>, <code>now_zoned_date_time(time_zone = NULL)</code>, <code>now_plain_date(...)</code>, <code>now_plain_time(...)</code>, <code>now_plain_date_time(...)</code>, <code><a href="reference/now_instant.html">now_time_zone()</a></code>
 </td>
-</tr></tbody></table><p>Every character constructor is a parser; <code><a href="reference/temporal-coercion.html">as_instant()</a></code>, <code><a href="reference/temporal-coercion.html">as_plain_date()</a></code>, etc. are S3 generics with methods for character, base R classes and the other zeitig classes.</p>
+</tr></tbody></table><p>Every character constructor is a parser; <code><a href="reference/temporal-coercion.html">as_instant()</a></code>, <code><a href="reference/temporal-coercion.html">as_plain_date()</a></code>, etc. are S3 generics with methods for character, base R classes and the other zeitig classes. Strings also combine with and compare against every class (<code>vec_ptype2()</code> with character gives the zeitig class and the string is parsed), as they do with base R’s <code>Date</code>: <code>plain_date(2020, 1, 1) == "2020-01-01"</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="accessors-year-epochmilliseconds-">Accessors (<code>.year</code>, <code>.epochMilliseconds</code>, …)<a class="anchor" aria-label="anchor" href="#accessors-year-epochmilliseconds-"></a></h3>
@@ -197,11 +197,12 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 </tr><tr><td><code>x.round(opts)</code></td>
 <td><code>temporal_round(x, smallest_unit =, rounding_increment = 1, rounding_mode = "halfExpand")</code></td>
 </tr><tr><td><code>x.with({...}, {overflow})</code></td>
-<td><code>temporal_with(x, year = , month = , ...)</code></td>
+<td>
+<code>temporal_with(x, year = , month = , ...)</code>; also <code>Duration.with()</code> (<code>temporal_with(d, hours = )</code>)</td>
 </tr><tr><td>
 <code>x.withPlainTime(t)</code> etc.</td>
 <td>
-<code><a href="reference/temporal_with.html">with_plain_time()</a></code>, <code><a href="reference/temporal_with.html">with_plain_date()</a></code>, <code><a href="reference/time_zone.html">with_time_zone()</a></code>, <code>with_calendar()</code> (iso8601 only)</td>
+<code><a href="reference/temporal_with.html">with_plain_time()</a></code>, <code><a href="reference/temporal_with.html">with_plain_date()</a></code>, <code><a href="reference/time_zone.html">with_time_zone()</a></code> (no <code>withCalendar()</code>: only ISO 8601)</td>
 </tr><tr><td><code>zdt.startOfDay()</code></td>
 <td><code><a href="reference/time_zone.html">start_of_day()</a></code></td>
 </tr><tr><td><code>zdt.getTimeZoneTransition(dir)</code></td>
@@ -229,7 +230,8 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <li>
 <code>temporal_strftime(x, fmt)</code> and <code>temporal_strptime(string, fmt, class)</code> expose <code>jiff::fmt::strtime</code>.</li>
 <li>
-<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> shows the Temporal string form; <code>pillar</code> methods make tibble columns readable.</li>
+<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> shows the Temporal string form. Tibble columns use vctrs’ <code>vctrs_vctr</code> methods (<code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code>, <code>vec_ptype_abbr()</code>); there are no <code>pillar</code> methods (section 11).</li>
+<li>With a fixed precision, <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> rounds and prints in one pass in Rust (<code>rs_format</code>).</li>
 </ul></div>
 <div class="section level3">
 <h3 id="interop-with-base-r">Interop with base R<a class="anchor" aria-label="anchor" href="#interop-with-base-r"></a></h3>
@@ -253,7 +255,8 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <td>
 <code>POSIXct</code>/<code>POSIXlt</code>
 </td>
-<td>wall clock interpreted in <code>tz</code> (default UTC); DST gaps resolved by the OS</td>
+<td>wall clock interpreted in <code>tz</code> (default UTC, <code>""</code> the session zone); DST gaps and overlaps resolved with <code>disambiguation = "compatible"</code>
+</td>
 </tr><tr><td><code>POSIXlt</code></td>
 <td>
 <code>PlainDateTime</code> / <code>ZonedDateTime</code>
@@ -313,10 +316,10 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 </tr></tbody></table></div>
 <div class="section level2">
 <h2 id="id_6-error-handling">6. Error handling<a class="anchor" aria-label="anchor" href="#id_6-error-handling"></a></h2>
-<ul><li>All Rust entry points return <code>savvy::Result</code>. <code>jiff::Error</code> is converted with its message (e.g. <code>"parameter 'day' with value 31 is not in the required range of 1..=30"</code>); the R wrapper rethrows it as a condition of class <code>zeitig_error</code> with the element index appended (<code>"... (element 3)"</code>) when a vector operation fails.</li>
+<ul><li>All Rust entry points return <code>savvy::Result</code>. <code>jiff::Error</code> is converted with its message (e.g. <code>"parameter 'day' with value 31 is not in the required range of 1..=30"</code>); the R wrapper rethrows it as a condition of class <code>zeitig_error</code> with the element index appended (<code>"... (element 3)"</code>) when a vector operation fails. The few jiff messages that name Rust items (<code>jiff::Span</code>, <code>SpanRelativeTo::days_are_24_hours()</code>, …) are rewritten in zeitig’s terms by <code>cols::temporal_message()</code> (e.g. “requires <code>relative_to</code>”), unit-tested against jiff’s real messages.</li>
 <li>Temporal distinguishes <code>RangeError</code> and <code>TypeError</code>. R conditions carry a subclass <code>zeitig_range_error</code> / <code>zeitig_type_error</code>; input-type problems are detected in R before calling Rust.</li>
 <li>
-<code>NA</code> is never an error. Rust receives <code>NA</code> as R’s sentinel values via savvy’s <code>is_na()</code> and emits <code>NA</code> fields in the output.</li>
+<code>NA</code> is never an error. Rust receives <code>NA</code> as R’s sentinel values (<code>cols::is_na_int()</code>, NaN for doubles, savvy’s <code>is_na()</code> for strings) and emits <code>NA</code> fields in the output. <code>tests/testthat/test-na.R</code> sends <code>NA</code> through every public operation.</li>
 <li>Panics must be impossible on user input. <code>panic = "abort"</code> stays on for release builds (CRAN requirement that the package does not leave R in a corrupted state after a Rust unwind), so any <code>unwrap()</code>/indexing on user-controlled data is a bug.</li>
 </ul></div>
 <div class="section level2">
@@ -329,7 +332,7 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <li>
 <strong>Dependency surface.</strong> Keep it minimal because every crate’s source ships in the tarball and counts toward the 5 MB CRAN size guideline. <code>Cargo.lock</code> is resolved with every optional feature of every dependency, so <code>cargo vendor</code> also ships crates that are never compiled (<code>defmt*</code>, <code>serde_core</code>/<code>serde_derive</code>, <code>log</code>, <code>thiserror*</code>, <code>bitflags</code>, <code>jiff-static</code> and a second <code>syn</code>); they cost about 0.3 MB compressed and are accepted rather than pruned by hand, because a pruned vendor directory no longer matches the lockfile. Measured (jiff 0.2.37, savvy 0.11.0): 29 crates, <code>vendor.tar.xz</code> 1.5 MB, source tarball 1.5 MB. Features on <code>jiff</code>: <code>std</code>, <code>tz-system</code>, <code>tz-fat</code>, <code>tzdb-zoneinfo</code> (read <code>/usr/share/zoneinfo</code> on Unix), <code>tzdb-bundle-platform</code> (bundled database only where the platform has none, i.e. Windows), <code>perf-inline</code>; <code>default-features = false</code> drops <code>tzdb-concatenated</code> (Android only), <code>serde</code>, <code>logging</code> and <code>jiff-static</code>.</li>
 <li>
-<strong>Time zone database.</strong> On Linux/macOS <code>jiff</code> reads <code>/usr/share/zoneinfo</code> (or <code>TZDIR</code>). On Windows it uses the bundled <code>jiff-tzdb</code> because Windows has no zoneinfo. CRAN’s check machines all satisfy one of these. <code>ZEITIG_TZDIR</code> is honoured as an override for testing. Document in the package that the database version therefore follows the OS on Unix and the vendored crate on Windows.</li>
+<strong>Time zone database.</strong> On Linux/macOS <code>jiff</code> reads <code>/usr/share/zoneinfo</code> (or <code>TZDIR</code>). On Windows it uses the bundled <code>jiff-tzdb</code> because Windows has no zoneinfo. CRAN’s check machines all satisfy one of these. <code>ZEITIG_TZDIR</code> (read once per session) is honoured as an override for testing; a directory that is missing or holds no TZif files is an error on every lookup, never a silent fallback (tested in a subprocess in <code>test-time-zone.R</code>). Document in the package that the database version therefore follows the OS on Unix and the vendored crate on Windows.</li>
 <li>
 <strong>Authorship and licences.</strong> <code>DESCRIPTION</code> adds <code>person("The authors of the dependency Rust crates", role = "cph")</code>, <code>inst/AUTHORS</code> lists every vendored crate with authors and licence, and <code>LICENSE.note</code> summarises the licence mix (MIT, Apache-2.0, Unlicense for jiff). All are permissive and compatible with the package’s MIT licence.</li>
 <li>
@@ -350,7 +353,7 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <li>
 <strong>Property tests in Rust</strong> (<code>#[cfg(test)]</code>): parse/format round trips, <code>add</code> then <code>since</code> identity, ordering consistency across the record representation and <code>jiff</code> comparison.</li>
 <li>
-<strong>savvy integration tests</strong> (<code>savvy-cli test</code>) for anything that needs a live R session, e.g. <code>NA</code> handling at the FFI boundary.</li>
+<strong>FFI boundary tests</strong> run from R rather than through <code>savvy-cli test</code>: <code>test-na.R</code> covers <code>NA</code> in every argument of every entry point, and settings read once per session (<code>ZEITIG_TZDIR</code>) are tested in a fresh R process (<code>helper-subprocess.R</code>).</li>
 <li>
 <strong>Platform matrix</strong> via the existing CI (<code>pedrobtz/r-actions</code> with <code>rust: true</code>): Linux, macOS, Windows; the <code>full-ci</code> label or a push to <code>main</code> runs the full set. Add a job that installs from the built tarball with network disabled to prove the vendored build works.</li>
 <li>
@@ -367,8 +370,7 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <td>Calendars</td>
 <td>pluggable, <code>iso8601</code> default</td>
 <td>ISO only</td>
-<td>
-<code>calendar = "iso8601"</code> accepted, as are <code>[u-ca=iso8601]</code> and <code>[!u-ca=iso8601]</code> annotations; any other calendar (argument or annotation of a plain date, plain date-time or zoned string) errors with <code>zeitig_range_error</code>
+<td>no <code>calendar</code> arguments and no <code>withCalendar()</code>; <code>[u-ca=iso8601]</code> and <code>[!u-ca=iso8601]</code> annotations are accepted, any other calendar annotation of a plain date, plain date-time or zoned string errors with <code>zeitig_range_error</code>
 </td>
 </tr><tr><td></td>
 <td>
@@ -434,13 +436,13 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 <td>IANA names and <code>±HH:MM</code>
 </td>
 <td>also POSIX TZ strings</td>
-<td>POSIX TZ strings and sub-minute offsets are rejected; names are canonicalised to the database’s spelling; <code>+00:00</code> stays distinct from <code>UTC</code>; <code><a href="reference/temporal_compare.html">temporal_equals()</a></code> treats <code>UTC</code>, <code>Etc/UTC</code>, <code>Etc/GMT</code> and <code>GMT</code> as one zone but resolves no other links</td>
+<td>POSIX TZ strings and sub-minute offsets are rejected; names are canonicalised to the database’s spelling; <code>+00:00</code> stays distinct from <code>UTC</code>; <code><a href="reference/temporal_compare.html">temporal_equals()</a></code> and the <code>until</code>/<code>since</code> zone check treat <code>UTC</code>, <code>Etc/UTC</code>, <code>Etc/GMT</code> and <code>GMT</code> as one zone but resolve no other links</td>
 </tr><tr><td></td>
 <td>
 <code>ZonedDateTime</code> <code>until</code> across zones</td>
 <td>RangeError for calendar units when zones differ</td>
-<td>computes anyway</td>
-<td>R checks and errors (<code>zeitig_range_error</code>) when <code>largest_unit</code> is <code>day</code> or larger and the zones differ</td>
+<td>errors unless the zone objects are equal</td>
+<td>Rust errors (<code>zeitig_range_error</code>) when <code>largest_unit</code> is <code>day</code> or larger and the zones differ (Temporal’s <code>TimeZoneEquals</code>, so UTC aliases count as one zone)</td>
 </tr><tr><td></td>
 <td>
 <code><a href="https://rdrr.io/r/base/toString.html" class="external-link">toString()</a></code> fractional digits</td>
@@ -523,11 +525,54 @@ vendored jiff    all date/time semantics, tzdb lookup, parsing, formatting, roun
 </div>
 <div class="section level2">
 <h2 id="id_10-performance-notes">10. Performance notes<a class="anchor" aria-label="anchor" href="#id_10-performance-notes"></a></h2>
-<ul><li>Per-call cost is one <code>.Call</code> plus an allocation per output column; per-element cost is a <code>jiff</code> operation (tens of nanoseconds for civil math, a few hundred for zoned math after the zone is cached). This is competitive with <code>clock</code> and far faster than <code>lubridate</code> for vector work.</li>
-<li>Parsing character vectors is done in Rust; R never splits strings.</li>
+<ul><li><p>Per-call cost is one <code>.Call</code> plus an allocation per output column. Input columns are borrowed, not copied (section 2), and the per-element loop allocates nothing except the strings it writes: duration fields are read into a fixed array, zone identifiers are shared <code>Rc&lt;str&gt;</code>s from the <code>TzCache</code>, and formatting reuses one buffer.</p></li>
 <li>
-<code>ZonedDateTime</code> columns with many distinct zones pay one <code>TimeZone::get</code> per distinct id per call.</li>
-<li>No parallelism in Rust (CRAN restricts to two threads and <code>jiff</code> work is already cheap).</li>
+<p>Measured with <code>tools/bench/bench.R</code> (release build, n = 1e6, median of 5 runs, one Linux container), in nanoseconds per element:</p>
+<table class="table"><colgroup><col width="25%"><col width="25%"><col width="25%"><col width="25%"></colgroup><thead><tr><th>Operation</th>
+<th>ns</th>
+<th>Operation</th>
+<th>ns</th>
+</tr></thead><tbody><tr><td><code>instant + PT1H</code></td>
+<td>50</td>
+<td><code>temporal_until(zoned, zoned, largest_unit = "day")</code></td>
+<td>230</td>
+</tr><tr><td><code>plain_date + P1D</code></td>
+<td>70</td>
+<td><code>temporal_round(zoned, "hour")</code></td>
+<td>350</td>
+</tr><tr><td><code>plain_date_time + PT1H</code></td>
+<td>100</td>
+<td><code>year(zoned)</code></td>
+<td>90</td>
+</tr><tr><td><code>zoned + P1D</code></td>
+<td>360</td>
+<td><code>temporal_fields(zoned)</code></td>
+<td>120</td>
+</tr><tr><td><code>duration + duration</code></td>
+<td>150</td>
+<td><code>temporal_with(zoned, hour = 1)</code></td>
+<td>530</td>
+</tr><tr><td>
+<code><a href="reference/instant.html">instant()</a></code> parse</td>
+<td>90</td>
+<td><code>format(plain_date)</code></td>
+<td>150</td>
+</tr><tr><td>
+<code><a href="reference/zoned_date_time.html">zoned_date_time()</a></code> parse</td>
+<td>620</td>
+<td><code>format(zoned)</code></td>
+<td>950</td>
+</tr><tr><td><code>as.POSIXct(plain_date_time)</code></td>
+<td>170</td>
+<td><code>format(zoned, fractional_second_digits = 3)</code></td>
+<td>1800</td>
+</tr></tbody></table><p>For scale on the same machine: <code>Date + 1</code> takes 2 ns (one vectorised double addition), <code>format(Date)</code> 300 ns and <code>format(POSIXct)</code> 800 ns. Arithmetic is jiff-bound and calendar-aware, so it costs more than base R’s plain-number arithmetic. Formatting writes one R string per element (<code>mkChar</code> through savvy’s unwind protection), which dominates the <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> rows.</p>
+</li>
+<li><p>Parsing character vectors is done in Rust; R never splits strings.</p></li>
+<li><p><code>ZonedDateTime</code> columns with many distinct zones pay one <code>TimeZone::get</code> per distinct id per call.</p></li>
+<li><p>The <code>halfEven</code> workaround (section 9) rounds a second time only when the <code>halfExpand</code> result could be the odd neighbour of a tie (<code>arith::half_even()</code>).</p></li>
+<li><p>No parallelism in Rust (CRAN restricts to two threads and <code>jiff</code> work is already cheap).</p></li>
+<li><p><code>devtools::load_all()</code> builds the cargo dev profile, 4 to 10 times slower; benchmark an installed package.</p></li>
 </ul></div>
 <div class="section level2">
 <h2 id="id_11-open-questions-decide-before-010-feature-freeze">11. Open questions (decide before 0.1.0 feature freeze)<a class="anchor" aria-label="anchor" href="#id_11-open-questions-decide-before-010-feature-freeze"></a></h2>

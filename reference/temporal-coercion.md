@@ -54,10 +54,15 @@ plain date-times and zoned date-times (wall-clock date), and
 [`as.POSIXct()`](https://rdrr.io/r/base/as.POSIXlt.html) /
 [`as.POSIXlt()`](https://rdrr.io/r/base/as.POSIXlt.html). For plain
 date-times these interpret the wall-clock time in `tz` (UTC by default;
-local times in DST gaps are resolved by the operating system). Instants
-and zoned date-times convert exactly up to the microsecond; zoned
-date-times keep their time zone when all elements share one IANA zone
-and `tz` is not given, otherwise `tz` (default UTC) is used.
+`""` is the session time zone, see
+[`now_time_zone()`](https://pedrobtz.github.io/zeitig/reference/now_instant.md));
+local times in a DST gap or overlap are resolved with
+`disambiguation = "compatible"`, as
+[`to_zoned_date_time()`](https://pedrobtz.github.io/zeitig/reference/temporal-conversions.md)
+does. Instants and zoned date-times convert exactly up to the
+microsecond; zoned date-times keep their time zone when all elements
+share one IANA zone and `tz` is not given, otherwise `tz` (default UTC)
+is used.
 
 ## Examples
 

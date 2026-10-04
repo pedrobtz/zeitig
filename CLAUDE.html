@@ -67,8 +67,8 @@
 <span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co"># Rust-only unit tests (no R session; #[cfg(test)] modules)</span></span>
 <span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="ex">cargo</span> test <span class="at">--manifest-path</span> src/rust/Cargo.toml</span>
 <span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co"># Rust tests that need a live R session (#[cfg(feature = "savvy-test")] modules)</span></span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="ex">savvy-cli</span> test src/rust</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co"># Benchmarks (install a release build first; load_all() compiles the slow dev profile)</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="ex">R</span> CMD INSTALL . <span class="kw">&amp;&amp;</span> <span class="ex">Rscript</span> tools/bench/bench.R</span>
 <span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a></span>
 <span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="co"># Full check as CRAN sees it (what CI runs)</span></span>
 <span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning")'</span></span>
@@ -129,8 +129,7 @@
 <ul><li>Crate name and R package name are both <code>zeitig</code>; the static lib must be <code>libzeitig.a</code> and the init symbol <code>R_init_zeitig</code>. Renaming either requires touching Makevars, <code>init.c</code>, the <code>.def</code> file and <code>Cargo.toml</code> together.</li>
 <li>
 <code>src/rust/.cargo/config.toml</code> exists only so <code>cargo test</code> links on Windows MSVC; it is excluded from the tarball on purpose.</li>
-<li>
-<code>cargo test</code> warns about an unexpected <code>savvy-test</code> cfg; that is expected (the feature is injected by <code>savvy-cli test</code>), do not “fix” it by removing the test module.</li>
+<li>There are no <code>savvy-cli test</code> modules: anything that needs a live R session is tested from R (<code>tests/testthat/test-na.R</code> for <code>NA</code> at the boundary; <code>helper-subprocess.R</code> runs a fresh R process for per-session settings such as <code>ZEITIG_TZDIR</code>).</li>
 <li>CRAN installs with at most 2 CPUs: Makevars passes <code>-j 2</code> to cargo.</li>
 <li>Makevars only builds <code>libzeitig.a</code> when it is missing (it is deleted after linking). A stray <code>src/rust/target/&lt;profile&gt;/libzeitig.a</code> left by a manual <code>cargo build</code> is linked as is and gives “undefined symbol: savvy_…_ffi”; delete it.</li>
 <li>Do not use savvy’s <code>NotAvailableValue::is_na()</code> on <code>i32</code> in code that <code>cargo test</code> links: it reads the <code>R_NaInt</code> data symbol and the test binary fails to link (<code>undefined symbol: R_NaInt</code>). Use <code>cols::is_na_int()</code> / <code>cols::NA_INT</code> instead. Column readers/writers for each record layout live in <code>src/rust/src/cols.rs</code>.</li>

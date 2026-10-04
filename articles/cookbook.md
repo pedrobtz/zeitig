@@ -34,16 +34,16 @@ value or on a whole column.
 
 now_instant()                          # exact time, no time zone
 #> <instant[1]>
-#> [1] 2026-10-03T21:44:48.201985644Z
+#> [1] 2026-10-04T07:05:40.027042716Z
 now_zoned_date_time("Europe/Berlin")   # exact time seen in a time zone
 #> <zoned_date_time[1]>
-#> [1] 2026-10-03T23:44:48.204419964+02:00[Europe/Berlin]
+#> [1] 2026-10-04T09:05:40.028827293+02:00[Europe/Berlin]
 now_plain_date("Asia/Tokyo")           # today's date in Tokyo
 #> <plain_date[1]>
 #> [1] 2026-10-04
 now_plain_time()                       # wall-clock time in the session time zone
 #> <plain_time[1]>
-#> [1] 21:44:48.207810553
+#> [1] 07:05:40.031468149
 now_time_zone()
 #> [1] "UTC"
 ```
@@ -430,7 +430,7 @@ date to measure them:
 
 duration_total(duration(months = 1), "day")
 #> Error in `duration_total()`:
-#> ! using unit 'month' in span or configuration requires that a relative reference time be given (`jiff::SpanRelativeTo::days_are_24_hours()` was given but this only permits using days and weeks without a relative reference time) (element 1)
+#> ! using unit 'month' in span or configuration requires `relative_to` (without it, only days of 24 hours and weeks of 7 days can be used) (element 1)
 duration_total(duration(months = 1), "day", relative_to = c("2024-01-01", "2024-02-01"))
 #> [1] 31 29
 ```
