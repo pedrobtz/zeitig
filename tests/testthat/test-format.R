@@ -119,3 +119,31 @@ test_that("summary() and str()", {
     str(plain_date(2020, 1:3, 1))
   })
 })
+
+test_that("format() rounds in the same pass as it prints", {
+  z <- zoned_date_time(c(
+    "2020-01-01T15:23:30.9996+01:00[Europe/Paris]", "2020-01-01T23:59:59.9999+01:00[Europe/Paris]"
+  ))
+  expect_equal(
+    format(z, fractional_second_digits = 3, rounding_mode = "halfExpand"),
+    c("2020-01-01T15:23:31.000+01:00[Europe/Paris]", "2020-01-02T00:00:00.000+01:00[Europe/Paris]")
+  )
+  expect_equal(
+    format(z, smallest_unit = "minute", rounding_mode = "halfEven", time_zone_name = "never"),
+    c("2020-01-01T15:24+01:00", "2020-01-02T00:00+01:00")
+  )
+  i <- instant(c("2020-01-01T00:00:00.5Z", "1969-12-31T23:59:59.5Z"))
+  expect_equal(
+    format(
+      i,
+      smallest_unit = "second", rounding_mode = "trunc", time_zone = c("Asia/Tokyo", "UTC")
+    ),
+    c("2020-01-01T09:00:00+09:00", "1969-12-31T23:59:59+00:00")
+  )
+  expect_error(
+    format(plain_time("12:00"), smallest_unit = "minute", rounding_mode = "bogus"),
+    class = "zeitig_range_error"
+  )
+  expect_error(temporal_strftime(plain_date(2020, 1:3, 1), c("%Y", "%m")))
+  expect_equal(temporal_strftime(plain_date(2020, 1:2, 1), c("%Y", "%m")), c("2020", "02"))
+})

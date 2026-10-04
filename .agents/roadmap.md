@@ -60,7 +60,7 @@ Rust column loops, option handling, error mapping) that the remaining types copy
 - [x] `now_*()` functions; default zone from `TZ`, then `Sys.timezone()` (which caches and misses later `TZ` changes), then UTC.
 - [x] `POSIXct` conversions both ways with documented precision loss.
 - [x] `temporal_equals()` vs `==` semantics as decided in `design.md` section 11.
-- [x] Tests covering DST gaps and overlaps in at least three zones, fixed offsets, `Etc/UTC`, and the `TZ`/`TZDIR` environment handling on all CI platforms.
+- [x] Tests covering DST gaps and overlaps in at least three zones, fixed offsets, `Etc/UTC`, and the `TZ`/`TZDIR` environment handling on all CI platforms (`ZEITIG_TZDIR` in a fresh R process, `test-time-zone.R`).
 
 ## Milestone 5 - Formatting, parsing, polish (done)
 
@@ -80,6 +80,7 @@ Rust column loops, option handling, error mapping) that the remaining types copy
 - [x] `NEWS.md` entry for 0.1.0; `Version: 0.1.0` in `DESCRIPTION` and `src/rust/Cargo.toml`.
 - [x] `cran-comments.md` noting: Rust package per CRAN policy, vendored crates, cargo/rustc versions reported by `configure`, tarball size, platforms tested.
 - [x] Temporal conformance test against the reference polyfill plus a curated test262 slice (`.agents/temporal-conformance-plan.md`); the differences it found are fixed or documented in `design.md` section 9.
+- [x] Implementation review (issue #13): borrowing column readers and allocation-free per-element loops in Rust, single-pass formatting, R-side fast paths, `NA`-boundary and `ZEITIG_TZDIR` tests, `tools/bench/bench.R`, and `design.md` brought in line with the code.
 - [ ] Submit; address CRAN feedback; tag `v0.1.0` and publish the GitHub release (triggers pkgdown).
 
 ## After 0.1.0

@@ -7,7 +7,7 @@ SEXP savvy_rs_duration_round__ffi(SEXP c_arg__x, SEXP c_arg__largest, SEXP c_arg
 SEXP savvy_rs_duration_sort_key__ffi(SEXP c_arg__x);
 SEXP savvy_rs_duration_total__ffi(SEXP c_arg__x, SEXP c_arg__unit, SEXP c_arg__relative);
 SEXP savvy_rs_duration_validate__ffi(SEXP c_arg__x);
-SEXP savvy_rs_format__ffi(SEXP c_arg__x, SEXP c_arg__kind, SEXP c_arg__digits, SEXP c_arg__minute, SEXP c_arg__offset, SEXP c_arg__time_zone_name, SEXP c_arg__calendar_name, SEXP c_arg__time_zone);
+SEXP savvy_rs_format__ffi(SEXP c_arg__x, SEXP c_arg__kind, SEXP c_arg__digits, SEXP c_arg__minute, SEXP c_arg__offset, SEXP c_arg__time_zone_name, SEXP c_arg__calendar_name, SEXP c_arg__round_unit, SEXP c_arg__round_increment, SEXP c_arg__round_mode, SEXP c_arg__time_zone);
 SEXP savvy_rs_instant_add__ffi(SEXP c_arg__x, SEXP c_arg__duration);
 SEXP savvy_rs_instant_diff__ffi(SEXP c_arg__x, SEXP c_arg__y, SEXP c_arg__largest, SEXP c_arg__smallest, SEXP c_arg__increment, SEXP c_arg__mode, SEXP c_arg__since);
 SEXP savvy_rs_instant_epoch_nanoseconds__ffi(SEXP c_arg__x);
@@ -28,6 +28,7 @@ SEXP savvy_rs_plain_date_parse__ffi(SEXP c_arg__x);
 SEXP savvy_rs_plain_date_time_add__ffi(SEXP c_arg__x, SEXP c_arg__duration, SEXP c_arg__reject);
 SEXP savvy_rs_plain_date_time_diff__ffi(SEXP c_arg__x, SEXP c_arg__y, SEXP c_arg__largest, SEXP c_arg__smallest, SEXP c_arg__increment, SEXP c_arg__mode, SEXP c_arg__since);
 SEXP savvy_rs_plain_date_time_format__ffi(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day, SEXP c_arg__second_of_day, SEXP c_arg__nanos);
+SEXP savvy_rs_plain_date_time_from_parts__ffi(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day, SEXP c_arg__hour, SEXP c_arg__minute, SEXP c_arg__second, SEXP c_arg__millisecond, SEXP c_arg__microsecond, SEXP c_arg__nanosecond, SEXP c_arg__reject);
 SEXP savvy_rs_plain_date_time_parse__ffi(SEXP c_arg__x);
 SEXP savvy_rs_plain_date_time_round__ffi(SEXP c_arg__x, SEXP c_arg__smallest, SEXP c_arg__increment, SEXP c_arg__mode);
 SEXP savvy_rs_plain_date_to_epoch_days__ffi(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day);
@@ -44,9 +45,9 @@ SEXP savvy_rs_zoned_add__ffi(SEXP c_arg__x, SEXP c_arg__duration, SEXP c_arg__re
 SEXP savvy_rs_zoned_civil__ffi(SEXP c_arg__x);
 SEXP savvy_rs_zoned_diff__ffi(SEXP c_arg__x, SEXP c_arg__y, SEXP c_arg__largest, SEXP c_arg__smallest, SEXP c_arg__increment, SEXP c_arg__mode, SEXP c_arg__since);
 SEXP savvy_rs_zoned_format__ffi(SEXP c_arg__x);
-SEXP savvy_rs_zoned_from_civil__ffi(SEXP c_arg__x, SEXP c_arg__time_zone, SEXP c_arg__disambiguation, SEXP c_arg__offset, SEXP c_arg__offset_mode);
+SEXP savvy_rs_zoned_from_civil__ffi(SEXP c_arg__x, SEXP c_arg__time_zone, SEXP c_arg__disambiguation, SEXP c_arg__offset_mode, SEXP c_arg__reference);
 SEXP savvy_rs_zoned_hours_in_day__ffi(SEXP c_arg__x);
-SEXP savvy_rs_zoned_offset__ffi(SEXP c_arg__x);
+SEXP savvy_rs_zoned_offset__ffi(SEXP c_arg__x, SEXP c_arg__as_string);
 SEXP savvy_rs_zoned_parse__ffi(SEXP c_arg__x, SEXP c_arg__disambiguation, SEXP c_arg__offset_mode);
 SEXP savvy_rs_zoned_round__ffi(SEXP c_arg__x, SEXP c_arg__smallest, SEXP c_arg__increment, SEXP c_arg__mode);
 SEXP savvy_rs_zoned_start_of_day__ffi(SEXP c_arg__x);

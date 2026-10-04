@@ -34,7 +34,14 @@ Initial CRAN release.
 * `summary()` methods; vignettes `vignette("zeitig")`,
   `vignette("time-zones")` and `vignette("temporal-differences")`.
 * New `available_time_zones()` lists the IANA time zone identifiers known to
-  the time zone database.
+  the time zone database. A `ZEITIG_TZDIR` environment variable that does not
+  point at a time zone database is an error rather than silently ignored.
+* `temporal_with()` also replaces the fields of durations
+  (`Duration.prototype.with()`).
+* Strings combine with and compare against every zeitig class by parsing, as
+  they do with base R's `Date`: `plain_date(2020, 1, 1) == "2020-01-01"`.
+* Error messages never name jiff's Rust types; for example a duration with
+  months used without `relative_to` reports that it "requires `relative_to`".
 * A conformance test compares about 6,300 operations with the reference
   Temporal implementation, including a selection of test262 cases. Every
   remaining difference is listed in `vignette("temporal-differences")`.

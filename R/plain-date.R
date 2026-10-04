@@ -77,6 +77,14 @@ vec_ptype2.zeitig_plain_date.zeitig_plain_date <- function(x, y, ...) {
 #' @export
 vec_cast.zeitig_plain_date.zeitig_plain_date <- function(x, to, ...) x
 
+# Strings combine with (and compare against) Temporal values by parsing, as
+# character does with base R's Date.
+#' @export
+vec_ptype2.zeitig_plain_date.character <- function(x, y, ...) vec_ptype(x)
+
+#' @export
+vec_ptype2.character.zeitig_plain_date <- function(x, y, ...) vec_ptype(y)
+
 #' @export
 vec_cast.zeitig_plain_date.character <- function(x, to, ...) plain_date_parse(x)
 

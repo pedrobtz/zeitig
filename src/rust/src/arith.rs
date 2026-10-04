@@ -9,9 +9,9 @@ use jiff::{RoundMode, Span, Timestamp, TimestampDifference, Unit, Zoned, ZonedDi
 use savvy::{savvy, IntegerSexp, ListSexp};
 
 use crate::cols::{
-    common_len, elt_error, DateIn, DateOut, DateTimeOut, DurationIn, DurationOut, TimeIn, TimeOut,
+    common_len, elt_error, DateCols, DateIn, DateOut, DateTimeCols, DateTimeOut, DurationCols,
+    DurationOut, TimeCols, TimeIn, TimeOut,
 };
-use crate::duration::DateTimeCols;
 use crate::opts::{increment_i64, parse_round_mode, parse_unit, DiffOpts};
 
 /// Temporal `overflow: "reject"` for date arithmetic: adding the years and
@@ -133,13 +133,11 @@ fn rounded_until<P: Point>(
     mode: RoundMode,
 ) -> Result<Span, jiff::Error> {
     if mode == RoundMode::HalfEven && o.smallest >= Unit::Day {
-        let lo = rounded_until(a, b, o, RoundMode::HalfTrunc)?;
-        let hi = rounded_until(a, b, o, RoundMode::HalfExpand)?;
-        if lo.fieldwise() == hi.fieldwise() {
-            return Ok(lo);
-        }
-        let q = unit_value(&lo, o.smallest).abs() / o.increment;
-        return Ok(if q % 2 == 0 { lo } else { hi });
+        return half_even(
+            |m| rounded_until(a, b, o, m),
+            |s| unit_value(s, o.smallest).abs() / o.increment,
+            |x, y| x.fieldwise() == y.fieldwise(),
+        );
     }
     if o.largest == Some(Unit::Week) && o.smallest == Unit::Day && o.increment > 1 {
         let weeks = i64::from(
@@ -179,6 +177,33 @@ pub(crate) fn unit_value(span: &Span, unit: Unit) -> i64 {
     }
 }
 
+/// Temporal's `halfEven` built from jiff's `halfExpand` and `halfTrunc`, for
+/// the cases where jiff may resolve an exact tie to the odd neighbour.
+///
+/// The two modes agree except at a tie, where they are one increment apart
+/// and Temporal picks the one whose rounded quantity (`q`, in increments) is
+/// even. `halfExpand` is computed first: when its quantity is even and
+/// non-zero it is the answer whether or not this is a tie, so the second
+/// rounding is only needed for odd quantities and for zero (which may be a
+/// carry into the next larger unit, e.g. 6.5 days rounded up to 1 week).
+pub(crate) fn half_even<T, E>(
+    round: impl Fn(RoundMode) -> Result<T, E>,
+    q: impl Fn(&T) -> i64,
+    same: impl Fn(&T, &T) -> bool,
+) -> Result<T, E> {
+    let hi = round(RoundMode::HalfExpand)?;
+    let qh = q(&hi);
+    if qh != 0 && qh % 2 == 0 {
+        return Ok(hi);
+    }
+    let lo = round(RoundMode::HalfTrunc)?;
+    if same(&lo, &hi) || q(&lo) % 2 == 0 {
+        Ok(lo)
+    } else {
+        Ok(hi)
+    }
+}
+
 /// Rounds a wall-clock value as Temporal's `RoundTime` does. For `halfEven`,
 /// Temporal decides a tie by the parity of the rounded unit's own field (the
 /// quantity below the next larger unit; nothing for days), while jiff uses the
@@ -193,21 +218,48 @@ pub(crate) fn round_time_like<T: PartialEq>(
     if mode != RoundMode::HalfEven {
         return round(mode);
     }
-    let (lo, hi) = (round(RoundMode::HalfTrunc)?, round(RoundMode::HalfExpand)?);
-    if lo == hi {
-        return Ok(lo);
-    }
-    let t = time(&lo);
-    let field = match unit {
-        Unit::Hour => i64::from(t.hour()),
-        Unit::Minute => i64::from(t.minute()),
-        Unit::Second => i64::from(t.second()),
-        Unit::Millisecond => i64::from(t.millisecond()),
-        Unit::Microsecond => i64::from(t.microsecond()),
-        Unit::Nanosecond => i64::from(t.nanosecond()),
-        _ => 0,
+    let field = |x: &T| {
+        let t = time(x);
+        let v = match unit {
+            Unit::Hour => i64::from(t.hour()),
+            Unit::Minute => i64::from(t.minute()),
+            Unit::Second => i64::from(t.second()),
+            Unit::Millisecond => i64::from(t.millisecond()),
+            Unit::Microsecond => i64::from(t.microsecond()),
+            Unit::Nanosecond => i64::from(t.nanosecond()),
+            _ => 0,
+        };
+        v / increment
     };
-    Ok(if (field / increment) % 2 == 0 { lo } else { hi })
+    half_even(round, field, |a, b| a == b)
+}
+
+/// `PlainTime.prototype.round()` for one value.
+pub(crate) fn round_time(
+    t: Time,
+    unit: Unit,
+    increment: i64,
+    mode: RoundMode,
+) -> Result<Time, jiff::Error> {
+    let opts = TimeRound::new().smallest(unit).increment(increment);
+    round_time_like(unit, increment, mode, |m| t.round(opts.mode(m)), |t| *t)
+}
+
+/// `PlainDateTime.prototype.round()` for one value.
+pub(crate) fn round_datetime(
+    dt: DateTime,
+    unit: Unit,
+    increment: i64,
+    mode: RoundMode,
+) -> Result<DateTime, jiff::Error> {
+    let opts = DateTimeRound::new().smallest(unit).increment(increment);
+    round_time_like(
+        unit,
+        increment,
+        mode,
+        |m| dt.round(opts.mode(m)),
+        |dt| dt.time(),
+    )
 }
 
 #[savvy]
@@ -219,7 +271,8 @@ fn rs_plain_date_add(
     reject: bool,
 ) -> savvy::Result<savvy::Sexp> {
     let x = DateIn::new(&year, &month, &day)?;
-    let d = DurationIn::new(&duration)?;
+    let dc = DurationCols::new(&duration)?;
+    let d = dc.reader()?;
     let n = common_len(&[x.len(), d.len()])?;
     let mut out = DateOut::with_capacity(n);
     for i in 0..n {
@@ -243,7 +296,8 @@ fn rs_plain_time_add(
     duration: ListSexp,
 ) -> savvy::Result<savvy::Sexp> {
     let x = TimeIn::new(&second_of_day, &nanos)?;
-    let d = DurationIn::new(&duration)?;
+    let dc = DurationCols::new(&duration)?;
+    let d = dc.reader()?;
     let n = common_len(&[x.len(), d.len()])?;
     let mut out = TimeOut::with_capacity(n);
     for i in 0..n {
@@ -264,7 +318,8 @@ fn rs_plain_date_time_add(
 ) -> savvy::Result<savvy::Sexp> {
     let cols = DateTimeCols::new(&x)?;
     let x = cols.reader()?;
-    let d = DurationIn::new(&duration)?;
+    let dc = DurationCols::new(&duration)?;
+    let d = dc.reader()?;
     let n = common_len(&[x.len(), d.len()])?;
     let mut out = DateTimeOut::with_capacity(n);
     for i in 0..n {
@@ -293,9 +348,8 @@ fn rs_plain_date_diff(
     since: bool,
 ) -> savvy::Result<savvy::Sexp> {
     let opts = DiffOpts::new(largest, smallest, increment, mode)?;
-    let (xc, yc) = (date_cols(&x)?, date_cols(&y)?);
-    let a = DateIn::new(&xc[0], &xc[1], &xc[2])?;
-    let b = DateIn::new(&yc[0], &yc[1], &yc[2])?;
+    let (xc, yc) = (DateCols::new(&x)?, DateCols::new(&y)?);
+    let (a, b) = (xc.reader()?, yc.reader()?);
     let n = common_len(&[a.len(), b.len()])?;
     let mut out = DurationOut::with_capacity(n);
     for i in 0..n {
@@ -310,26 +364,6 @@ fn rs_plain_date_diff(
     out.into_sexp()
 }
 
-fn date_cols(x: &ListSexp) -> savvy::Result<[IntegerSexp; 3]> {
-    int_cols::<3>(x)
-}
-
-fn int_cols<const N: usize>(x: &ListSexp) -> savvy::Result<[IntegerSexp; N]> {
-    let mut cols = Vec::with_capacity(N);
-    for k in 0..N {
-        match x.get_by_index(k).map(|s| s.into_typed()) {
-            Some(savvy::TypedSexp::Integer(v)) => cols.push(v),
-            _ => {
-                return Err(savvy::Error::new(
-                    "internal error: record fields must be integer vectors",
-                ))
-            }
-        }
-    }
-    cols.try_into()
-        .map_err(|_| savvy::Error::new("internal error: wrong number of record fields"))
-}
-
 #[savvy]
 #[allow(clippy::too_many_arguments)]
 fn rs_plain_time_diff(
@@ -342,9 +376,8 @@ fn rs_plain_time_diff(
     since: bool,
 ) -> savvy::Result<savvy::Sexp> {
     let opts = DiffOpts::new(largest, smallest, increment, mode)?;
-    let (xc, yc) = (int_cols::<2>(&x)?, int_cols::<2>(&y)?);
-    let a = TimeIn::new(&xc[0], &xc[1])?;
-    let b = TimeIn::new(&yc[0], &yc[1])?;
+    let (xc, yc) = (TimeCols::new(&x)?, TimeCols::new(&y)?);
+    let (a, b) = (xc.reader()?, yc.reader()?);
     let n = common_len(&[a.len(), b.len()])?;
     let mut out = DurationOut::with_capacity(n);
     for i in 0..n {
@@ -401,13 +434,11 @@ fn rs_plain_time_round(
         increment_i64(increment)?,
         parse_round_mode(mode)?,
     );
-    let opts = TimeRound::new().smallest(unit).increment(increment);
     let mut out = TimeOut::with_capacity(x.len());
     for i in 0..x.len() {
         match x.get(i)? {
             Some(t) => out.push(Some(
-                round_time_like(unit, increment, mode, |m| t.round(opts.mode(m)), |t| *t)
-                    .map_err(|e| elt_error(i, e))?,
+                round_time(t, unit, increment, mode).map_err(|e| elt_error(i, e))?,
             )),
             None => out.push(None),
         }
@@ -429,19 +460,11 @@ fn rs_plain_date_time_round(
         increment_i64(increment)?,
         parse_round_mode(mode)?,
     );
-    let opts = DateTimeRound::new().smallest(unit).increment(increment);
     let mut out = DateTimeOut::with_capacity(x.len());
     for i in 0..x.len() {
         match x.get(i)? {
             Some(dt) => out.push(Some(
-                round_time_like(
-                    unit,
-                    increment,
-                    mode,
-                    |m| dt.round(opts.mode(m)),
-                    |dt| dt.time(),
-                )
-                .map_err(|e| elt_error(i, e))?,
+                round_datetime(dt, unit, increment, mode).map_err(|e| elt_error(i, e))?,
             )),
             None => out.push(None),
         }
@@ -544,6 +567,94 @@ mod tests {
             let span = dt.since((Unit::Year, g.datetime())).unwrap();
             let parsed = super::super::duration::tests_parse(&span.to_string());
             assert_eq!(parsed.fieldwise(), span.fieldwise());
+        }
+    }
+
+    /// The pre-shortcut `halfEven`: always round both ways, then pick by the
+    /// parity of the `halfTrunc` result.
+    fn half_even_reference<T>(
+        round: impl Fn(RoundMode) -> T,
+        q: impl Fn(&T) -> i64,
+        same: impl Fn(&T, &T) -> bool,
+    ) -> T {
+        let (lo, hi) = (round(RoundMode::HalfTrunc), round(RoundMode::HalfExpand));
+        if same(&lo, &hi) || q(&lo) % 2 == 0 {
+            lo
+        } else {
+            hi
+        }
+    }
+
+    #[test]
+    fn half_even_shortcut_matches_two_roundings() {
+        use super::{round_time, rounded_until, unit_value};
+        use crate::opts::DiffOpts;
+        let mut g = Lcg(5);
+        let units = [
+            (Unit::Year, Unit::Year),
+            (Unit::Year, Unit::Month),
+            (Unit::Month, Unit::Day),
+            (Unit::Week, Unit::Day),
+            (Unit::Day, Unit::Day),
+        ];
+        let mut ties = 0;
+        for _ in 0..1500 {
+            // Whole days (ties for even increments) and date-times half a day
+            // apart (ties when rounding to days).
+            let (da, db) = (g.date(), g.date());
+            let (ta, tb) = (da.at(0, 0, 0, 0), db.at(12, 0, 0, 0));
+            for (largest, smallest) in units {
+                for increment in [1, 2, 4] {
+                    let o = DiffOpts {
+                        largest: Some(largest),
+                        smallest,
+                        increment,
+                        mode: RoundMode::HalfEven,
+                    };
+                    let q = |s: &Span| unit_value(s, smallest).abs() / increment;
+                    let same = |x: &Span, y: &Span| x.fieldwise() == y.fieldwise();
+                    let new = rounded_until(&da, &db, &o, RoundMode::HalfEven).unwrap();
+                    let old =
+                        half_even_reference(|m| rounded_until(&da, &db, &o, m).unwrap(), q, same);
+                    assert_eq!(new.fieldwise(), old.fieldwise(), "{da} {db} {largest:?}");
+                    let new = rounded_until(&ta, &tb, &o, RoundMode::HalfEven).unwrap();
+                    let lo = rounded_until(&ta, &tb, &o, RoundMode::HalfTrunc).unwrap();
+                    let hi = rounded_until(&ta, &tb, &o, RoundMode::HalfExpand).unwrap();
+                    ties += usize::from(!same(&lo, &hi));
+                    let old =
+                        half_even_reference(|m| rounded_until(&ta, &tb, &o, m).unwrap(), q, same);
+                    assert_eq!(new.fieldwise(), old.fieldwise(), "{ta} {tb} {largest:?}");
+                }
+            }
+        }
+        assert!(ties > 1000, "too few ties exercised: {ties}");
+        for _ in 0..3000 {
+            // hh:mm:30 is a tie when rounding to minutes, and so on.
+            let t = time(g.range(0, 23) as i8, g.range(0, 59) as i8, 30, 500_000_000);
+            for (unit, increment) in [
+                (Unit::Hour, 1),
+                (Unit::Minute, 1),
+                (Unit::Minute, 2),
+                (Unit::Second, 1),
+                (Unit::Millisecond, 250),
+            ] {
+                let field = |x: &Time| {
+                    let v = match unit {
+                        Unit::Hour => i64::from(x.hour()),
+                        Unit::Minute => i64::from(x.minute()),
+                        Unit::Second => i64::from(x.second()),
+                        _ => i64::from(x.millisecond()),
+                    };
+                    v / increment
+                };
+                let new = round_time(t, unit, increment, RoundMode::HalfEven).unwrap();
+                let old = half_even_reference(
+                    |m| round_time(t, unit, increment, m).unwrap(),
+                    field,
+                    |a, b| a == b,
+                );
+                assert_eq!(new, old, "{t} {unit:?} {increment}");
+            }
         }
     }
 

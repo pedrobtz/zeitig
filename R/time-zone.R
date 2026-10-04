@@ -14,5 +14,5 @@
 #' head(available_time_zones())
 #' "Europe/Lisbon" %in% available_time_zones()
 available_time_zones <- function() {
-  rs_available_time_zones()
+  zeitig_call(rs_available_time_zones())
 }

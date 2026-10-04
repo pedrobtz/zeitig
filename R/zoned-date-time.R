@@ -64,14 +64,19 @@ zoned_date_time_parse <- function(x, disambiguation = "compatible", offset = "re
   new_zoned_fields(zeitig_call(rs_zoned_parse(unname(x), disambiguation, offset), call = call))
 }
 
-zoned_from_plain <- function(pdt, time_zone, disambiguation = "compatible", offset = NULL,
+# `reference` (zoned date-times, as in `ZonedDateTime.prototype.with()`)
+# supplies UTC offsets to reconcile with the new wall-clock times using
+# `offset_mode`; it must already have the size of `pdt`.
+zoned_from_plain <- function(pdt, time_zone, disambiguation = "compatible", reference = NULL,
                              offset_mode = "prefer", call = rlang::caller_env()) {
   check_time_zone(time_zone, call = call)
-  offset <- offset %||% NA_integer_
-  args <- vec_recycle_common(x = pdt, tz = time_zone, offset = offset, .call = call)
+  args <- vec_recycle_common(x = pdt, tz = time_zone, .call = call)
+  if (!is.null(reference)) {
+    reference <- zoned_data(reference)
+  }
   new_zoned_fields(zeitig_call(
     rs_zoned_from_civil(
-      unclass(vec_data(args$x)), args$tz, disambiguation, args$offset, offset_mode
+      unclass(vec_data(args$x)), args$tz, disambiguation, offset_mode, reference
     ),
     call = call
   ))
@@ -119,6 +124,14 @@ vec_ptype2.zeitig_zoned_date_time.zeitig_zoned_date_time <- function(x, y, ...) 
 
 #' @export
 vec_cast.zeitig_zoned_date_time.zeitig_zoned_date_time <- function(x, to, ...) x
+
+# Strings combine with (and compare against) Temporal values by parsing, as
+# character does with base R's Date.
+#' @export
+vec_ptype2.zeitig_zoned_date_time.character <- function(x, y, ...) vec_ptype(x)
+
+#' @export
+vec_ptype2.character.zeitig_zoned_date_time <- function(x, y, ...) vec_ptype(y)
 
 #' @export
 vec_cast.zeitig_zoned_date_time.character <- function(x, to, ...) zoned_date_time_parse(x)
@@ -172,14 +185,14 @@ time_zone <- function(x) {
 #' @export
 offset <- function(x) {
   check_class(x, "zeitig_zoned_date_time", "a zoned date-time")
-  zeitig_call(rs_zoned_offset(zoned_data(x)))$string
+  zeitig_call(rs_zoned_offset(zoned_data(x), TRUE))
 }
 
 #' @rdname time_zone
 #' @export
 offset_nanoseconds <- function(x) {
   check_class(x, "zeitig_zoned_date_time", "a zoned date-time")
-  zeitig_call(rs_zoned_offset(zoned_data(x)))$seconds * 1e9
+  zeitig_call(rs_zoned_offset(zoned_data(x), FALSE)) * 1e9
 }
 
 #' @rdname time_zone

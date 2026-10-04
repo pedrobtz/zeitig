@@ -59,6 +59,14 @@ obj_type_friendly <- function(x) {
 # RangeError in Temporal, so the error also has class `zeitig_range_error`.
 arg_option <- function(x, values, error_arg = rlang::caller_arg(x),
                        error_call = rlang::caller_env()) {
+  # Fast paths for the common cases (a valid value, or the untouched default
+  # vector of choices) skip arg_match() and its condition handler.
+  if (is.character(x) && length(x) == 1L && !is.na(x) && x %in% values) {
+    return(x)
+  }
+  if (identical(x, values)) {
+    return(values[[1]])
+  }
   withCallingHandlers(
     arg_match(x, values, error_arg = error_arg, error_call = error_call),
     error = function(e) {
@@ -69,9 +77,10 @@ arg_option <- function(x, values, error_arg = rlang::caller_arg(x),
 }
 
 disambiguation_values <- c("compatible", "earlier", "later", "reject")
+overflow_values <- c("constrain", "reject")
 
 arg_overflow <- function(overflow, call = rlang::caller_env()) {
-  overflow <- arg_option(overflow, c("constrain", "reject"), error_call = call)
+  overflow <- arg_option(overflow, overflow_values, error_arg = "overflow", error_call = call)
   identical(overflow, "reject")
 }
 

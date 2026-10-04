@@ -41,9 +41,10 @@ plain_date_time <- function(year, month, day, hour = 0L, minute = 0L, second = 0
     microsecond = as_int_field(microsecond),
     nanosecond = as_int_field(nanosecond)
   ))
-  date <- zeitig_call(rs_plain_date_from_parts(f$year, f$month, f$day, reject))
-  time <- plain_time_parts(f, reject)
-  new_plain_date_time_from(date, time)
+  new_plain_date_time_fields(zeitig_call(rs_plain_date_time_from_parts(
+    f$year, f$month, f$day, f$hour, f$minute, f$second, f$millisecond, f$microsecond,
+    f$nanosecond, reject
+  )))
 }
 
 plain_date_time_parse <- function(x, call = rlang::caller_env()) {
@@ -99,6 +100,14 @@ vec_ptype2.zeitig_plain_date_time.zeitig_plain_date_time <- function(x, y, ...) 
 
 #' @export
 vec_cast.zeitig_plain_date_time.zeitig_plain_date_time <- function(x, to, ...) x
+
+# Strings combine with (and compare against) Temporal values by parsing, as
+# character does with base R's Date.
+#' @export
+vec_ptype2.zeitig_plain_date_time.character <- function(x, y, ...) vec_ptype(x)
+
+#' @export
+vec_ptype2.character.zeitig_plain_date_time <- function(x, y, ...) vec_ptype(y)
 
 #' @export
 vec_cast.zeitig_plain_date_time.character <- function(x, to, ...) plain_date_time_parse(x)

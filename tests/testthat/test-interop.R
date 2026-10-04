@@ -47,3 +47,20 @@ test_that("as_*() reject unsupported inputs", {
   expect_equal(format(as_plain_time(plain_date_time("2020-01-01T10:00"))), "10:00:00")
   expect_equal(format(as_plain_date_time(plain_date(2020, 1, 1))), "2020-01-01T00:00:00")
 })
+
+test_that("plain_date_time -> POSIXct resolves DST gaps like to_zoned_date_time()", {
+  gap <- plain_date_time(c("2019-03-10T02:30", "2019-11-03T01:30", NA))
+  ct <- as.POSIXct(gap, tz = "America/New_York")
+  expect_equal(format(ct, "%H:%M %Z"), c("03:30 EDT", "01:30 EDT", NA))
+  expect_equal(
+    as.double(ct),
+    epoch_seconds(to_zoned_date_time(gap, "America/New_York"))
+  )
+  # tz = "" is the session time zone, and the attribute stays ""
+  local_tz <- as.POSIXct(plain_date_time("2020-07-01T12:00"), tz = "")
+  expect_equal(attr(local_tz, "tzone"), "")
+  expect_equal(
+    as.double(local_tz),
+    epoch_seconds(to_zoned_date_time(plain_date_time("2020-07-01T12:00"), now_time_zone()))
+  )
+})

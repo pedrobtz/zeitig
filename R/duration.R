@@ -117,15 +117,20 @@ format.zeitig_duration <- function(x, ..., fractional_second_digits = "auto",
 # unit (at least seconds; days for durations with date units), and the
 # seconds are always printed.
 duration_format_precision <- function(x, digits, round, rounding_mode) {
+  if (vec_size(x) == 0) {
+    # paste0() would recycle the empty pieces below to one string.
+    return(character())
+  }
   f <- duration_data(x)
   date_units <- c("years", "months", "weeks", "days")
-  time_units <- setdiff(duration_field_names, date_units)
-  has_date <- Reduce(`|`, lapply(f[date_units], function(v) !is.na(v) & v != 0))
-  time_largest <- vapply(seq_len(vec_size(x)), function(i) {
-    nonzero <- time_units[vapply(f[time_units], function(v) isTRUE(v[i] != 0), logical(1))]
-    sub_second <- length(nonzero) == 0 || match(nonzero[1], time_units) > 3
-    if (sub_second) "second" else sub("s$", "", nonzero[1])
-  }, character(1))
+  nonzero <- function(v) !is.na(v) & v != 0
+  has_date <- Reduce(`|`, lapply(f[date_units], nonzero))
+  # The largest non-zero time unit, at least seconds: hours, minutes or
+  # seconds, scanning from the smallest so the largest wins.
+  time_largest <- rep("second", vec_size(x))
+  for (u in c("minutes", "hours")) {
+    time_largest[nonzero(f[[u]])] <- sub("s$", "", u)
+  }
   largest <- ifelse(has_date, "day", time_largest)
   time <- duration_map(x, identity)
   for (u in date_units) vctrs::field(time, u) <- rep(0, vec_size(x))
@@ -173,6 +178,14 @@ vec_ptype2.zeitig_duration.zeitig_duration <- function(x, y, ...) {
 
 #' @export
 vec_cast.zeitig_duration.zeitig_duration <- function(x, to, ...) x
+
+# Strings combine with (and compare against) Temporal values by parsing, as
+# character does with base R's Date.
+#' @export
+vec_ptype2.zeitig_duration.character <- function(x, y, ...) vec_ptype(x)
+
+#' @export
+vec_ptype2.character.zeitig_duration <- function(x, y, ...) vec_ptype(y)
 
 #' @export
 vec_cast.zeitig_duration.character <- function(x, to, ...) duration_parse(x)
@@ -391,12 +404,12 @@ temporal_units <- c(
   "millisecond", "microsecond", "nanosecond"
 )
 
+unit_values <- c(temporal_units, paste0(temporal_units, "s"))
+unit_values_auto <- c("auto", unit_values)
+
 # Validate a unit name, accepting Temporal's plural spellings.
 arg_unit <- function(x, auto = FALSE, arg = rlang::caller_arg(x), call = rlang::caller_env()) {
-  values <- c(temporal_units, paste0(temporal_units, "s"))
-  if (auto) {
-    values <- c("auto", values)
-  }
+  values <- if (auto) unit_values_auto else unit_values
   x <- arg_option(x, values, error_arg = arg, error_call = call)
   sub("s$", "", x)
 }

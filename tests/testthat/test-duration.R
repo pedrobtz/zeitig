@@ -161,3 +161,36 @@ test_that("vctrs behaviour", {
   expect_equal(readRDS(path), x)
   expect_snapshot(duration(c("P1Y2M", "-PT1.5S", NA)))
 })
+
+test_that("temporal_with() replaces duration fields (Duration.prototype.with)", {
+  d <- duration(c("PT1H30M", "-P1D", NA))
+  expect_equal(format(temporal_with(d, minutes = 0)), c("PT1H", "-P1D", NA))
+  expect_equal(format(temporal_with(d[1:2], days = c(2, -3))), c("P2DT1H30M", "-P3D"))
+  expect_equal(format(temporal_with(d[1], hours = 1:3)), c("PT1H30M", "PT2H30M", "PT3H30M"))
+  expect_error(temporal_with(d[1], minutes = -5), class = "zeitig_range_error")
+  expect_error(temporal_with(d[1], minutes = 0.5), class = "zeitig_range_error")
+  expect_error(temporal_with(d[1], hour = 2), class = "zeitig_type_error")
+  expect_error(temporal_with(d[1], 2), class = "zeitig_type_error")
+})
+
+test_that("errors use zeitig's names, not jiff's Rust types", {
+  msg <- function(expr) tryCatch(expr, zeitig_error = conditionMessage)
+  m <- msg(duration_total(duration(months = 1), "day"))
+  expect_match(m, "requires `relative_to`", fixed = TRUE)
+  expect_no_match(m, "jiff::", fixed = TRUE)
+  m <- msg(summary(duration(months = 1:3)))
+  expect_no_match(m, "jiff::", fixed = TRUE)
+  m <- msg(instant("2020-01-01T00:00Z") + duration(days = 1))
+  expect_match(m, "instants and plain times have no calendar", fixed = TRUE)
+  m <- msg(plain_date("2020-01-01T00:00Z"))
+  expect_no_match(m, "jiff::", fixed = TRUE)
+})
+
+test_that("format() with a fixed precision keeps the duration's largest unit", {
+  d <- duration(c("PT1H", "P1DT0.0005S", "PT90M", "PT0.25S", "-PT2M3.5S", NA))
+  expect_equal(
+    format(d, fractional_second_digits = 3, rounding_mode = "halfExpand"),
+    c("PT1H0.000S", "P1DT0.001S", "PT90M0.000S", "PT0.250S", "-PT2M3.500S", NA)
+  )
+  expect_equal(format(d[0], fractional_second_digits = 1), character())
+})

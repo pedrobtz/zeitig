@@ -49,11 +49,12 @@ nanosecond.
 The reverse conversions use base generics: \code{\link[=as.Date]{as.Date()}} for plain dates,
 plain date-times and zoned date-times (wall-clock date), and
 \code{\link[=as.POSIXct]{as.POSIXct()}} / \code{\link[=as.POSIXlt]{as.POSIXlt()}}. For plain date-times these interpret the
-wall-clock time in \code{tz} (UTC by default; local times in DST gaps are
-resolved by the operating system). Instants and zoned date-times convert
-exactly up to the microsecond; zoned date-times keep their time zone when
-all elements share one IANA zone and \code{tz} is not given, otherwise \code{tz}
-(default UTC) is used.
+wall-clock time in \code{tz} (UTC by default; \code{""} is the session time zone,
+see \code{\link[=now_time_zone]{now_time_zone()}}); local times in a DST gap or overlap are resolved
+with \code{disambiguation = "compatible"}, as \code{\link[=to_zoned_date_time]{to_zoned_date_time()}} does.
+Instants and zoned date-times convert exactly up to the microsecond; zoned
+date-times keep their time zone when all elements share one IANA zone and
+\code{tz} is not given, otherwise \code{tz} (default UTC) is used.
 }
 \examples{
 as_plain_date(as.Date("2020-02-29"))
