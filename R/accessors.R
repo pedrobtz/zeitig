@@ -46,8 +46,10 @@ date_field <- function(x, field, call = rlang::caller_env()) {
 
 time_field <- function(x, field, call = rlang::caller_env()) {
   f <- civil_time_fields(x, arg = "x", call = call)
-  sod <- f$second_of_day
-  ns <- f$nanos
+  time_part(f$second_of_day, f$nanos, field)
+}
+
+time_part <- function(sod, ns, field) {
   switch(field,
     hour = sod %/% 3600L,
     minute = sod %/% 60L %% 60L,
@@ -57,6 +59,8 @@ time_field <- function(x, field, call = rlang::caller_env()) {
     nanosecond = ns %% 1000L
   )
 }
+
+time_part_names <- c("hour", "minute", "second", "millisecond", "microsecond", "nanosecond")
 
 #' Date and time fields
 #'
@@ -180,21 +184,23 @@ temporal_fields <- function(x) {
   if (is_duration(x)) {
     return(new_data_frame(duration_data(x), n = vec_size(x)))
   }
-  out <- list()
-  if (is_plain_date(x) || is_plain_date_time(x) || is_zoned_date_time(x)) {
-    out <- c(out, civil_date_fields(x))
-  }
-  if (is_plain_time(x) || is_plain_date_time(x) || is_zoned_date_time(x)) {
-    out <- c(out, lapply(
-      c(
-        hour = "hour", minute = "minute", second = "second", millisecond = "millisecond",
-        microsecond = "microsecond", nanosecond = "nanosecond"
-      ),
-      function(field) time_field(x, field)
-    ))
-  }
-  if (length(out) == 0) {
+  has_date <- is_plain_date(x) || is_plain_date_time(x) || is_zoned_date_time(x)
+  has_time <- is_plain_time(x) || is_plain_date_time(x) || is_zoned_date_time(x)
+  if (!has_date && !has_time) {
     zeitig_type_error(sprintf("`x` must be a Temporal object, not %s.", obj_type_friendly(x)))
+  }
+  # One call into Rust for the wall clock of a zoned date-time, shared by all
+  # the fields.
+  f <- if (is_zoned_date_time(x)) zoned_civil(x) else vec_data(x)
+  out <- list()
+  if (has_date) {
+    out <- f[c("year", "month", "day")]
+  }
+  if (has_time) {
+    parts <- lapply(time_part_names, function(field) {
+      time_part(f$second_of_day, f$nanos, field)
+    })
+    out <- c(out, stats::setNames(parts, time_part_names))
   }
   new_data_frame(out, n = vec_size(x))
 }

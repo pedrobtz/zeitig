@@ -29,7 +29,9 @@ instant <- function(x) {
 #' @param seconds,milliseconds,nanoseconds Exactly one of these: numbers of
 #'   units since the epoch, or for `nanoseconds` also a character vector of
 #'   integers. Fractional seconds are rounded to the microsecond; fractional
-#'   milliseconds and nanoseconds are truncated.
+#'   milliseconds and nanoseconds are truncated. Numeric `nanoseconds` beyond
+#'   2^53 in absolute value are an error, because a double cannot hold them
+#'   exactly; give them as strings.
 #' @export
 instant_from_epoch <- function(seconds = NULL, milliseconds = NULL, nanoseconds = NULL) {
   given <- !vapply(list(seconds, milliseconds, nanoseconds), is.null, logical(1))
@@ -38,6 +40,16 @@ instant_from_epoch <- function(seconds = NULL, milliseconds = NULL, nanoseconds 
   }
   if (!is.null(nanoseconds)) {
     if (is.numeric(nanoseconds)) {
+      big <- !is.na(nanoseconds) & abs(nanoseconds) > 2^53
+      if (any(big)) {
+        zeitig_range_error(sprintf(
+          paste(
+            "`nanoseconds` must be at most 2^53 in absolute value when numeric",
+            "(element %d); give larger values as strings."
+          ),
+          which(big)[[1]]
+        ))
+      }
       nanoseconds <- ifelse(is.na(nanoseconds), NA_character_, format(
         trunc(nanoseconds),
         scientific = FALSE, trim = TRUE
@@ -163,6 +175,14 @@ vec_ptype2.zeitig_instant.zeitig_instant <- function(x, y, ...) {
 
 #' @export
 vec_cast.zeitig_instant.zeitig_instant <- function(x, to, ...) x
+
+# Strings combine with (and compare against) Temporal values by parsing, as
+# character does with base R's Date.
+#' @export
+vec_ptype2.zeitig_instant.character <- function(x, y, ...) vec_ptype(x)
+
+#' @export
+vec_ptype2.character.zeitig_instant <- function(x, y, ...) vec_ptype(y)
 
 #' @export
 vec_cast.zeitig_instant.character <- function(x, to, ...) instant(x)

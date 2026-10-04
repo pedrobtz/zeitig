@@ -114,11 +114,12 @@ to_zoned_date_time <- function(x, time_zone, time = NULL,
 #' The reverse conversions use base generics: [as.Date()] for plain dates,
 #' plain date-times and zoned date-times (wall-clock date), and
 #' [as.POSIXct()] / [as.POSIXlt()]. For plain date-times these interpret the
-#' wall-clock time in `tz` (UTC by default; local times in DST gaps are
-#' resolved by the operating system). Instants and zoned date-times convert
-#' exactly up to the microsecond; zoned date-times keep their time zone when
-#' all elements share one IANA zone and `tz` is not given, otherwise `tz`
-#' (default UTC) is used.
+#' wall-clock time in `tz` (UTC by default; `""` is the session time zone,
+#' see [now_time_zone()]); local times in a DST gap or overlap are resolved
+#' with `disambiguation = "compatible"`, as [to_zoned_date_time()] does.
+#' Instants and zoned date-times convert exactly up to the microsecond; zoned
+#' date-times keep their time zone when all elements share one IANA zone and
+#' `tz` is not given, otherwise `tz` (default UTC) is used.
 #'
 #' @param x An object to convert.
 #' @param ... Passed on to methods.
@@ -344,9 +345,8 @@ as.POSIXlt.zeitig_zoned_date_time <- function(x, tz = NULL, ...) {
 
 #' @export
 as.POSIXct.zeitig_plain_date_time <- function(x, tz = "UTC", ...) {
-  f <- temporal_fields(x)
-  sec <- f$second + (f$millisecond * 1e6 + f$microsecond * 1e3 + f$nanosecond) / 1e9
-  ISOdatetime(f$year, f$month, f$day, f$hour, f$minute, sec, tz = tz)
+  zone <- if (identical(tz, "")) default_time_zone() else tz
+  as.POSIXct(to_instant(zoned_from_plain(x, zone, "compatible")), tz = tz)
 }
 
 #' @export

@@ -4,81 +4,73 @@ use jiff::civil::DateTime;
 use jiff::fmt::temporal::SpanParser;
 use jiff::{RoundMode, SpanCompare, SpanRelativeTo, SpanRound, SpanTotal, Unit, Zoned};
 use savvy::{
-    savvy, IntegerSexp, ListSexp, OwnedIntegerSexp, OwnedListSexp, OwnedRealSexp, OwnedStringSexp,
-    StringSexp, TypedSexp,
+    savvy, ListSexp, OwnedIntegerSexp, OwnedListSexp, OwnedRealSexp, OwnedStringSexp, StringSexp,
 };
 
-use crate::arith::unit_value;
-use crate::cols::{common_len, elt_error, DateTimeIn, DurationIn, DurationOut, ZonedIn};
+use crate::arith::{half_even, unit_value};
+use crate::cols::{
+    common_len, elt_error, DateTimeCols, DateTimeIn, DurationCols, DurationOut, ZonedCols, ZonedIn,
+};
 use crate::opts::{increment_i64, parse_round_mode, parse_unit, parse_unit_auto};
 use crate::tz::TzCache;
 
 static SPAN_PARSER: SpanParser = SpanParser::new();
 
-/// The five integer columns of a plain date-time record.
-pub(crate) struct DateTimeCols([IntegerSexp; 5]);
-
-impl DateTimeCols {
-    pub(crate) fn new(x: &ListSexp) -> savvy::Result<Self> {
-        let mut cols = Vec::with_capacity(5);
-        for k in 0..5 {
-            match x.get_by_index(k).map(|s| s.into_typed()) {
-                Some(TypedSexp::Integer(v)) => cols.push(v),
-                _ => {
-                    return Err(savvy::Error::new(
-                        "internal error: date-time fields must be integer vectors",
-                    ))
-                }
-            }
-        }
-        let cols: [IntegerSexp; 5] = cols
-            .try_into()
-            .map_err(|_| savvy::Error::new("internal error: expected five columns"))?;
-        Ok(Self(cols))
-    }
-
-    pub(crate) fn reader(&self) -> savvy::Result<DateTimeIn<'_>> {
-        let c = &self.0;
-        DateTimeIn::new(&c[0], &c[1], &c[2], &c[3], &c[4])
-    }
-}
-
-/// Optional `relative_to` column: plain date-times (plain dates are passed as
-/// midnight) or zoned date-times. Without it days are 24 hours and calendar
-/// units error.
+/// Optional `relative_to` columns: plain date-times (plain dates are passed
+/// as midnight) or zoned date-times. Without it days are 24 hours and
+/// calendar units error.
 pub(crate) enum Relative {
     None,
     Civil(DateTimeCols),
-    Zoned(ZonedIn, std::cell::RefCell<TzCache>),
+    Zoned(ZonedCols),
 }
 
 impl Relative {
     pub(crate) fn new(x: Option<ListSexp>) -> savvy::Result<Self> {
         Ok(match x {
             None => Relative::None,
-            Some(x) if x.len() == 3 => Relative::Zoned(ZonedIn::new(&x)?, Default::default()),
+            Some(x) if x.len() == 3 => Relative::Zoned(ZonedCols::new(&x)?),
             Some(x) => Relative::Civil(DateTimeCols::new(&x)?),
         })
     }
 
-    pub(crate) fn len(&self) -> savvy::Result<Option<usize>> {
+    /// The reader over the columns, built once per call.
+    pub(crate) fn reader(&self) -> savvy::Result<RelativeIn<'_>> {
         Ok(match self {
-            Relative::None => None,
-            Relative::Civil(c) => Some(c.reader()?.len()),
-            Relative::Zoned(z, _) => Some(z.len()),
+            Relative::None => RelativeIn::None,
+            Relative::Civil(c) => RelativeIn::Civil(c.reader()?),
+            Relative::Zoned(c) => RelativeIn::Zoned(c.reader()?, TzCache::default()),
         })
+    }
+}
+
+pub(crate) enum RelativeIn<'a> {
+    None,
+    Civil(DateTimeIn<'a>),
+    Zoned(ZonedIn<'a>, TzCache),
+}
+
+impl RelativeIn<'_> {
+    /// Errors unless the relative-to column has length `n` (when given).
+    fn check_len(&self, n: usize) -> savvy::Result<()> {
+        let m = match self {
+            RelativeIn::None => return Ok(()),
+            RelativeIn::Civil(c) => c.len(),
+            RelativeIn::Zoned(z, _) => z.len(),
+        };
+        common_len(&[n, m]).map(|_| ())
     }
 
     /// The relative-to anchor for element `i`.
-    pub(crate) fn anchor(&self, i: usize) -> savvy::Result<Anchor> {
+    pub(crate) fn anchor(&mut self, i: usize) -> savvy::Result<Anchor> {
         Ok(match self {
-            Relative::None => Anchor::DaysAre24Hours,
-            Relative::Civil(c) => match c.reader()?.get(i)? {
+            RelativeIn::None => Anchor::DaysAre24Hours,
+            RelativeIn::Civil(c) => match c.get(i)? {
                 Some(dt) => Anchor::Civil(dt),
                 None => Anchor::Missing,
             },
-            Relative::Zoned(z, cache) => match z.get(i, &mut cache.borrow_mut())? {
-                Some(z) => Anchor::Zoned(Box::new(z)),
+            RelativeIn::Zoned(z, cache) => match z.get(i, cache)? {
+                Some((z, _)) => Anchor::Zoned(Box::new(z)),
                 None => Anchor::Missing,
             },
         })
@@ -103,16 +95,10 @@ impl Anchor {
     }
 }
 
-fn check_len(n: usize, rel: &Relative) -> savvy::Result<()> {
-    if let Some(m) = rel.len()? {
-        common_len(&[n, m])?;
-    }
-    Ok(())
-}
-
 #[savvy]
 fn rs_duration_validate(x: ListSexp) -> savvy::Result<savvy::Sexp> {
-    let x = DurationIn::new(&x)?;
+    let cols = DurationCols::new(&x)?;
+    let x = cols.reader()?;
     let mut out = DurationOut::with_capacity(x.len());
     for i in 0..x.len() {
         out.push(x.get(i)?);
@@ -137,7 +123,8 @@ fn rs_duration_parse(x: StringSexp) -> savvy::Result<savvy::Sexp> {
 
 #[savvy]
 fn rs_duration_format(x: ListSexp) -> savvy::Result<savvy::Sexp> {
-    let x = DurationIn::new(&x)?;
+    let cols = DurationCols::new(&x)?;
+    let x = cols.reader()?;
     let mut out = OwnedStringSexp::new(x.len())?;
     for i in 0..x.len() {
         match x.get(i)? {
@@ -151,8 +138,8 @@ fn rs_duration_format(x: ListSexp) -> savvy::Result<savvy::Sexp> {
 // `Duration.prototype.add()`: days are 24 hours, calendar units error.
 #[savvy]
 fn rs_duration_add(x: ListSexp, y: ListSexp) -> savvy::Result<savvy::Sexp> {
-    let x = DurationIn::new(&x)?;
-    let y = DurationIn::new(&y)?;
+    let (xc, yc) = (DurationCols::new(&x)?, DurationCols::new(&y)?);
+    let (x, y) = (xc.reader()?, yc.reader()?);
     let n = common_len(&[x.len(), y.len()])?;
     let mut out = DurationOut::with_capacity(n);
     for i in 0..n {
@@ -178,9 +165,11 @@ fn rs_duration_round(
     mode: &str,
     relative: Option<ListSexp>,
 ) -> savvy::Result<savvy::Sexp> {
-    let x = DurationIn::new(&x)?;
+    let cols = DurationCols::new(&x)?;
+    let x = cols.reader()?;
     let rel = Relative::new(relative)?;
-    check_len(x.len(), &rel)?;
+    let mut rel = rel.reader()?;
+    rel.check_len(x.len())?;
     let largest = parse_unit_auto(largest)?;
     let smallest = parse_unit(smallest)?;
     let increment = increment_i64(increment)?;
@@ -204,16 +193,13 @@ fn rs_duration_round(
             span.round(opts).map_err(|e| elt_error(i, e))
         };
         // jiff sometimes resolves exact `halfEven` ties to calendar units or
-        // days to the odd neighbour; a tie is where `halfTrunc` and
-        // `halfExpand` disagree, and Temporal picks the even one.
+        // days to the odd neighbour; Temporal picks the even one.
         let rounded = if mode == RoundMode::HalfEven && smallest >= Unit::Day {
-            let (lo, hi) = (round(RoundMode::HalfTrunc)?, round(RoundMode::HalfExpand)?);
-            let even = (unit_value(&lo, smallest).abs() / increment) % 2 == 0;
-            if lo.fieldwise() == hi.fieldwise() || even {
-                lo
-            } else {
-                hi
-            }
+            half_even(
+                round,
+                |s| unit_value(s, smallest).abs() / increment,
+                |a, b| a.fieldwise() == b.fieldwise(),
+            )?
         } else {
             round(mode)?
         };
@@ -228,9 +214,11 @@ fn rs_duration_total(
     unit: &str,
     relative: Option<ListSexp>,
 ) -> savvy::Result<savvy::Sexp> {
-    let x = DurationIn::new(&x)?;
+    let cols = DurationCols::new(&x)?;
+    let x = cols.reader()?;
     let rel = Relative::new(relative)?;
-    check_len(x.len(), &rel)?;
+    let mut rel = rel.reader()?;
+    rel.check_len(x.len())?;
     let unit = parse_unit(unit)?;
     let mut out = OwnedRealSexp::new(x.len())?;
     for i in 0..x.len() {
@@ -254,11 +242,12 @@ fn rs_duration_compare(
     y: ListSexp,
     relative: Option<ListSexp>,
 ) -> savvy::Result<savvy::Sexp> {
-    let x = DurationIn::new(&x)?;
-    let y = DurationIn::new(&y)?;
+    let (xc, yc) = (DurationCols::new(&x)?, DurationCols::new(&y)?);
+    let (x, y) = (xc.reader()?, yc.reader()?);
     let n = common_len(&[x.len(), y.len()])?;
     let rel = Relative::new(relative)?;
-    check_len(n, &rel)?;
+    let mut rel = rel.reader()?;
+    rel.check_len(n)?;
     let mut out = OwnedIntegerSexp::new(n)?;
     for i in 0..n {
         let anchor = rel.anchor(i)?;
@@ -280,7 +269,8 @@ fn rs_duration_compare(
 // them needs `relative_to`.
 #[savvy]
 fn rs_duration_sort_key(x: ListSexp) -> savvy::Result<savvy::Sexp> {
-    let x = DurationIn::new(&x)?;
+    let cols = DurationCols::new(&x)?;
+    let x = cols.reader()?;
     let n = x.len();
     let mut secs = OwnedRealSexp::new(n)?;
     let mut nanos = OwnedIntegerSexp::new(n)?;

@@ -1,16 +1,47 @@
 //! Temporal `toString()` options, `strftime` and `strptime`.
 
+use std::fmt::Write as _;
+
 use jiff::civil::{Date, DateTime, Time};
-use jiff::fmt::strtime;
-use jiff::{Timestamp, Zoned};
+use jiff::fmt::strtime::{self, BrokenDownTime};
+use jiff::{RoundMode, Timestamp, Unit, Zoned};
 use savvy::{savvy, ListSexp, OwnedStringSexp, StringSexp};
 
+use crate::arith::{round_datetime, round_time};
 use crate::cols::{
-    elt_error, is_na_str, list_int, DateIn, DateOut, DateTimeOut, InstantIn, InstantOut, TimeIn,
-    TimeOut, ZonedIn, ZonedOut,
+    common_len, elt_error, str_values, DateCols, DateOut, DateTimeCols, DateTimeOut, InstantCols,
+    InstantOut, TimeCols, TimeOut, ZonedCols, ZonedOut,
 };
-use crate::duration::DateTimeCols;
-use crate::tz::{format_offset, TzCache};
+use crate::opts::{increment_i64, parse_round_mode, parse_unit};
+use crate::tz::{db, format_offset, time_zone_id, TzCache};
+use crate::zoned::{instant_round_opts, round_zoned};
+
+/// The record layout of a Temporal type, as named by the R callers.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Kind {
+    PlainDate,
+    PlainTime,
+    PlainDateTime,
+    Instant,
+    Zoned,
+}
+
+impl Kind {
+    fn parse(x: &str) -> savvy::Result<Self> {
+        Ok(match x {
+            "plain_date" => Kind::PlainDate,
+            "plain_time" => Kind::PlainTime,
+            "plain_date_time" => Kind::PlainDateTime,
+            "instant" => Kind::Instant,
+            "zoned_date_time" => Kind::Zoned,
+            _ => {
+                return Err(savvy::Error::new(format!(
+                    "internal error: unknown kind '{x}'"
+                )))
+            }
+        })
+    }
+}
 
 /// Options of Temporal's `toString()`, already validated in R.
 #[derive(Clone, Copy)]
@@ -45,8 +76,8 @@ impl FormatOpts {
         offset: &str,
         time_zone_name: &str,
         calendar_name: &str,
-    ) -> savvy::Result<Self> {
-        Ok(Self {
+    ) -> Self {
+        Self {
             digits: if (0..=9).contains(&digits) {
                 Some(digits as u8)
             } else {
@@ -64,7 +95,7 @@ impl FormatOpts {
                 "critical" => 2,
                 _ => 0,
             },
-        })
+        }
     }
 
     fn calendar(&self) -> &'static str {
@@ -76,88 +107,243 @@ impl FormatOpts {
     }
 }
 
-pub(crate) fn fmt_time(t: Time, o: &FormatOpts) -> String {
-    let mut s = format!("{:02}:{:02}", t.hour(), t.minute());
+/// The rounding `toString()` applies before printing a fixed precision.
+#[derive(Clone, Copy)]
+pub(crate) struct Rounding {
+    unit: Unit,
+    increment: i64,
+    mode: RoundMode,
+}
+
+// The writers below append to a buffer that is reused for every element, so
+// formatting allocates nothing per element. Writing to a `String` cannot
+// fail, hence the ignored `fmt::Result`s.
+
+pub(crate) fn write_time(buf: &mut String, t: Time, o: &FormatOpts) {
+    let _ = write!(buf, "{:02}:{:02}", t.hour(), t.minute());
     if o.minute {
-        return s;
+        return;
     }
-    s.push_str(&format!(":{:02}", t.second()));
+    let _ = write!(buf, ":{:02}", t.second());
     let ns = t.subsec_nanosecond();
     match o.digits {
         None => {
             if ns != 0 {
-                let frac = format!("{ns:09}");
-                s.push('.');
-                s.push_str(frac.trim_end_matches('0'));
+                let _ = write!(buf, ".{ns:09}");
+                let trimmed = buf.trim_end_matches('0').len();
+                buf.truncate(trimmed);
             }
         }
         Some(0) => {}
         Some(n) => {
-            let frac = format!("{ns:09}");
-            s.push('.');
-            s.push_str(&frac[..n as usize]);
+            let start = buf.len();
+            let _ = write!(buf, ".{ns:09}");
+            buf.truncate(start + 1 + n as usize);
         }
     }
-    s
 }
 
-pub(crate) fn fmt_date(d: Date, o: &FormatOpts) -> String {
-    format!("{d}{}", o.calendar())
+pub(crate) fn write_date(buf: &mut String, d: Date, o: &FormatOpts) {
+    let _ = write!(buf, "{d}");
+    buf.push_str(o.calendar());
 }
 
-pub(crate) fn fmt_datetime(dt: DateTime, o: &FormatOpts) -> String {
-    format!("{}T{}{}", dt.date(), fmt_time(dt.time(), o), o.calendar())
+pub(crate) fn write_datetime(buf: &mut String, dt: DateTime, o: &FormatOpts) {
+    let _ = write!(buf, "{}T", dt.date());
+    write_time(buf, dt.time(), o);
+    buf.push_str(o.calendar());
 }
 
-pub(crate) fn fmt_zoned(z: &Zoned, id: &str, o: &FormatOpts) -> String {
+pub(crate) fn write_zoned(buf: &mut String, z: &Zoned, id: &str, o: &FormatOpts) {
     let dt = z.datetime();
-    let mut s = format!("{}T{}", dt.date(), fmt_time(dt.time(), o));
+    let _ = write!(buf, "{}T", dt.date());
+    write_time(buf, dt.time(), o);
     if o.offset {
-        s.push_str(&format_offset(z.offset().seconds()));
+        buf.push_str(&format_offset(z.offset().seconds()));
     }
     match o.time_zone_name {
-        1 => s.push_str(&format!("[{id}]")),
-        2 => s.push_str(&format!("[!{id}]")),
+        1 => {
+            let _ = write!(buf, "[{id}]");
+        }
+        2 => {
+            let _ = write!(buf, "[!{id}]");
+        }
         _ => {}
     }
-    s.push_str(o.calendar());
-    s
+    buf.push_str(o.calendar());
 }
 
 /// Temporal `Instant.prototype.toString()`: UTC with `Z`, or the wall clock
 /// and offset in `tz` when one is given (no annotation).
-pub(crate) fn fmt_instant(t: Timestamp, tz: Option<&Zoned>, o: &FormatOpts) -> String {
+pub(crate) fn write_instant(buf: &mut String, t: Timestamp, tz: Option<&Zoned>, o: &FormatOpts) {
     match tz {
         None => {
             let dt = t.to_zoned(jiff::tz::TimeZone::UTC).datetime();
-            format!("{}T{}Z", dt.date(), fmt_time(dt.time(), o))
+            let _ = write!(buf, "{}T", dt.date());
+            write_time(buf, dt.time(), o);
+            buf.push('Z');
         }
         Some(z) => {
             let dt = z.datetime();
-            format!(
-                "{}T{}{}",
-                dt.date(),
-                fmt_time(dt.time(), o),
-                format_offset(z.offset().seconds())
-            )
+            let _ = write!(buf, "{}T", dt.date());
+            write_time(buf, dt.time(), o);
+            buf.push_str(&format_offset(z.offset().seconds()));
         }
     }
 }
 
-fn strings(v: Vec<Option<String>>) -> savvy::Result<savvy::Sexp> {
-    let mut out = OwnedStringSexp::new(v.len())?;
-    for (i, s) in v.iter().enumerate() {
-        match s {
-            Some(s) => out.set_elt(i, s)?,
-            None => out.set_na(i)?,
+#[cfg(test)]
+fn fmt_with(f: impl FnOnce(&mut String)) -> String {
+    let mut s = String::new();
+    f(&mut s);
+    s
+}
+
+/// Formats every element of a record with `o`, after `round` when given.
+/// `time_zone` (instants only, same length as `x`) prints the wall clock in
+/// that zone.
+fn format_records(
+    x: &ListSexp,
+    kind: Kind,
+    o: &FormatOpts,
+    round: Option<Rounding>,
+    time_zone: Option<&StringSexp>,
+) -> savvy::Result<savvy::Sexp> {
+    let mut buf = String::with_capacity(64);
+    macro_rules! each {
+        ($n:expr, |$i:ident, $buf:ident| $body:block) => {{
+            let n = $n;
+            let mut out = OwnedStringSexp::new(n)?;
+            for $i in 0..n {
+                buf.clear();
+                let $buf = &mut buf;
+                let written: bool = $body;
+                if written {
+                    out.set_elt($i, $buf)?;
+                } else {
+                    out.set_na($i)?;
+                }
+            }
+            Ok(out.into())
+        }};
+    }
+    let rerr = |i: usize| move |e: jiff::Error| elt_error(i, e);
+    match kind {
+        Kind::PlainDate => {
+            let cols = DateCols::new(x)?;
+            let r = cols.reader()?;
+            each!(r.len(), |i, b| {
+                match r.get(i)? {
+                    Some(d) => {
+                        write_date(b, d, o);
+                        true
+                    }
+                    None => false,
+                }
+            })
+        }
+        Kind::PlainTime => {
+            let cols = TimeCols::new(x)?;
+            let r = cols.reader()?;
+            each!(r.len(), |i, b| {
+                match r.get(i)? {
+                    Some(t) => {
+                        let t = match round {
+                            Some(p) => {
+                                round_time(t, p.unit, p.increment, p.mode).map_err(rerr(i))?
+                            }
+                            None => t,
+                        };
+                        write_time(b, t, o);
+                        b.push_str(o.calendar());
+                        true
+                    }
+                    None => false,
+                }
+            })
+        }
+        Kind::PlainDateTime => {
+            let cols = DateTimeCols::new(x)?;
+            let r = cols.reader()?;
+            each!(r.len(), |i, b| {
+                match r.get(i)? {
+                    Some(dt) => {
+                        let dt = match round {
+                            Some(p) => {
+                                round_datetime(dt, p.unit, p.increment, p.mode).map_err(rerr(i))?
+                            }
+                            None => dt,
+                        };
+                        write_datetime(b, dt, o);
+                        true
+                    }
+                    None => false,
+                }
+            })
+        }
+        Kind::Instant => {
+            let cols = InstantCols::new(x)?;
+            let r = cols.reader()?;
+            let tz = time_zone.map(str_values);
+            if let Some(tz) = &tz {
+                common_len(&[r.len(), tz.len()])?;
+            }
+            let opts = round.map(|p| instant_round_opts(p.unit, p.increment, p.mode));
+            let mut cache = TzCache::default();
+            each!(r.len(), |i, b| {
+                match r.get(i)? {
+                    Some(t) => {
+                        let t = match opts {
+                            Some(opts) => t.round(opts).map_err(rerr(i))?,
+                            None => t,
+                        };
+                        match tz.as_ref().and_then(|tz| tz[i]) {
+                            Some(id) => {
+                                let zone = cache.get(i, id)?.tz.clone();
+                                write_instant(b, t, Some(&t.to_zoned(zone)), o);
+                            }
+                            None => write_instant(b, t, None, o),
+                        }
+                        true
+                    }
+                    None => false,
+                }
+            })
+        }
+        Kind::Zoned => {
+            let cols = ZonedCols::new(x)?;
+            let r = cols.reader()?;
+            let mut cache = TzCache::default();
+            each!(r.len(), |i, b| {
+                match r.get(i, &mut cache)? {
+                    Some((z, id)) => {
+                        let z = match round {
+                            Some(p) => {
+                                round_zoned(&z, p.unit, p.increment, p.mode).map_err(rerr(i))?
+                            }
+                            None => z,
+                        };
+                        write_zoned(b, &z, &id, o);
+                        true
+                    }
+                    None => false,
+                }
+            })
         }
     }
-    Ok(out.into())
+}
+
+/// `toString()` with default options.
+pub(crate) fn format_default(x: &ListSexp, kind: Kind) -> savvy::Result<savvy::Sexp> {
+    format_records(x, kind, &FormatOpts::default(), None, None)
 }
 
 // Formats any Temporal record with `toString()` options. `kind` names the
 // record layout: "plain_date", "plain_time", "plain_date_time", "instant",
-// "zoned_date_time". `time_zone` (instants only) may be NA per element.
+// "zoned_date_time". When `round_unit` is not empty, each value is first
+// rounded to `round_increment` `round_unit`s with `round_mode` (Temporal
+// rounds before printing a fixed precision). `time_zone` (instants only) is
+// either NULL or a character vector as long as `x`, NA for UTC.
 #[savvy]
 #[allow(clippy::too_many_arguments)]
 fn rs_format(
@@ -168,164 +354,97 @@ fn rs_format(
     offset: &str,
     time_zone_name: &str,
     calendar_name: &str,
-    time_zone: StringSexp,
+    round_unit: &str,
+    round_increment: f64,
+    round_mode: &str,
+    time_zone: Option<StringSexp>,
 ) -> savvy::Result<savvy::Sexp> {
-    let o = FormatOpts::from_r(digits, minute, offset, time_zone_name, calendar_name)?;
-    let mut out = Vec::new();
-    match kind {
-        "plain_date" => {
-            let (y, m, d) = (int_sexp(&x, 0)?, int_sexp(&x, 1)?, int_sexp(&x, 2)?);
-            let r = DateIn::new(&y, &m, &d)?;
-            for i in 0..r.len() {
-                out.push(r.get(i)?.map(|v| fmt_date(v, &o)));
-            }
-        }
-        "plain_time" => {
-            let (s, n) = (int_sexp(&x, 0)?, int_sexp(&x, 1)?);
-            let r = TimeIn::new(&s, &n)?;
-            for i in 0..r.len() {
-                out.push(
-                    r.get(i)?
-                        .map(|v| format!("{}{}", fmt_time(v, &o), o.calendar())),
-                );
-            }
-        }
-        "plain_date_time" => {
-            let cols = DateTimeCols::new(&x)?;
-            let r = cols.reader()?;
-            for i in 0..r.len() {
-                out.push(r.get(i)?.map(|v| fmt_datetime(v, &o)));
-            }
-        }
-        "instant" => {
-            let r = InstantIn::new(&x)?;
-            let tz: Vec<&str> = time_zone.iter().collect();
-            let mut cache = TzCache::default();
-            for i in 0..r.len() {
-                let Some(t) = r.get(i)? else {
-                    out.push(None);
-                    continue;
-                };
-                let id = tz
-                    .get(i % tz.len().max(1))
-                    .copied()
-                    .filter(|s| !is_na_str(s));
-                match id {
-                    Some(id) => {
-                        let zone = cache.get(i, id)?.0.clone();
-                        out.push(Some(fmt_instant(t, Some(&t.to_zoned(zone)), &o)));
-                    }
-                    None => out.push(Some(fmt_instant(t, None, &o))),
-                }
-            }
-        }
-        "zoned_date_time" => {
-            let r = ZonedIn::new(&x)?;
-            let mut cache = TzCache::default();
-            for i in 0..r.len() {
-                match r.get(i, &mut cache)? {
-                    Some(z) => {
-                        let id = crate::tz::time_zone_id(z.time_zone());
-                        out.push(Some(fmt_zoned(&z, &id, &o)));
-                    }
-                    None => out.push(None),
-                }
-            }
-        }
-        _ => {
-            return Err(savvy::Error::new(format!(
-                "internal error: unknown kind '{kind}'"
-            )))
-        }
-    }
-    strings(out)
+    let kind = Kind::parse(kind)?;
+    let o = FormatOpts::from_r(digits, minute, offset, time_zone_name, calendar_name);
+    let round = if round_unit.is_empty() || kind == Kind::PlainDate {
+        None
+    } else {
+        Some(Rounding {
+            unit: parse_unit(round_unit)?,
+            increment: increment_i64(round_increment)?,
+            mode: parse_round_mode(round_mode)?,
+        })
+    };
+    format_records(&x, kind, &o, round, time_zone.as_ref())
 }
 
-fn int_sexp(x: &ListSexp, k: usize) -> savvy::Result<savvy::IntegerSexp> {
-    let v = list_int(x, k)?;
-    Ok(savvy::OwnedIntegerSexp::try_from_slice(v)?.as_read_only())
-}
-
+// `format` must be as long as `x` (R recycles); NA formats give NA.
 #[savvy]
 fn rs_strftime(x: ListSexp, kind: &str, format: StringSexp) -> savvy::Result<savvy::Sexp> {
-    let fmts: Vec<&str> = format.iter().collect();
-    if fmts.is_empty() {
-        return Err(savvy::Error::new("`format` must not be empty"));
-    }
-    let fmt_at = |i: usize| fmts[i % fmts.len()];
-    let mut out = Vec::new();
-    macro_rules! each {
-        ($len:expr, $get:expr) => {
-            for i in 0..$len {
-                let f = fmt_at(i);
-                match $get(i)? {
-                    Some(v) if !is_na_str(f) => {
-                        out.push(Some(strtime::format(f, v).map_err(|e| elt_error(i, e))?))
-                    }
-                    _ => out.push(None),
+    let fmts = str_values(&format);
+    let mut buf = String::with_capacity(64);
+    let mut write =
+        |out: &mut OwnedStringSexp, i: usize, tm: Option<BrokenDownTime>| -> savvy::Result<()> {
+            match (tm, fmts[i]) {
+                (Some(tm), Some(f)) => {
+                    buf.clear();
+                    tm.format(f, &mut buf).map_err(|e| elt_error(i, e))?;
+                    out.set_elt(i, &buf)?;
                 }
+                _ => out.set_na(i)?,
             }
+            Ok(())
         };
+    macro_rules! each {
+        ($len:expr, |$i:ident| $get:expr) => {{
+            let n = common_len(&[$len, fmts.len()])?;
+            let mut out = OwnedStringSexp::new(n)?;
+            for $i in 0..n {
+                let tm = $get.map(BrokenDownTime::from);
+                write(&mut out, $i, tm)?;
+            }
+            Ok(out.into())
+        }};
     }
-    match kind {
-        "plain_date" => {
-            let (y, m, d) = (int_sexp(&x, 0)?, int_sexp(&x, 1)?, int_sexp(&x, 2)?);
-            let r = DateIn::new(&y, &m, &d)?;
-            each!(r.len(), |i| r.get(i));
+    match Kind::parse(kind)? {
+        Kind::PlainDate => {
+            let cols = DateCols::new(&x)?;
+            let r = cols.reader()?;
+            each!(r.len(), |i| r.get(i)?)
         }
-        "plain_time" => {
-            let (s, n) = (int_sexp(&x, 0)?, int_sexp(&x, 1)?);
-            let r = TimeIn::new(&s, &n)?;
-            each!(r.len(), |i| r.get(i));
+        Kind::PlainTime => {
+            let cols = TimeCols::new(&x)?;
+            let r = cols.reader()?;
+            each!(r.len(), |i| r.get(i)?)
         }
-        "plain_date_time" => {
+        Kind::PlainDateTime => {
             let cols = DateTimeCols::new(&x)?;
             let r = cols.reader()?;
-            each!(r.len(), |i| r.get(i));
+            each!(r.len(), |i| r.get(i)?)
         }
-        "instant" => {
-            let r = InstantIn::new(&x)?;
-            each!(r.len(), |i| r.get(i));
+        Kind::Instant => {
+            let cols = InstantCols::new(&x)?;
+            let r = cols.reader()?;
+            each!(r.len(), |i| r.get(i)?)
         }
-        "zoned_date_time" => {
-            let r = ZonedIn::new(&x)?;
+        Kind::Zoned => {
+            let cols = ZonedCols::new(&x)?;
+            let r = cols.reader()?;
             let mut cache = TzCache::default();
-            for i in 0..r.len() {
-                let f = fmt_at(i);
-                match r.get(i, &mut cache)? {
-                    Some(z) if !is_na_str(f) => {
-                        out.push(Some(strtime::format(f, &z).map_err(|e| elt_error(i, e))?))
-                    }
-                    _ => out.push(None),
-                }
-            }
-        }
-        _ => {
-            return Err(savvy::Error::new(format!(
-                "internal error: unknown kind '{kind}'"
-            )))
+            each!(r.len(), |i| r.get(i, &mut cache)?.map(|(z, _)| z).as_ref())
         }
     }
-    strings(out)
 }
 
+// `format` must be as long as `x` (R recycles).
 #[savvy]
 fn rs_strptime(x: StringSexp, format: StringSexp, kind: &str) -> savvy::Result<savvy::Sexp> {
-    let fmts: Vec<&str> = format.iter().collect();
-    if fmts.is_empty() {
-        return Err(savvy::Error::new("`format` must not be empty"));
-    }
-    let n = x.len();
-    let input: Vec<&str> = x.iter().collect();
-    let parsed = |i: usize| -> savvy::Result<Option<strtime::BrokenDownTime>> {
-        let (s, f) = (input[i], fmts[i % fmts.len()]);
-        if is_na_str(s) || is_na_str(f) {
-            return Ok(None);
+    let input = str_values(&x);
+    let fmts = str_values(&format);
+    let n = common_len(&[input.len(), fmts.len()])?;
+    let parsed = |i: usize| -> savvy::Result<Option<BrokenDownTime>> {
+        match (input[i], fmts[i]) {
+            (Some(s), Some(f)) => strtime::parse(f, s).map(Some).map_err(|e| elt_error(i, e)),
+            _ => Ok(None),
         }
-        strtime::parse(f, s).map(Some).map_err(|e| elt_error(i, e))
     };
-    match kind {
-        "plain_date" => {
+    match Kind::parse(kind)? {
+        Kind::PlainDate => {
             let mut out = DateOut::with_capacity(n);
             for i in 0..n {
                 out.push(match parsed(i)? {
@@ -335,7 +454,7 @@ fn rs_strptime(x: StringSexp, format: StringSexp, kind: &str) -> savvy::Result<s
             }
             out.into_sexp()
         }
-        "plain_time" => {
+        Kind::PlainTime => {
             let mut out = TimeOut::with_capacity(n);
             for i in 0..n {
                 out.push(match parsed(i)? {
@@ -345,7 +464,7 @@ fn rs_strptime(x: StringSexp, format: StringSexp, kind: &str) -> savvy::Result<s
             }
             out.into_sexp()
         }
-        "plain_date_time" => {
+        Kind::PlainDateTime => {
             let mut out = DateTimeOut::with_capacity(n);
             for i in 0..n {
                 out.push(match parsed(i)? {
@@ -355,7 +474,7 @@ fn rs_strptime(x: StringSexp, format: StringSexp, kind: &str) -> savvy::Result<s
             }
             out.into_sexp()
         }
-        "instant" => {
+        Kind::Instant => {
             let mut out = InstantOut::with_capacity(n);
             for i in 0..n {
                 out.push(match parsed(i)? {
@@ -365,20 +484,28 @@ fn rs_strptime(x: StringSexp, format: StringSexp, kind: &str) -> savvy::Result<s
             }
             out.into_sexp()
         }
-        "zoned_date_time" => {
+        Kind::Zoned => {
+            let db = db().map_err(savvy::Error::new)?;
+            let mut cache = TzCache::default();
             let mut out = ZonedOut::with_capacity(n);
             for i in 0..n {
-                let z = match parsed(i)? {
-                    Some(b) => Some(b.to_zoned().map_err(|e| elt_error(i, e))?),
-                    None => None,
+                let Some(b) = parsed(i)? else {
+                    out.push(None);
+                    continue;
                 };
-                out.push(z.as_ref());
+                let z = b.to_zoned_with(db).map_err(|e| elt_error(i, e))?;
+                // Canonical identifier, as for parsed RFC 9557 strings.
+                let id = time_zone_id(z.time_zone()).map_err(|e| elt_error(i, e))?;
+                let r = cache.get(i, &id)?;
+                let z = if r.tz == *z.time_zone() {
+                    z
+                } else {
+                    z.with_time_zone(r.tz.clone())
+                };
+                out.push(Some((&z, &r.id)));
             }
             out.into_sexp()
         }
-        _ => Err(savvy::Error::new(format!(
-            "internal error: unknown kind '{kind}'"
-        ))),
     }
 }
 
@@ -394,19 +521,23 @@ mod tests {
         let o = FormatOpts::default();
         for ns in [0, 1, 500_000_000, 123_456_789, 100] {
             let t = time(1, 2, 3, ns);
-            assert_eq!(fmt_time(t, &o), t.to_string());
+            assert_eq!(fmt_with(|b| write_time(b, t, &o)), t.to_string());
             let dt = date(2020, 2, 29).to_datetime(t);
-            assert_eq!(fmt_datetime(dt, &o), dt.to_string());
+            assert_eq!(fmt_with(|b| write_datetime(b, dt, &o)), dt.to_string());
             for tz in ["America/New_York", "UTC", "Asia/Kolkata"] {
                 let z = dt.to_zoned(TimeZone::get(tz).unwrap()).unwrap();
-                assert_eq!(fmt_zoned(&z, tz, &o), z.to_string());
+                assert_eq!(fmt_with(|b| write_zoned(b, &z, tz, &o)), z.to_string());
             }
             let fixed = dt.to_zoned(TimeZone::fixed(jiff::tz::offset(-8))).unwrap();
-            assert_eq!(fmt_zoned(&fixed, "-08:00", &o), fixed.to_string());
+            assert_eq!(
+                fmt_with(|b| write_zoned(b, &fixed, "-08:00", &o)),
+                fixed.to_string()
+            );
             let ts = dt.to_zoned(TimeZone::UTC).unwrap().timestamp();
-            assert_eq!(fmt_instant(ts, None, &o), ts.to_string());
+            assert_eq!(fmt_with(|b| write_instant(b, ts, None, &o)), ts.to_string());
         }
-        assert_eq!(fmt_date(date(-5, 1, 1), &o), date(-5, 1, 1).to_string());
+        let d = date(-5, 1, 1);
+        assert_eq!(fmt_with(|b| write_date(b, d, &o)), d.to_string());
     }
 
     #[test]
@@ -417,9 +548,18 @@ mod tests {
             minute,
             ..FormatOpts::default()
         };
-        assert_eq!(fmt_time(t, &o(Some(0), false)), "15:23:30");
-        assert_eq!(fmt_time(t, &o(Some(4), false)), "15:23:30.1200");
-        assert_eq!(fmt_time(t, &o(None, true)), "15:23");
+        let ft = |o: FormatOpts| fmt_with(|b| write_time(b, t, &o));
+        assert_eq!(ft(o(Some(0), false)), "15:23:30");
+        assert_eq!(ft(o(Some(4), false)), "15:23:30.1200");
+        assert_eq!(ft(o(Some(9), false)), "15:23:30.120000000");
+        assert_eq!(ft(o(None, true)), "15:23");
+        // the buffer is reused: trimming must not eat earlier zeros
+        let mut b = String::from("2020-10-10T");
+        write_time(&mut b, time(10, 0, 0, 500_000_000), &o(None, false));
+        assert_eq!(b, "2020-10-10T10:00:00.5");
+        let mut b = String::from("2020-10-10T");
+        write_time(&mut b, time(10, 0, 0, 0), &o(None, false));
+        assert_eq!(b, "2020-10-10T10:00:00");
         let z = date(2020, 1, 1)
             .to_datetime(t)
             .to_zoned(TimeZone::get("Europe/Paris").unwrap())
@@ -431,14 +571,14 @@ mod tests {
             ..FormatOpts::default()
         };
         assert_eq!(
-            fmt_zoned(&z, "Europe/Paris", &opts),
+            fmt_with(|b| write_zoned(b, &z, "Europe/Paris", &opts)),
             "2020-01-01T15:23:30.12[!Europe/Paris][u-ca=iso8601]"
         );
         opts.time_zone_name = 0;
         opts.calendar_name = 0;
         opts.offset = true;
         assert_eq!(
-            fmt_zoned(&z, "Europe/Paris", &opts),
+            fmt_with(|b| write_zoned(b, &z, "Europe/Paris", &opts)),
             "2020-01-01T15:23:30.12+01:00"
         );
     }

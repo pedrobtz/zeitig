@@ -18,7 +18,9 @@ is_instant(x)
 \item{seconds, milliseconds, nanoseconds}{Exactly one of these: numbers of
 units since the epoch, or for \code{nanoseconds} also a character vector of
 integers. Fractional seconds are rounded to the microsecond; fractional
-milliseconds and nanoseconds are truncated.}
+milliseconds and nanoseconds are truncated. Numeric \code{nanoseconds} beyond
+2^53 in absolute value are an error, because a double cannot hold them
+exactly; give them as strings.}
 }
 \value{
 A \code{zeitig_instant} vector.

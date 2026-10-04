@@ -54,25 +54,17 @@ format_options <- function(x, kind, fractional_second_digits = "auto", smallest_
     error_call = call
   )
   p <- format_precision(fractional_second_digits, smallest_unit, call = call)
-  digits <- p$digits
-  minute <- p$minute
-  round <- p$round
-  if (!is.null(round) && kind != "plain_date") {
-    x <- temporal_round(
-      x, round$unit,
-      rounding_increment = round$increment, rounding_mode = rounding_mode
-    )
-  }
-  if (is.null(time_zone)) {
-    time_zone <- NA_character_
-  } else {
+  if (!is.null(time_zone)) {
     check_time_zone(time_zone, call = call)
     time_zone <- vec_recycle(time_zone, vec_size(x), call = call)
   }
-  fields <- unclass(vec_data(x))
+  # Rounding to the requested precision happens in Rust, in the same pass as
+  # the formatting.
+  round <- p$round %||% list(unit = "", increment = 1)
   zeitig_call(
     rs_format(
-      fields, kind, digits, minute, offset, time_zone_name, calendar_name, time_zone
+      unclass(vec_data(x)), kind, p$digits, p$minute, offset, time_zone_name, calendar_name,
+      round$unit, round$increment, rounding_mode, time_zone
     ),
     call = call
   )

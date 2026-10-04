@@ -83,8 +83,8 @@ NULL
 }
 
 
-`rs_format` <- function(`x`, `kind`, `digits`, `minute`, `offset`, `time_zone_name`, `calendar_name`, `time_zone`) {
-  .Call(savvy_rs_format__impl, `x`, `kind`, `digits`, `minute`, `offset`, `time_zone_name`, `calendar_name`, `time_zone`)
+`rs_format` <- function(`x`, `kind`, `digits`, `minute`, `offset`, `time_zone_name`, `calendar_name`, `round_unit`, `round_increment`, `round_mode`, `time_zone` = NULL) {
+  .Call(savvy_rs_format__impl, `x`, `kind`, `digits`, `minute`, `offset`, `time_zone_name`, `calendar_name`, `round_unit`, `round_increment`, `round_mode`, `time_zone`)
 }
 
 
@@ -188,6 +188,11 @@ NULL
 }
 
 
+`rs_plain_date_time_from_parts` <- function(`year`, `month`, `day`, `hour`, `minute`, `second`, `millisecond`, `microsecond`, `nanosecond`, `reject`) {
+  .Call(savvy_rs_plain_date_time_from_parts__impl, `year`, `month`, `day`, `hour`, `minute`, `second`, `millisecond`, `microsecond`, `nanosecond`, `reject`)
+}
+
+
 `rs_plain_date_time_parse` <- function(`x`) {
   .Call(savvy_rs_plain_date_time_parse__impl, `x`)
 }
@@ -268,8 +273,8 @@ NULL
 }
 
 
-`rs_zoned_from_civil` <- function(`x`, `time_zone`, `disambiguation`, `offset`, `offset_mode`) {
-  .Call(savvy_rs_zoned_from_civil__impl, `x`, `time_zone`, `disambiguation`, `offset`, `offset_mode`)
+`rs_zoned_from_civil` <- function(`x`, `time_zone`, `disambiguation`, `offset_mode`, `reference` = NULL) {
+  .Call(savvy_rs_zoned_from_civil__impl, `x`, `time_zone`, `disambiguation`, `offset_mode`, `reference`)
 }
 
 
@@ -278,8 +283,8 @@ NULL
 }
 
 
-`rs_zoned_offset` <- function(`x`) {
-  .Call(savvy_rs_zoned_offset__impl, `x`)
+`rs_zoned_offset` <- function(`x`, `as_string`) {
+  .Call(savvy_rs_zoned_offset__impl, `x`, `as_string`)
 }
 
 

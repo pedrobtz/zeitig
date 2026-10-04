@@ -10,6 +10,28 @@ use savvy::{
 use crate::cols::{
     common_len, elt_error, is_na_int, DateIn, DateOut, DateTimeIn, DateTimeOut, TimeIn, TimeOut,
 };
+
+/// The six time component columns of a constructor call.
+struct TimeParts<'a>([&'a [i32]; 6]);
+
+impl<'a> TimeParts<'a> {
+    fn new(cols: [&'a IntegerSexp; 6]) -> Self {
+        Self(cols.map(|c| c.as_slice()))
+    }
+
+    fn lens(&self) -> [usize; 6] {
+        self.0.map(|c| c.len())
+    }
+
+    /// Element `i`, `None` when any component is missing.
+    fn get(&self, i: usize, reject: bool) -> savvy::Result<Option<Time>> {
+        let v = self.0.map(|c| c[i]);
+        if any_na(&v) {
+            return Ok(None);
+        }
+        regulate_time(i, v[0], v[1], v[2], v[3], v[4], v[5], reject).map(Some)
+    }
+}
 use crate::ixdtf::{prepare, Kind};
 
 fn range_error(i: usize, what: &str, value: i64, lo: i64, hi: i64) -> savvy::Error {
@@ -231,32 +253,18 @@ fn rs_plain_time_from_parts(
     nanosecond: IntegerSexp,
     reject: bool,
 ) -> savvy::Result<savvy::Sexp> {
-    let n = common_len(&[
-        hour.len(),
-        minute.len(),
-        second.len(),
-        millisecond.len(),
-        microsecond.len(),
-        nanosecond.len(),
-    ])?;
-    let cols = [
-        hour.as_slice(),
-        minute.as_slice(),
-        second.as_slice(),
-        millisecond.as_slice(),
-        microsecond.as_slice(),
-        nanosecond.as_slice(),
-    ];
+    let parts = TimeParts::new([
+        &hour,
+        &minute,
+        &second,
+        &millisecond,
+        &microsecond,
+        &nanosecond,
+    ]);
+    let n = common_len(&parts.lens())?;
     let mut out = TimeOut::with_capacity(n);
     for i in 0..n {
-        let v: Vec<i32> = cols.iter().map(|c| c[i]).collect();
-        if any_na(&v) {
-            out.push(None);
-        } else {
-            out.push(Some(regulate_time(
-                i, v[0], v[1], v[2], v[3], v[4], v[5], reject,
-            )?));
-        }
+        out.push(parts.get(i, reject)?);
     }
     out.into_sexp()
 }
@@ -293,6 +301,61 @@ fn rs_plain_time_format(
 
 // ---------------------------------------------------------------------------
 // PlainDateTime
+
+// One call for `plain_date_time()` from components: a missing component
+// makes the whole element missing.
+#[savvy]
+#[allow(clippy::too_many_arguments)]
+fn rs_plain_date_time_from_parts(
+    year: IntegerSexp,
+    month: IntegerSexp,
+    day: IntegerSexp,
+    hour: IntegerSexp,
+    minute: IntegerSexp,
+    second: IntegerSexp,
+    millisecond: IntegerSexp,
+    microsecond: IntegerSexp,
+    nanosecond: IntegerSexp,
+    reject: bool,
+) -> savvy::Result<savvy::Sexp> {
+    let parts = TimeParts::new([
+        &hour,
+        &minute,
+        &second,
+        &millisecond,
+        &microsecond,
+        &nanosecond,
+    ]);
+    let lens = parts.lens();
+    let n = common_len(&[
+        year.len(),
+        month.len(),
+        day.len(),
+        lens[0],
+        lens[1],
+        lens[2],
+        lens[3],
+        lens[4],
+        lens[5],
+    ])?;
+    let (y, m, d) = (year.as_slice(), month.as_slice(), day.as_slice());
+    let mut out = DateTimeOut::with_capacity(n);
+    for i in 0..n {
+        // Both halves are validated (as Temporal does) before a missing
+        // component blanks the element.
+        let date = if any_na(&[y[i], m[i], d[i]]) {
+            None
+        } else {
+            Some(regulate_date(i, y[i], m[i], d[i], reject)?)
+        };
+        let time = parts.get(i, reject)?;
+        out.push(match (date, time) {
+            (Some(d), Some(t)) => Some(d.to_datetime(t)),
+            _ => None,
+        });
+    }
+    out.into_sexp()
+}
 
 #[savvy]
 fn rs_plain_date_time_parse(x: StringSexp) -> savvy::Result<savvy::Sexp> {

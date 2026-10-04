@@ -39,7 +39,9 @@ temporal_equals <- function(x, y) {
 }
 
 # ECMA-402 resolves "Etc/UTC", "Etc/GMT" and "GMT" to "UTC" (other links are
-# not resolved, see design.md section 9).
+# not resolved, see design.md section 9). Keep in sync with
+# `time_zone_primary()` in src/rust/src/tz.rs, which applies the same rule to
+# the calendar-unit check of temporal_until()/temporal_since().
 time_zone_primary <- function(x) {
   x[x %in% c("Etc/UTC", "Etc/GMT", "GMT")] <- "UTC"
   x

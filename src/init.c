@@ -84,8 +84,8 @@ SEXP savvy_rs_duration_validate__impl(SEXP c_arg__x) {
     return handle_result(res);
 }
 
-SEXP savvy_rs_format__impl(SEXP c_arg__x, SEXP c_arg__kind, SEXP c_arg__digits, SEXP c_arg__minute, SEXP c_arg__offset, SEXP c_arg__time_zone_name, SEXP c_arg__calendar_name, SEXP c_arg__time_zone) {
-    SEXP res = savvy_rs_format__ffi(c_arg__x, c_arg__kind, c_arg__digits, c_arg__minute, c_arg__offset, c_arg__time_zone_name, c_arg__calendar_name, c_arg__time_zone);
+SEXP savvy_rs_format__impl(SEXP c_arg__x, SEXP c_arg__kind, SEXP c_arg__digits, SEXP c_arg__minute, SEXP c_arg__offset, SEXP c_arg__time_zone_name, SEXP c_arg__calendar_name, SEXP c_arg__round_unit, SEXP c_arg__round_increment, SEXP c_arg__round_mode, SEXP c_arg__time_zone) {
+    SEXP res = savvy_rs_format__ffi(c_arg__x, c_arg__kind, c_arg__digits, c_arg__minute, c_arg__offset, c_arg__time_zone_name, c_arg__calendar_name, c_arg__round_unit, c_arg__round_increment, c_arg__round_mode, c_arg__time_zone);
     return handle_result(res);
 }
 
@@ -189,6 +189,11 @@ SEXP savvy_rs_plain_date_time_format__impl(SEXP c_arg__year, SEXP c_arg__month, 
     return handle_result(res);
 }
 
+SEXP savvy_rs_plain_date_time_from_parts__impl(SEXP c_arg__year, SEXP c_arg__month, SEXP c_arg__day, SEXP c_arg__hour, SEXP c_arg__minute, SEXP c_arg__second, SEXP c_arg__millisecond, SEXP c_arg__microsecond, SEXP c_arg__nanosecond, SEXP c_arg__reject) {
+    SEXP res = savvy_rs_plain_date_time_from_parts__ffi(c_arg__year, c_arg__month, c_arg__day, c_arg__hour, c_arg__minute, c_arg__second, c_arg__millisecond, c_arg__microsecond, c_arg__nanosecond, c_arg__reject);
+    return handle_result(res);
+}
+
 SEXP savvy_rs_plain_date_time_parse__impl(SEXP c_arg__x) {
     SEXP res = savvy_rs_plain_date_time_parse__ffi(c_arg__x);
     return handle_result(res);
@@ -269,8 +274,8 @@ SEXP savvy_rs_zoned_format__impl(SEXP c_arg__x) {
     return handle_result(res);
 }
 
-SEXP savvy_rs_zoned_from_civil__impl(SEXP c_arg__x, SEXP c_arg__time_zone, SEXP c_arg__disambiguation, SEXP c_arg__offset, SEXP c_arg__offset_mode) {
-    SEXP res = savvy_rs_zoned_from_civil__ffi(c_arg__x, c_arg__time_zone, c_arg__disambiguation, c_arg__offset, c_arg__offset_mode);
+SEXP savvy_rs_zoned_from_civil__impl(SEXP c_arg__x, SEXP c_arg__time_zone, SEXP c_arg__disambiguation, SEXP c_arg__offset_mode, SEXP c_arg__reference) {
+    SEXP res = savvy_rs_zoned_from_civil__ffi(c_arg__x, c_arg__time_zone, c_arg__disambiguation, c_arg__offset_mode, c_arg__reference);
     return handle_result(res);
 }
 
@@ -279,8 +284,8 @@ SEXP savvy_rs_zoned_hours_in_day__impl(SEXP c_arg__x) {
     return handle_result(res);
 }
 
-SEXP savvy_rs_zoned_offset__impl(SEXP c_arg__x) {
-    SEXP res = savvy_rs_zoned_offset__ffi(c_arg__x);
+SEXP savvy_rs_zoned_offset__impl(SEXP c_arg__x, SEXP c_arg__as_string) {
+    SEXP res = savvy_rs_zoned_offset__ffi(c_arg__x, c_arg__as_string);
     return handle_result(res);
 }
 
@@ -315,7 +320,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_rs_duration_sort_key__impl", (DL_FUNC) &savvy_rs_duration_sort_key__impl, 1},
     {"savvy_rs_duration_total__impl", (DL_FUNC) &savvy_rs_duration_total__impl, 3},
     {"savvy_rs_duration_validate__impl", (DL_FUNC) &savvy_rs_duration_validate__impl, 1},
-    {"savvy_rs_format__impl", (DL_FUNC) &savvy_rs_format__impl, 8},
+    {"savvy_rs_format__impl", (DL_FUNC) &savvy_rs_format__impl, 11},
     {"savvy_rs_instant_add__impl", (DL_FUNC) &savvy_rs_instant_add__impl, 2},
     {"savvy_rs_instant_diff__impl", (DL_FUNC) &savvy_rs_instant_diff__impl, 7},
     {"savvy_rs_instant_epoch_nanoseconds__impl", (DL_FUNC) &savvy_rs_instant_epoch_nanoseconds__impl, 1},
@@ -336,6 +341,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_rs_plain_date_time_add__impl", (DL_FUNC) &savvy_rs_plain_date_time_add__impl, 3},
     {"savvy_rs_plain_date_time_diff__impl", (DL_FUNC) &savvy_rs_plain_date_time_diff__impl, 7},
     {"savvy_rs_plain_date_time_format__impl", (DL_FUNC) &savvy_rs_plain_date_time_format__impl, 5},
+    {"savvy_rs_plain_date_time_from_parts__impl", (DL_FUNC) &savvy_rs_plain_date_time_from_parts__impl, 10},
     {"savvy_rs_plain_date_time_parse__impl", (DL_FUNC) &savvy_rs_plain_date_time_parse__impl, 1},
     {"savvy_rs_plain_date_time_round__impl", (DL_FUNC) &savvy_rs_plain_date_time_round__impl, 4},
     {"savvy_rs_plain_date_to_epoch_days__impl", (DL_FUNC) &savvy_rs_plain_date_to_epoch_days__impl, 3},
@@ -354,7 +360,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"savvy_rs_zoned_format__impl", (DL_FUNC) &savvy_rs_zoned_format__impl, 1},
     {"savvy_rs_zoned_from_civil__impl", (DL_FUNC) &savvy_rs_zoned_from_civil__impl, 5},
     {"savvy_rs_zoned_hours_in_day__impl", (DL_FUNC) &savvy_rs_zoned_hours_in_day__impl, 1},
-    {"savvy_rs_zoned_offset__impl", (DL_FUNC) &savvy_rs_zoned_offset__impl, 1},
+    {"savvy_rs_zoned_offset__impl", (DL_FUNC) &savvy_rs_zoned_offset__impl, 2},
     {"savvy_rs_zoned_parse__impl", (DL_FUNC) &savvy_rs_zoned_parse__impl, 3},
     {"savvy_rs_zoned_round__impl", (DL_FUNC) &savvy_rs_zoned_round__impl, 4},
     {"savvy_rs_zoned_start_of_day__impl", (DL_FUNC) &savvy_rs_zoned_start_of_day__impl, 1},

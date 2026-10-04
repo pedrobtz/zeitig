@@ -5,14 +5,17 @@
 //! record marks the element as missing and is written back as `NA` in every
 //! output field.
 
+use std::borrow::Cow;
+use std::rc::Rc;
+
 use jiff::civil::{Date, DateTime, Time};
 use jiff::{Span, Timestamp, Zoned};
 use savvy::{
-    IntegerSexp, ListSexp, OwnedIntegerSexp, OwnedListSexp, OwnedRealSexp, OwnedStringSexp, Sexp,
-    TypedSexp,
+    IntegerSexp, ListSexp, OwnedIntegerSexp, OwnedListSexp, OwnedRealSexp, OwnedStringSexp,
+    RealSexp, Sexp, StringSexp, TypedSexp,
 };
 
-use crate::tz::{time_zone_id, TzCache};
+use crate::tz::TzCache;
 
 /// R's `NA_integer_`. Compared directly instead of through savvy's
 /// `NotAvailableValue`, which reads the `R_NaInt` symbol and so cannot be
@@ -31,7 +34,75 @@ pub(crate) fn is_na_str(x: &str) -> bool {
 
 /// Error for element `i` (0-based), with the 1-based index R users see.
 pub(crate) fn elt_error(i: usize, e: impl std::fmt::Display) -> savvy::Error {
-    savvy::Error::new(format!("{e} (element {})", i + 1))
+    let msg = e.to_string();
+    savvy::Error::new(format!("{} (element {})", temporal_message(&msg), i + 1))
+}
+
+/// Rewrites the few jiff error messages that name Rust items (`jiff::Span`,
+/// `SpanRelativeTo::days_are_24_hours()`, ...) in terms of zeitig's API, as
+/// design.md section 6 promises Temporal wording. Only runs on the error
+/// path.
+pub(crate) fn temporal_message(msg: &str) -> Cow<'_, str> {
+    if !msg.contains("jiff::") && !msg.contains("relative reference time") {
+        return Cow::Borrowed(msg);
+    }
+    const PHRASES: [(&str, &str); 9] = [
+        (
+            " (operations on `jiff::Timestamp`, `jiff::tz::Offset` and `jiff::civil::Time` \
+             don't support calendar units in a `jiff::Span`)",
+            " (instants and plain times have no calendar, so years, months, weeks and days \
+             are not allowed)",
+        ),
+        (
+            "requires that either a relative reference time be given or \
+             `jiff::SpanRelativeTo::days_are_24_hours()` is used to indicate invariant \
+             24-hour days, but neither were provided",
+            "requires `relative_to`",
+        ),
+        (
+            "requires that a relative reference time be given \
+             (`jiff::SpanRelativeTo::days_are_24_hours()` was given but this only permits \
+             using days and weeks without a relative reference time)",
+            "requires `relative_to` (without it, only days of 24 hours and weeks of 7 days \
+             can be used)",
+        ),
+        (
+            "requires that a relative reference time be given, but none was provided",
+            "requires `relative_to`",
+        ),
+        (
+            ", parse as a `jiff::Timestamp` first and convert to a civil date/time instead",
+            "; parse it with instant() or zoned_date_time() and convert the result instead",
+        ),
+        (
+            " (perhaps try parsing into a `jiff::Span` instead)",
+            " (parse it with duration() instead)",
+        ),
+        (" (must use `jiff::Span::to_duration` instead)", ""),
+        ("numeric `jiff::tz::Offset`", "numeric UTC offset"),
+        ("relative reference time", "`relative_to` value"),
+    ];
+    const NAMES: [(&str, &str); 9] = [
+        ("`jiff::civil::DateTime`", "plain date-time"),
+        ("`jiff::civil::Date`", "plain date"),
+        ("`jiff::civil::Time`", "plain time"),
+        ("`jiff::Timestamp`", "instant"),
+        ("`jiff::Zoned`", "zoned date-time"),
+        ("`jiff::Span`", "duration"),
+        ("`jiff::SignedDuration`", "exact duration"),
+        ("`jiff::tz::Offset`", "UTC offset"),
+        (
+            "`jiff::SpanRelativeTo::days_are_24_hours()`",
+            "24-hour days",
+        ),
+    ];
+    let mut out = msg.to_string();
+    for (from, to) in PHRASES.iter().chain(NAMES.iter()) {
+        if out.contains(from) {
+            out = out.replace(from, to);
+        }
+    }
+    Cow::Owned(out)
 }
 
 /// Common length of a set of columns; errors if they differ (a bug in the R
@@ -65,7 +136,82 @@ fn to_i16(v: i32) -> Option<i16> {
 }
 
 // ---------------------------------------------------------------------------
+// Record fields passed as a list. The handles below are cheap (no copy); the
+// readers built from them borrow the R vectors' data.
+
+/// The first `N` fields of a record as integer vectors.
+pub(crate) fn int_cols<const N: usize>(x: &ListSexp) -> savvy::Result<[IntegerSexp; N]> {
+    let mut cols = Vec::with_capacity(N);
+    for k in 0..N {
+        match x.get_by_index(k).map(|s| s.into_typed()) {
+            Some(TypedSexp::Integer(v)) => cols.push(v),
+            _ => {
+                return Err(savvy::Error::new(format!(
+                    "internal error: record field {} must be an integer vector",
+                    k + 1
+                )))
+            }
+        }
+    }
+    cols.try_into()
+        .map_err(|_| savvy::Error::new("internal error: wrong number of record fields"))
+}
+
+pub(crate) fn real_col(x: &ListSexp, k: usize) -> savvy::Result<RealSexp> {
+    match x.get_by_index(k).map(|s| s.into_typed()) {
+        Some(TypedSexp::Real(v)) => Ok(v),
+        _ => Err(savvy::Error::new(format!(
+            "internal error: record field {} must be a double vector",
+            k + 1
+        ))),
+    }
+}
+
+pub(crate) fn int_col(x: &ListSexp, k: usize) -> savvy::Result<IntegerSexp> {
+    match x.get_by_index(k).map(|s| s.into_typed()) {
+        Some(TypedSexp::Integer(v)) => Ok(v),
+        _ => Err(savvy::Error::new(format!(
+            "internal error: record field {} must be an integer vector",
+            k + 1
+        ))),
+    }
+}
+
+pub(crate) fn str_col(x: &ListSexp, k: usize) -> savvy::Result<StringSexp> {
+    match x.get_by_index(k).map(|s| s.into_typed()) {
+        Some(TypedSexp::String(v)) => Ok(v),
+        _ => Err(savvy::Error::new(format!(
+            "internal error: record field {} must be a character vector",
+            k + 1
+        ))),
+    }
+}
+
+/// Strings of a character vector, `None` for `NA`. The `&'static str`s point
+/// into R's global string cache, so this allocates one `Vec`, not a string
+/// per element.
+pub(crate) fn str_values(x: &StringSexp) -> Vec<Option<&'static str>> {
+    x.iter()
+        .map(|s| if is_na_str(s) { None } else { Some(s) })
+        .collect()
+}
+
+// ---------------------------------------------------------------------------
 // PlainDate: year, month, day
+
+/// The fields of a plain date record.
+pub(crate) struct DateCols([IntegerSexp; 3]);
+
+impl DateCols {
+    pub(crate) fn new(x: &ListSexp) -> savvy::Result<Self> {
+        Ok(Self(int_cols::<3>(x)?))
+    }
+
+    pub(crate) fn reader(&self) -> savvy::Result<DateIn<'_>> {
+        let c = &self.0;
+        DateIn::new(&c[0], &c[1], &c[2])
+    }
+}
 
 pub(crate) struct DateIn<'a> {
     y: &'a [i32],
@@ -146,6 +292,19 @@ impl DateOut {
 // ---------------------------------------------------------------------------
 // PlainTime: second_of_day, nanos
 
+/// The fields of a plain time record.
+pub(crate) struct TimeCols([IntegerSexp; 2]);
+
+impl TimeCols {
+    pub(crate) fn new(x: &ListSexp) -> savvy::Result<Self> {
+        Ok(Self(int_cols::<2>(x)?))
+    }
+
+    pub(crate) fn reader(&self) -> savvy::Result<TimeIn<'_>> {
+        TimeIn::new(&self.0[0], &self.0[1])
+    }
+}
+
 pub(crate) struct TimeIn<'a> {
     sod: &'a [i32],
     ns: &'a [i32],
@@ -221,6 +380,20 @@ impl TimeOut {
 
 // ---------------------------------------------------------------------------
 // PlainDateTime: year, month, day, second_of_day, nanos
+
+/// The fields of a plain date-time record.
+pub(crate) struct DateTimeCols([IntegerSexp; 5]);
+
+impl DateTimeCols {
+    pub(crate) fn new(x: &ListSexp) -> savvy::Result<Self> {
+        Ok(Self(int_cols::<5>(x)?))
+    }
+
+    pub(crate) fn reader(&self) -> savvy::Result<DateTimeIn<'_>> {
+        let c = &self.0;
+        DateTimeIn::new(&c[0], &c[1], &c[2], &c[3], &c[4])
+    }
+}
 
 pub(crate) struct DateTimeIn<'a> {
     date: DateIn<'a>,
@@ -306,13 +479,18 @@ pub(crate) const DURATION_FIELDS: [&str; 10] = [
 
 /// Builds a `Span` from Temporal duration fields. `None` when any field is
 /// `NA`; an error for non-integers, mixed signs or values outside jiff's
-/// per-unit limits.
+/// per-unit limits. One pass over the fields, no allocation, and zero fields
+/// skip jiff's per-unit setter.
 pub(crate) fn span_from_fields(i: usize, v: [f64; 10]) -> savvy::Result<Option<Span>> {
     if v.iter().any(|x| x.is_nan()) {
         return Ok(None);
     }
     let mut sign = 0.0;
+    let mut a = [0i64; 10];
     for (k, &x) in v.iter().enumerate() {
+        if x == 0.0 {
+            continue;
+        }
         if !x.is_finite() || x.fract() != 0.0 {
             return Err(elt_error(
                 i,
@@ -322,53 +500,45 @@ pub(crate) fn span_from_fields(i: usize, v: [f64; 10]) -> savvy::Result<Option<S
                 ),
             ));
         }
-        if x != 0.0 {
-            if sign != 0.0 && x.signum() != sign {
-                return Err(elt_error(
-                    i,
-                    "mixed-sign values not allowed as duration fields",
-                ));
-            }
-            sign = x.signum();
+        if sign != 0.0 && x.signum() != sign {
+            return Err(elt_error(
+                i,
+                "mixed-sign values not allowed as duration fields",
+            ));
         }
+        sign = x.signum();
+        let m = x.abs();
+        if m >= 9.223_372_036_854_775e18 {
+            return Err(elt_error(
+                i,
+                format!("duration field '{}' is out of range", DURATION_FIELDS[k]),
+            ));
+        }
+        a[k] = m as i64;
     }
-    let a: Vec<i64> = v
-        .iter()
-        .enumerate()
-        .map(|(k, x)| {
-            let x = x.abs();
-            if x >= 9.223_372_036_854_775e18 {
-                Err(elt_error(
-                    i,
-                    format!("duration field '{}' is out of range", DURATION_FIELDS[k]),
-                ))
-            } else {
-                Ok(x as i64)
-            }
-        })
-        .collect::<savvy::Result<_>>()?;
+    if sign == 0.0 {
+        return Ok(Some(Span::new()));
+    }
     let e = |e| elt_error(i, e);
-    let span = Span::new()
-        .try_years(a[0])
-        .map_err(e)?
-        .try_months(a[1])
-        .map_err(e)?
-        .try_weeks(a[2])
-        .map_err(e)?
-        .try_days(a[3])
-        .map_err(e)?
-        .try_hours(a[4])
-        .map_err(e)?
-        .try_minutes(a[5])
-        .map_err(e)?
-        .try_seconds(a[6])
-        .map_err(e)?
-        .try_milliseconds(a[7])
-        .map_err(e)?
-        .try_microseconds(a[8])
-        .map_err(e)?
-        .try_nanoseconds(a[9])
+    let mut span = Span::new();
+    for (k, &n) in a.iter().enumerate() {
+        if n == 0 {
+            continue;
+        }
+        span = match k {
+            0 => span.try_years(n),
+            1 => span.try_months(n),
+            2 => span.try_weeks(n),
+            3 => span.try_days(n),
+            4 => span.try_hours(n),
+            5 => span.try_minutes(n),
+            6 => span.try_seconds(n),
+            7 => span.try_milliseconds(n),
+            8 => span.try_microseconds(n),
+            _ => span.try_nanoseconds(n),
+        }
         .map_err(e)?;
+    }
     Ok(Some(if sign < 0.0 { span.negate() } else { span }))
 }
 
@@ -387,40 +557,45 @@ pub(crate) fn span_to_fields(s: Span) -> [f64; 10] {
     ]
 }
 
-pub(crate) struct DurationIn {
-    cols: Vec<Vec<f64>>,
-}
+/// The ten fields of a duration record, in `DURATION_FIELDS` order.
+pub(crate) struct DurationCols(Vec<RealSexp>);
 
-impl DurationIn {
-    /// `x` is the list of the ten record fields, in `DURATION_FIELDS` order.
+impl DurationCols {
     pub(crate) fn new(x: &ListSexp) -> savvy::Result<Self> {
         let mut cols = Vec::with_capacity(10);
         for (k, name) in DURATION_FIELDS.iter().enumerate() {
-            let col = match x.get_by_index(k).map(|s| s.into_typed()) {
-                Some(TypedSexp::Real(r)) => r,
+            match x.get_by_index(k).map(|s| s.into_typed()) {
+                Some(TypedSexp::Real(r)) => cols.push(r),
                 _ => {
                     return Err(savvy::Error::new(format!(
                         "internal error: duration field '{name}' must be a double vector"
                     )))
                 }
-            };
-            cols.push(col.to_vec());
+            }
         }
-        let lens: Vec<usize> = cols.iter().map(|c| c.len()).collect();
-        common_len(&lens)?;
-        Ok(Self { cols })
+        Ok(Self(cols))
     }
 
+    pub(crate) fn reader(&self) -> savvy::Result<DurationIn<'_>> {
+        let cols: [&[f64]; 10] = std::array::from_fn(|k| self.0[k].as_slice());
+        let lens: [usize; 10] = cols.map(|c| c.len());
+        let n = common_len(&lens)?;
+        Ok(DurationIn { cols, n })
+    }
+}
+
+pub(crate) struct DurationIn<'a> {
+    cols: [&'a [f64]; 10],
+    n: usize,
+}
+
+impl DurationIn<'_> {
     pub(crate) fn len(&self) -> usize {
-        self.cols.first().map_or(0, |c| c.len())
+        self.n
     }
 
     pub(crate) fn get(&self, i: usize) -> savvy::Result<Option<Span>> {
-        let mut v = [0.0; 10];
-        for (k, c) in self.cols.iter().enumerate() {
-            v[k] = c[i];
-        }
-        span_from_fields(i, v)
+        span_from_fields(i, self.cols.map(|c| c[i]))
     }
 }
 
@@ -467,63 +642,35 @@ pub(crate) fn na_real() -> f64 {
 }
 
 // ---------------------------------------------------------------------------
-// Generic access to record fields passed as a list.
-
-pub(crate) fn list_real(x: &ListSexp, k: usize) -> savvy::Result<Vec<f64>> {
-    match x.get_by_index(k).map(|s| s.into_typed()) {
-        Some(TypedSexp::Real(v)) => Ok(v.to_vec()),
-        _ => Err(savvy::Error::new(format!(
-            "internal error: record field {} must be a double vector",
-            k + 1
-        ))),
-    }
-}
-
-pub(crate) fn list_int(x: &ListSexp, k: usize) -> savvy::Result<Vec<i32>> {
-    match x.get_by_index(k).map(|s| s.into_typed()) {
-        Some(TypedSexp::Integer(v)) => Ok(v.to_vec()),
-        _ => Err(savvy::Error::new(format!(
-            "internal error: record field {} must be an integer vector",
-            k + 1
-        ))),
-    }
-}
-
-pub(crate) fn list_str(x: &ListSexp, k: usize) -> savvy::Result<Vec<Option<String>>> {
-    match x.get_by_index(k).map(|s| s.into_typed()) {
-        Some(TypedSexp::String(v)) => Ok(v
-            .iter()
-            .map(|s| {
-                if is_na_str(s) {
-                    None
-                } else {
-                    Some(s.to_string())
-                }
-            })
-            .collect()),
-        _ => Err(savvy::Error::new(format!(
-            "internal error: record field {} must be a character vector",
-            k + 1
-        ))),
-    }
-}
-
-// ---------------------------------------------------------------------------
 // Instant: seconds (double), nanos (integer)
 
-pub(crate) struct InstantIn {
-    secs: Vec<f64>,
-    nanos: Vec<i32>,
+/// The fields of an instant record (also the first two of a zoned one).
+pub(crate) struct InstantCols {
+    secs: RealSexp,
+    nanos: IntegerSexp,
 }
 
-impl InstantIn {
+impl InstantCols {
     pub(crate) fn new(x: &ListSexp) -> savvy::Result<Self> {
-        let secs = list_real(x, 0)?;
-        let nanos = list_int(x, 1)?;
-        common_len(&[secs.len(), nanos.len()])?;
-        Ok(Self { secs, nanos })
+        Ok(Self {
+            secs: real_col(x, 0)?,
+            nanos: int_col(x, 1)?,
+        })
     }
 
+    pub(crate) fn reader(&self) -> savvy::Result<InstantIn<'_>> {
+        let (secs, nanos) = (self.secs.as_slice(), self.nanos.as_slice());
+        common_len(&[secs.len(), nanos.len()])?;
+        Ok(InstantIn { secs, nanos })
+    }
+}
+
+pub(crate) struct InstantIn<'a> {
+    secs: &'a [f64],
+    nanos: &'a [i32],
+}
+
+impl InstantIn<'_> {
     pub(crate) fn len(&self) -> usize {
         self.secs.len()
     }
@@ -586,10 +733,15 @@ impl InstantOut {
         }
     }
 
-    pub(crate) fn into_sexp(self) -> savvy::Result<Sexp> {
-        let mut out = OwnedListSexp::new(2, true)?;
+    fn write_into(self, out: &mut OwnedListSexp) -> savvy::Result<()> {
         out.set_name_and_value(0, "seconds", OwnedRealSexp::try_from_slice(self.secs)?)?;
         out.set_name_and_value(1, "nanos", OwnedIntegerSexp::try_from_slice(self.nanos)?)?;
+        Ok(())
+    }
+
+    pub(crate) fn into_sexp(self) -> savvy::Result<Sexp> {
+        let mut out = OwnedListSexp::new(2, true)?;
+        self.write_into(&mut out)?;
         Ok(out.into())
     }
 }
@@ -597,35 +749,58 @@ impl InstantOut {
 // ---------------------------------------------------------------------------
 // ZonedDateTime: seconds, nanos, tz
 
-pub(crate) struct ZonedIn {
-    inst: InstantIn,
-    tz: Vec<Option<String>>,
+/// The fields of a zoned date-time record.
+pub(crate) struct ZonedCols {
+    inst: InstantCols,
+    tz: StringSexp,
 }
 
-impl ZonedIn {
+impl ZonedCols {
     pub(crate) fn new(x: &ListSexp) -> savvy::Result<Self> {
-        let inst = InstantIn::new(x)?;
-        let tz = list_str(x, 2)?;
-        common_len(&[inst.len(), tz.len()])?;
-        Ok(Self { inst, tz })
+        Ok(Self {
+            inst: InstantCols::new(x)?,
+            tz: str_col(x, 2)?,
+        })
     }
 
+    pub(crate) fn reader(&self) -> savvy::Result<ZonedIn<'_>> {
+        let inst = self.inst.reader()?;
+        let tz = str_values(&self.tz);
+        common_len(&[inst.len(), tz.len()])?;
+        Ok(ZonedIn { inst, tz })
+    }
+}
+
+pub(crate) struct ZonedIn<'a> {
+    inst: InstantIn<'a>,
+    tz: Vec<Option<&'static str>>,
+}
+
+impl ZonedIn<'_> {
     pub(crate) fn len(&self) -> usize {
         self.inst.len()
     }
 
-    pub(crate) fn get(&self, i: usize, cache: &mut TzCache) -> savvy::Result<Option<Zoned>> {
-        let (Some(t), Some(id)) = (self.inst.get(i)?, self.tz[i].as_deref()) else {
+    /// Element `i` and its canonical time zone identifier, `None` when
+    /// missing.
+    pub(crate) fn get(
+        &self,
+        i: usize,
+        cache: &mut TzCache,
+    ) -> savvy::Result<Option<(Zoned, Rc<str>)>> {
+        let (Some(t), Some(id)) = (self.inst.get(i)?, self.tz[i]) else {
             return Ok(None);
         };
-        let tz = cache.get(i, id)?.0.clone();
-        Ok(Some(t.to_zoned(tz)))
+        let r = cache.get(i, id)?;
+        Ok(Some((t.to_zoned(r.tz.clone()), r.id.clone())))
     }
 }
 
+/// Zoned date-time columns being built. Time zone identifiers are shared
+/// `Rc<str>`s from the `TzCache`, so pushing an element allocates nothing.
 pub(crate) struct ZonedOut {
     inst: InstantOut,
-    tz: Vec<Option<String>>,
+    tz: Vec<Option<Rc<str>>>,
 }
 
 impl ZonedOut {
@@ -636,19 +811,23 @@ impl ZonedOut {
         }
     }
 
-    pub(crate) fn push(&mut self, x: Option<&Zoned>) {
-        self.inst.push(x.map(|z| z.timestamp()));
-        self.tz.push(x.map(|z| time_zone_id(z.time_zone())));
+    /// Pushes a zoned date-time and the canonical identifier of its zone.
+    pub(crate) fn push(&mut self, x: Option<(&Zoned, &Rc<str>)>) {
+        match x {
+            Some((z, id)) => {
+                self.inst.push(Some(z.timestamp()));
+                self.tz.push(Some(id.clone()));
+            }
+            None => {
+                self.inst.push(None);
+                self.tz.push(None);
+            }
+        }
     }
 
     pub(crate) fn into_sexp(self) -> savvy::Result<Sexp> {
         let mut out = OwnedListSexp::new(3, true)?;
-        out.set_name_and_value(0, "seconds", OwnedRealSexp::try_from_slice(self.inst.secs)?)?;
-        out.set_name_and_value(
-            1,
-            "nanos",
-            OwnedIntegerSexp::try_from_slice(self.inst.nanos)?,
-        )?;
+        self.inst.write_into(&mut out)?;
         let mut tz = OwnedStringSexp::new(self.tz.len())?;
         for (i, v) in self.tz.iter().enumerate() {
             match v {
@@ -658,5 +837,51 @@ impl ZonedOut {
         }
         out.set_name_and_value(2, "tz", tz)?;
         Ok(out.into())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn jiff_message(r: Result<impl std::fmt::Debug, jiff::Error>) -> String {
+        r.unwrap_err().to_string()
+    }
+
+    #[test]
+    fn jiff_messages_are_rewritten() {
+        use jiff::{SpanRelativeTo, ToSpan, Unit};
+        let calendar = jiff_message(Timestamp::UNIX_EPOCH.checked_add(1.day()));
+        assert!(calendar.contains("jiff::"), "{calendar}");
+        let msg = temporal_message(&calendar);
+        assert!(!msg.contains("jiff::"), "{msg}");
+        assert!(msg.contains("have no calendar"), "{msg}");
+
+        let months = jiff_message(
+            1.month()
+                .total((Unit::Day, SpanRelativeTo::days_are_24_hours())),
+        );
+        let msg = temporal_message(&months);
+        assert!(!msg.contains("jiff::"), "{msg}");
+        assert!(msg.contains("requires `relative_to`"), "{msg}");
+
+        let zulu = jiff_message("2020-01-01T00:00Z".parse::<Date>());
+        let msg = temporal_message(&zulu);
+        assert!(!msg.contains("jiff::"), "{msg}");
+
+        let plain = "parameter 'day' with value 31 is not in the required range of 1..=30";
+        assert!(matches!(temporal_message(plain), Cow::Borrowed(_)));
+    }
+
+    #[test]
+    fn span_fields_skip_zeros_and_check_signs() {
+        let v = [0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -5.0];
+        let span = span_from_fields(0, v).unwrap().unwrap();
+        assert_eq!(span_to_fields(span), v);
+        let zero = span_from_fields(0, [0.0; 10]).unwrap().unwrap();
+        assert!(zero.is_zero());
+        let mut inf = [0.0; 10];
+        inf[3] = f64::INFINITY;
+        assert!(span_from_fields(0, inf).is_err());
     }
 }

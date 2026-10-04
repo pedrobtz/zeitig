@@ -1,9 +1,9 @@
 #' Replace fields
 #'
 #' `temporal_with()` returns a copy of `x` with some fields replaced, the
-#' equivalent of Temporal's `.with()`. `with_plain_time()` and
-#' `with_plain_date()` replace the whole time or date part of a plain or
-#' zoned date-time (`.withPlainTime()`, `.withPlainDate()`).
+#' equivalent of Temporal's `.with()` (including `Duration.prototype.with()`).
+#' `with_plain_time()` and `with_plain_date()` replace the whole time or date
+#' part of a plain or zoned date-time (`.withPlainTime()`, `.withPlainDate()`).
 #'
 #' For zoned date-times the fields are wall-clock fields in the element's
 #' time zone; the new local time is resolved with `disambiguation`, and
@@ -16,9 +16,10 @@
 #' @param ... Named fields to replace, recycled with `x` to a common length. Plain dates take
 #'   `year`, `month`, `day`; plain times take `hour`, `minute`, `second`,
 #'   `millisecond`, `microsecond`, `nanosecond`; plain and zoned date-times
-#'   take both.
+#'   take both; durations take `years` to `nanoseconds` (the result must
+#'   still have fields of one sign).
 #' @param overflow How to handle out-of-range values: `"constrain"` (the
-#'   default) clamps, `"reject"` raises an error.
+#'   default) clamps, `"reject"` raises an error. Not used for durations.
 #' @param disambiguation,offset Zoned date-times only; see
 #'   [zoned_date_time()]. `offset` defaults to `"prefer"` here.
 #' @returns An object of the same class as `x`.
@@ -34,6 +35,7 @@
 #' z <- zoned_date_time("2019-11-03T01:30-04:00[America/New_York]")
 #' temporal_with(z, minute = 45) # stays at -04:00 in the DST overlap
 #' with_plain_time(z)
+#' temporal_with(duration(hours = 1, minutes = 30), minutes = 0)
 temporal_with <- function(x, ..., overflow = c("constrain", "reject"),
                           disambiguation = c("compatible", "earlier", "later", "reject"),
                           offset = c("prefer", "use", "ignore", "reject")) {
@@ -41,16 +43,23 @@ temporal_with <- function(x, ..., overflow = c("constrain", "reject"),
     disambiguation <- arg_option(disambiguation, disambiguation_values)
     offset <- arg_option(offset, c("prefer", "use", "ignore", "reject"))
     pdt <- temporal_with(to_plain_date_time(x), ..., overflow = overflow)
-    n <- vec_size(pdt)
-    x <- vec_recycle(x, n)
-    old <- zeitig_call(rs_zoned_offset(zoned_data(x)))$seconds
-    return(zoned_from_plain(pdt, time_zone(x), disambiguation, old, offset))
+    x <- vec_recycle(x, vec_size(pdt))
+    # The current UTC offsets are read from `x` itself in Rust.
+    return(zoned_from_plain(
+      pdt, time_zone(x), disambiguation,
+      reference = x, offset_mode = offset
+    ))
   }
   args <- rlang::list2(...)
   if (length(args) > 0 && (is.null(names(args)) || any(names(args) == ""))) {
     zeitig_type_error("All fields in `...` must be named.")
   }
-  if (is_plain_date(x)) {
+  extra <- list(overflow = overflow)
+  if (is_duration(x)) {
+    # Duration.prototype.with(): the result is validated like duration().
+    ctor <- duration
+    extra <- list()
+  } else if (is_plain_date(x)) {
     ctor <- plain_date
   } else if (is_plain_time(x)) {
     ctor <- plain_time
@@ -71,9 +80,13 @@ temporal_with <- function(x, ..., overflow = c("constrain", "reject"),
   }
   args <- vec_recycle_common(!!!args, .size = n)
   fields[names(args)] <- args
-  out <- do.call(ctor, c(fields, list(overflow = overflow)))
+  out <- do.call(ctor, c(fields, extra))
   # A missing element stays missing even when all its fields were replaced.
-  vec_assign(out, vec_detect_missing(x), vec_init(out))
+  missing <- vec_detect_missing(x)
+  if (any(missing)) {
+    out <- vec_assign(out, missing, vec_init(out))
+  }
+  out
 }
 
 #' @rdname temporal_with

@@ -24,10 +24,11 @@ with_plain_date(x, date)
 \item{...}{Named fields to replace, recycled with \code{x} to a common length. Plain dates take
 \code{year}, \code{month}, \code{day}; plain times take \code{hour}, \code{minute}, \code{second},
 \code{millisecond}, \code{microsecond}, \code{nanosecond}; plain and zoned date-times
-take both.}
+take both; durations take \code{years} to \code{nanoseconds} (the result must
+still have fields of one sign).}
 
 \item{overflow}{How to handle out-of-range values: \code{"constrain"} (the
-default) clamps, \code{"reject"} raises an error.}
+default) clamps, \code{"reject"} raises an error. Not used for durations.}
 
 \item{disambiguation, offset}{Zoned date-times only; see
 \code{\link[=zoned_date_time]{zoned_date_time()}}. \code{offset} defaults to \code{"prefer"} here.}
@@ -42,9 +43,9 @@ An object of the same class as \code{x}.
 }
 \description{
 \code{temporal_with()} returns a copy of \code{x} with some fields replaced, the
-equivalent of Temporal's \code{.with()}. \code{with_plain_time()} and
-\code{with_plain_date()} replace the whole time or date part of a plain or
-zoned date-time (\code{.withPlainTime()}, \code{.withPlainDate()}).
+equivalent of Temporal's \code{.with()} (including \code{Duration.prototype.with()}).
+\code{with_plain_time()} and \code{with_plain_date()} replace the whole time or date
+part of a plain or zoned date-time (\code{.withPlainTime()}, \code{.withPlainDate()}).
 }
 \details{
 For zoned date-times the fields are wall-clock fields in the element's
@@ -65,4 +66,5 @@ with_plain_date(dt, plain_date(2000, 1, 1))
 z <- zoned_date_time("2019-11-03T01:30-04:00[America/New_York]")
 temporal_with(z, minute = 45) # stays at -04:00 in the DST overlap
 with_plain_time(z)
+temporal_with(duration(hours = 1, minutes = 30), minutes = 0)
 }
